@@ -1,0 +1,6 @@
+apscheduler>=3.10,<4.0
+smbprotocol>=1.10
+psycopg2-binary>=2.9
+pydantic>=2.0
+pydantic-settings>=2.0
+structlog>=23.0

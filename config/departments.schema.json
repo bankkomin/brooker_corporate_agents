@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brooker-corporate-agent/config/departments.schema.json",
+  "title": "Departments Configuration",
+  "description": "Schema for departments.json — single source of truth for department definitions",
+  "type": "object",
+  "required": ["version", "departments", "globalAccess"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "departments": {
+      "type": "object",
+      "description": "Map of department ID to department definition",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/Department"
+      }
+    },
+    "globalAccess": {
+      "$ref": "#/$defs/GlobalAccess"
+    }
+  },
+  "$defs": {
+    "Department": {
+      "type": "object",
+      "required": ["name", "shortName", "agents", "dataAccess", "escalation", "dashboardWidgets", "slackChannels"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full department name"
+        },
+        "shortName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "description": "Short identifier (e.g. CAC, RISK)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the department's responsibilities"
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Hex color code for UI theming"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Icon identifier for UI display"
+        },
+        "agents": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Agent IDs scoped to this department"
+        },
+        "dataAccess": {
+          "$ref": "#/$defs/DataAccess"
+        },
+        "escalation": {
+          "$ref": "#/$defs/Escalation"
+        },
+        "dashboardWidgets": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Widget IDs shown on the department dashboard"
+        },
+        "slackChannels": {
+          "$ref": "#/$defs/SlackChannels"
+        }
+      }
+    },
+    "DataAccess": {
+      "type": "object",
+      "required": ["qdrantCollections", "sensitivityLevel"],
+      "additionalProperties": false,
+      "properties": {
+        "qdrantCollections": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Qdrant collection names this department can access"
+        },
+        "mirrorPaths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Filesystem mirror paths for document ingestion"
+        },
+        "excelFiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Excel tracker filenames accessible to this department"
+        },
+        "sensitivityLevel": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted"],
+          "description": "Data sensitivity classification"
+        },
+        "vaultPath": {
+          "type": "string",
+          "description": "Mount path for this department's wiki vault directory"
+        },
+        "wikiCollection": {
+          "type": "string",
+          "description": "Qdrant collection name for wiki articles from this department"
+        }
+      }
+    },
+    "Escalation": {
+      "type": "object",
+      "required": ["canEscalateTo", "hodEmails"],
+      "additionalProperties": false,
+      "properties": {
+        "canEscalateTo": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Role IDs this department can escalate proposals to"
+        },
+        "hodEmails": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Head-of-department email addresses (may use env var placeholders)"
+        }
+      }
+    },
+    "SlackChannels": {
+      "type": "object",
+      "required": ["general"],
+      "additionalProperties": false,
+      "properties": {
+        "general": {
+          "type": "string",
+          "description": "General department Slack channel ID"
+        },
+        "approvals": {
+          "type": "string",
+          "description": "Approvals Slack channel ID"
+        },
+        "escalations": {
+          "type": "string",
+          "description": "Escalations Slack channel ID"
+        }
+      }
+    },
+    "GlobalAccess": {
+      "type": "object",
+      "required": ["sharedCollections", "roles"],
+      "additionalProperties": false,
+      "properties": {
+        "sharedCollections": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Qdrant collections accessible across all departments"
+        },
+        "roles": {
+          "type": "object",
+          "description": "Cross-department role definitions",
+          "additionalProperties": {
+            "$ref": "#/$defs/GlobalRole"
+          }
+        }
+      }
+    },
+    "GlobalRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "canRead": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Department IDs this role can read (use '*' for all)"
+        },
+        "canApprove": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Department IDs this role can approve proposals for (use '*' for all)"
+        }
+      }
+    }
+  }
+}

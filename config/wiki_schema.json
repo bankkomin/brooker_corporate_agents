@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "description": "Wiki knowledge base schema — article conventions, frontmatter, and workflows",
+  "frontmatter": {
+    "required_fields": ["title", "type", "department", "sources", "related", "created", "updated", "confidence"],
+    "optional_fields": ["coverage", "tags", "ticket_id"],
+    "type_enum": ["concept", "decision", "meeting-note", "entity", "escalation", "source-summary", "trend", "index", "log"],
+    "confidence_enum": ["high", "medium", "low"],
+    "coverage_enum": ["high", "medium", "low"]
+  },
+  "article_types": {
+    "concept": {
+      "directory": "concepts",
+      "filename_pattern": "{slug}.md",
+      "sections": ["Summary", "Key Metrics", "Historical Context", "Related Concepts", "Sources"]
+    },
+    "decision": {
+      "directory": "decisions",
+      "filename_pattern": "{date}-{slug}.md",
+      "sections": ["Summary", "Change Details", "Rationale", "Source Evidence", "Impact"]
+    },
+    "meeting-note": {
+      "directory": "meeting-notes",
+      "filename_pattern": "{date}-{slug}.md",
+      "sections": ["Attendees", "Topics Discussed", "Decisions Made", "Action Items", "Follow-Up"]
+    },
+    "entity": {
+      "directory": "entities",
+      "filename_pattern": "{slug}.md",
+      "sections": ["Overview", "Key Facts", "History", "Related Entities"]
+    },
+    "escalation": {
+      "directory": "decisions",
+      "filename_pattern": "{date}-escalation-{slug}.md",
+      "sections": ["Summary", "Severity", "Trigger Details", "Resolution", "Follow-Up"]
+    },
+    "source-summary": {
+      "directory": "concepts",
+      "filename_pattern": "source-{slug}.md",
+      "sections": ["Document Overview", "Key Findings", "Relevance", "Extracted Data"]
+    }
+  },
+  "lint": {
+    "schedule_cron": "0 2 * * 1",
+    "contradiction_check": true,
+    "stale_threshold_days": 30,
+    "orphan_check": true,
+    "missing_concept_threshold": 3,
+    "coverage_scoring": true
+  },
+  "maintenance": {
+    "prune_age_days": 365,
+    "archive_directory": "archive",
+    "gap_report_enabled": true
+  },
+  "compilation": {
+    "model": "qwen-3.5-122b",
+    "temperature": 0.3,
+    "max_tokens": 4096
+  }
+}

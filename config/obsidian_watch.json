@@ -1,0 +1,21 @@
+{
+  "vault_path": "${OBSIDIAN_VAULT_PATH}",
+  "watch_folders": [
+    {"path": "shared/policies/",             "collection": "shared_policies", "doc_type": "policy_note"},
+    {"path": "shared/escalation-protocols/", "collection": "shared_policies", "doc_type": "escalation"},
+    {"path": "cac/concepts/",                "collection": "cac_knowledge",   "doc_type": "concept"},
+    {"path": "cac/decisions/",               "collection": "cac_knowledge",   "doc_type": "decision_log"},
+    {"path": "cac/meeting-notes/",           "collection": "cac_knowledge",   "doc_type": "meeting_note"},
+    {"path": "cac/entities/",                "collection": "cac_knowledge",   "doc_type": "entity"},
+    {"path": "cac/trends/",                  "collection": "cac_knowledge",   "doc_type": "trend"},
+    {"path": "hr/concepts/",                 "collection": "hr_knowledge",    "doc_type": "concept"},
+    {"path": "hr/decisions/",                "collection": "hr_knowledge",    "doc_type": "decision_log"},
+    {"path": "hr/meeting-notes/",            "collection": "hr_knowledge",    "doc_type": "meeting_note"},
+    {"path": "hr/entities/",                 "collection": "hr_knowledge",    "doc_type": "entity"}
+  ],
+  "ignore_folders": [".obsidian", "templates", "archive"],
+  "ignore_files": ["index.md", "log.md", "lint-report.md"],
+  "debounce_seconds": 5,
+  "chunk_size": 512,
+  "chunk_overlap": 128
+}

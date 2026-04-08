@@ -1,0 +1,384 @@
+networks:
+  agent-net:
+    driver: bridge
+
+volumes:
+  # Data zone volumes — bind-mount host directories in production.
+  # In dev (docker-compose.dev.yml), these are overridden to plain named volumes.
+  mirror_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MIRROR_PATH:-/data/mirror}
+  staging_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${STAGING_PATH:-/data/staging}
+  archive_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${ARCHIVE_PATH:-/data/archive}
+  qdrant_data:
+  postgres_data:
+  minio_data:
+
+secrets:
+  jwt_private_key:
+    file: ./secrets/jwt_private.pem
+  jwt_public_key:
+    file: ./secrets/jwt_public.pem
+
+services:
+  # ---- Infrastructure Services ----
+
+  postgres:
+    image: postgres:16-alpine
+    ports: ["5432:5432"]
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    networks: [agent-net]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agents -d corporate_agents"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.1
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks: [agent-net]
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: "6334"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest  # TODO: pin to specific version for prod
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+    volumes:
+      - minio_data:/data
+    networks: [agent-net]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-changeme}
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:1.25-alpine
+    ports: ["8080:8080"]
+    restart: unless-stopped
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks: [agent-net]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---- Application Services ----
+
+  gateway:
+    build: ./services/gateway
+    ports: ["3000:3000"]
+    restart: unless-stopped
+    networks: [agent-net]
+    secrets:
+      - jwt_public_key
+    environment:
+      ENV: ${ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
+      SYNC_BACK_URL: http://sync-back:3006
+      EMAIL_NOTIFIER_URL: http://email-notifier:3005
+    depends_on:
+      postgres:
+        condition: service_healthy
+      email-notifier:
+        condition: service_healthy
+      sync-back:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  cac-orchestrator:
+    build: ./services/cac-orchestrator
+    ports: ["3001:3001"]
+    restart: unless-stopped
+    volumes:
+      - mirror_data:/data/mirror:ro
+      - staging_data:/data/staging:rw
+      - ./config:/app/config:ro
+      - ./skills:/app/skills:ro
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    networks: [agent-net]
+    environment:
+      VLLM_LARGE_URL: http://nginx:8080/v1
+      VLLM_LARGE_MODEL: ${VLLM_LARGE_MODEL:-qwen-122b}
+      QDRANT_HOST: qdrant
+      QDRANT_REST_PORT: 6333
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      STAGING_PATH: /data/staging
+      MIRROR_PATH: /data/mirror
+      CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.85}
+      RAG_TOP_K: ${RAG_TOP_K:-8}
+      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.70}
+      ESCALATION_RULES_PATH: /app/config/escalation_rules.json
+      EXCEL_SCHEMA_PATH: /app/config/excel_schema/alco_tracker.json
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      PAPERCLIP_URL: http://paperclip:3100
+      PAPERCLIP_API_KEY: ${PAPERCLIP_API_KEY:-changeme}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      nginx:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  slack-bot:
+    build: ./services/slack-bot
+    ports: ["3003:3003"]
+    restart: unless-stopped
+    networks: [agent-net]
+    environment:
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
+      CAC_CHANNEL_ID: ${CAC_CHANNEL_ID:-}
+      ESCALATIONS_CHANNEL_ID: ${ESCALATIONS_CHANNEL_ID:-}
+      APPROVALS_CHANNEL_ID: ${APPROVALS_CHANNEL_ID:-}
+      RAG_INGESTION_URL: http://rag-ingestion:3004
+      CAC_ORCHESTRATOR_URL: http://cac-orchestrator:3001
+      ORCHESTRATOR_ENABLED: "false"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rag-ingestion:
+    build: ./services/rag-ingestion
+    ports: ["3004:3004"]
+    restart: unless-stopped
+    volumes:
+      - mirror_data:/data/mirror:ro
+      - ./obsidian-vault:/mnt/obsidian-vault:ro
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    networks: [agent-net]
+    environment:
+      EMBEDDER_TYPE: vllm
+      VLLM_EMBED_URL: http://host.docker.internal:8002/v1
+      QDRANT_HOST: qdrant
+      QDRANT_REST_PORT: "6333"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      MINIO_ENDPOINT: minio:9000
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      OBSIDIAN_VAULT_PATH: /mnt/obsidian-vault
+      OBSIDIAN_WATCH_ENABLED: "true"
+      WIKI_COMPILER_URL: http://wiki-compiler:3007
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # sync-mirror:
+  #   build: ./services/sync-mirror
+  #   volumes:
+  #     - mirror_data:/data/mirror:rw
+  #   networks: [agent-net]
+  #   environment:
+  #     MIRROR_SOURCE: ${MIRROR_SOURCE:-smb}
+  #     MIRROR_SYNC_INTERVAL_MINUTES: ${MIRROR_SYNC_INTERVAL_MINUTES:-15}
+  #     POSTGRES_HOST: postgres
+
+  sync-back:
+    build:
+      context: ./services/sync-back
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      - STAGING_PATH=/data/staging
+      - ARCHIVE_PATH=/data/archive
+      - MIRROR_PATH=/data/mirror
+      - EMAIL_NOTIFIER_URL=http://email-notifier:3005
+      - SLACK_WEBHOOK_URL=${SLACK_ESCALATIONS_WEBHOOK_URL:-}
+    networks:
+      - agent-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    volumes:
+      - staging_data:/data/staging
+      - archive_data:/data/archive
+      - mirror_data:/data/mirror:ro
+
+  approval-ui:
+    build:
+      context: ./services/approval-ui
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - NEXT_PUBLIC_GATEWAY_URL=http://localhost:3000
+      - JWT_PUBLIC_KEY_PATH=/run/secrets/jwt_public_key
+      - PORT=4000
+      - NODE_ENV=production
+      - PAPERCLIP_URL=http://paperclip:3100
+      - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY:-changeme}
+    secrets:
+      - jwt_public_key
+    networks:
+      - agent-net
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    volumes:
+      - ./config/departments.json:/app/src/config/departments.json:ro
+
+  email-notifier:
+    build: ./services/email-notifier
+    restart: unless-stopped
+    expose:
+      - "3005"
+    networks: [agent-net]
+    secrets:
+      - jwt_private_key
+    environment:
+      - LOG_LEVEL=info
+      - JWT_PRIVATE_KEY_PATH=/run/secrets/jwt_private_key
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-noreply@brooker.co.th}
+      - DASHBOARD_URL=${DASHBOARD_URL:-http://localhost:4000}
+      - EMAIL_DRY_RUN=${EMAIL_DRY_RUN:-true}
+      - CEO_EMAIL=${CEO_EMAIL:-}
+      - SLACK_ESCALATIONS_WEBHOOK_URL=${SLACK_ESCALATIONS_WEBHOOK_URL:-}
+    volumes:
+      - ./config/departments.json:/app/config/departments.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  paperclip:
+    build: ./services/paperclip
+    container_name: cac-paperclip
+    ports: ["3100:3100"]
+    restart: unless-stopped
+    networks: [agent-net]
+    volumes:
+      - ./data/staging:/data/staging
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY:-dev-paperclip-key}
+      - SYNC_BACK_URL=http://sync-back:3006
+      - EMAIL_NOTIFIER_URL=http://email-notifier:3005
+      - SLACK_BOT_URL=http://slack-bot:3003
+      - WIKI_COMPILER_URL=http://wiki-compiler:3007
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3100/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  wiki-compiler:
+    build: ./services/wiki-compiler
+    container_name: wiki-compiler
+    ports:
+      - "3007:3007"
+    volumes:
+      - ./obsidian-vault:/mnt/obsidian-vault:rw
+      - ./config:/app/config:ro
+      - ./skills:/app/skills:ro
+    environment:
+      - VLLM_BASE_URL=http://host.docker.internal:8000/v1
+      - VLLM_MODEL=qwen-3.5-122b
+      - VAULT_PATH=/mnt/obsidian-vault
+      - WIKI_SCHEMA_PATH=/app/config/wiki_schema.json
+      - DEPARTMENTS_CONFIG=/app/config/departments.json
+      - WIKI_COMPILER_PORT=3007
+      - LOG_LEVEL=INFO
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - agent-net
+    restart: unless-stopped

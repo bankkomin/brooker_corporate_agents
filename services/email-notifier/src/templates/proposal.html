@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposal Review Required</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <tr>
+      <td style="background:#1e40af;padding:24px 32px;">
+        <h1 style="color:#ffffff;margin:0;font-size:20px;">Proposal Review Required</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:32px;">
+        <p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 16px;">
+          A new proposal requires your review and approval.
+        </p>
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f9fafb;border-radius:6px;margin:0 0 24px;">
+          <tr>
+            <td style="padding:16px 20px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;font-size:14px;width:120px;">Proposal ID</td>
+                  <td style="padding:4px 0;color:#111827;font-size:14px;font-weight:600;">{{ proposal_id }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;font-size:14px;">Agent</td>
+                  <td style="padding:4px 0;color:#111827;font-size:14px;">{{ agent_name }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;font-size:14px;">File</td>
+                  <td style="padding:4px 0;color:#111827;font-size:14px;">{{ file }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;font-size:14px;">Location</td>
+                  <td style="padding:4px 0;color:#111827;font-size:14px;">{{ tab }} &rarr; {{ cell }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;font-size:14px;">New Value</td>
+                  <td style="padding:4px 0;color:#111827;font-size:14px;font-weight:600;">{{ new_value }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;font-size:14px;">Confidence</td>
+                  <td style="padding:4px 0;color:#111827;font-size:14px;">{{ "%.0f"|format(confidence * 100) }}%</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto;">
+          <tr>
+            <td style="background:#2563eb;border-radius:6px;">
+              <a href="{{ approve_url }}" style="display:inline-block;padding:14px 32px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;">
+                Review Proposal
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;text-align:center;">
+          This link expires in 24 hours. If you did not expect this email, please ignore it.
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reminder: Proposal Awaiting Review</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <tr>
+      <td style="background:#d97706;padding:24px 32px;">
+        <h1 style="color:#ffffff;margin:0;font-size:20px;">Reminder: Proposal Awaiting Review</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:32px;">
+        <p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 16px;">
+          Proposal <strong>{{ proposal_id }}</strong> is still awaiting your review. Please take action at your earliest convenience.
+        </p>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto;">
+          <tr>
+            <td style="background:#2563eb;border-radius:6px;">
+              <a href="{{ approve_url }}" style="display:inline-block;padding:14px 32px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;">
+                Review Now
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;text-align:center;">
+          If you have already reviewed this proposal, please disregard this reminder.
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

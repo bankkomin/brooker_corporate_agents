@@ -1,0 +1,22 @@
+{
+  "filename": "ALCO_Tracker.xlsx",
+  "tabs": [
+    {
+      "name": "Funding Facilities",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "SCB Facility",
+          "columns": {
+            "B": "Facility Name",
+            "C": "Limit",
+            "D": "Drawn Amount",
+            "E": "Covenant Threshold"
+          }
+        }
+      ]
+    }
+  ],
+  "_comment": "Populate with real Excel structure during Stage 8 UAT"
+}

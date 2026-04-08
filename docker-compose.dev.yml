@@ -1,0 +1,59 @@
+# docker-compose.dev.yml
+# Local development overrides — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Changes from production:
+# - Data volumes use plain named volumes (no host bind mounts)
+# - No vLLM required (nginx health check relaxed)
+# - Debug logging enabled
+# - Gateway hot-reload enabled
+
+# Override data zone volumes to plain named volumes for local dev
+# (production uses bind mounts to /data/ on the DGX Spark host)
+volumes:
+  mirror_data:
+    driver: local
+  staging_data:
+    driver: local
+  archive_data:
+    driver: local
+
+services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: devpassword
+
+  minio:
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+  nginx:
+    # In dev mode without vLLM, nginx will return 502 for /v1/* requests
+    # This is expected — services should handle LLM errors gracefully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  gateway:
+    environment:
+      ENV: development
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./services/gateway/src:/app/src
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3000", "--reload"]
+
+  slack-bot:
+    environment:
+      LOG_LEVEL: DEBUG
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-xoxb-dev-token}
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET:-dev-secret}
+      CAC_CHANNEL_ID: ${CAC_CHANNEL_ID:-C0000000000}
+      ESCALATIONS_CHANNEL_ID: ${ESCALATIONS_CHANNEL_ID:-C0000000001}
+      APPROVALS_CHANNEL_ID: ${APPROVALS_CHANNEL_ID:-C0000000002}
+    volumes:
+      - ./services/slack-bot/src:/app/src
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3003", "--reload"]

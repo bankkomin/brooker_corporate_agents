@@ -1,0 +1,21 @@
+{
+  "triggers": [
+    {
+      "type": "covenant_ratio",
+      "description": "Debt covenant ratio exceeded",
+      "threshold": 3.5,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod", "ceo"]
+    },
+    {
+      "type": "liquidity_ratio",
+      "description": "Liquidity ratio below minimum",
+      "threshold": 0.5,
+      "condition": "<",
+      "severity": "critical",
+      "notify": ["hod", "ceo"]
+    }
+  ],
+  "_comment": "Add more rules during Stage 5 agent implementation"
+}

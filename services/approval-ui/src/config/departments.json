@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "departments": {
+    "cac": {
+      "name": "Capital Allocation Committee",
+      "shortName": "CAC",
+      "description": "Treasury, capital adequacy, ALM, and funding operations",
+      "color": "#3b82f6",
+      "icon": "building-2",
+      "agents": ["liquidity", "capital", "alm", "funding"],
+      "dataAccess": {
+        "qdrantCollections": ["cac_docs", "cac_chat", "cac_knowledge", "shared_policies"],
+        "mirrorPaths": ["/data/mirror/alco/", "/data/mirror/treasury/"],
+        "excelFiles": ["ALCO_Tracker.xlsx"],
+        "sensitivityLevel": "confidential"
+      },
+      "escalation": {
+        "canEscalateTo": ["cfo", "ceo"],
+        "hodEmails": ["${CAC_HOD_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity"],
+      "slackChannels": {
+        "general": "${CAC_CHANNEL_ID}",
+        "approvals": "${APPROVALS_CHANNEL_ID}",
+        "escalations": "${ESCALATIONS_CHANNEL_ID}"
+      }
+    }
+  },
+  "globalAccess": {
+    "sharedCollections": ["shared_policies"],
+    "roles": {
+      "ceo": { "canRead": ["*"], "canApprove": ["*"] },
+      "cfo": { "canRead": ["cac", "risk"], "canApprove": ["cac"] }
+    }
+  }
+}

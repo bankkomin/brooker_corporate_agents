@@ -1,0 +1,79 @@
+# services/rag-ingestion/src/embedder.py
+"""Async embedding wrapper for vLLM (OpenAI-compatible endpoint)."""
+from __future__ import annotations
+
+import httpx
+import structlog
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+
+from .config import RAGSettings
+
+logger = structlog.get_logger("rag-ingestion.embedder")
+
+
+class Embedder:
+    """Async client for vLLM embedding endpoint."""
+
+    BATCH_SIZE = 32
+
+    def __init__(self, settings: RAGSettings) -> None:
+        self._url = f"{settings.vllm_embed_url.rstrip('/')}/embeddings"
+        self._model = settings.vllm_embed_model
+        self._http: httpx.AsyncClient | None = None
+
+    async def start(self) -> None:
+        self._http = httpx.AsyncClient(timeout=30.0)
+
+    async def close(self) -> None:
+        if self._http:
+            await self._http.aclose()
+            self._http = None
+
+    @retry(
+        retry=retry_if_exception_type((httpx.TransportError, httpx.TimeoutException)),
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=8),
+        reraise=True,
+    )
+    async def _embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed a single batch via vLLM."""
+        assert self._http is not None, "Call start() before embedding"
+        payload = {"model": self._model, "input": texts}
+        resp = await self._http.post(self._url, json=payload)
+        resp.raise_for_status()
+        data = resp.json()
+        sorted_results = sorted(data["data"], key=lambda x: x["index"])
+        return [item["embedding"] for item in sorted_results]
+
+    async def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of texts, splitting into batches if needed."""
+        if not texts:
+            return []
+        all_vectors: list[list[float]] = []
+        for i in range(0, len(texts), self.BATCH_SIZE):
+            batch = texts[i : i + self.BATCH_SIZE]
+            vectors = await self._embed_batch(batch)
+            all_vectors.extend(vectors)
+            logger.debug("embedder.batch_done", batch_start=i, count=len(batch))
+        return all_vectors
+
+    async def embed_single(self, text: str) -> list[float]:
+        """Embed a single text string."""
+        results = await self.embed_texts([text])
+        return results[0]
+
+    async def get_dimension(self) -> int:
+        """Get embedding dimension by embedding a test string."""
+        vec = await self.embed_single("dimension test")
+        return len(vec)
+
+    async def health_check(self) -> bool:
+        """Check if vLLM embed endpoint is reachable."""
+        try:
+            assert self._http is not None
+            resp = await self._http.get(
+                self._url.replace("/embeddings", "/models")
+            )
+            return resp.status_code == 200
+        except Exception:
+            return False
