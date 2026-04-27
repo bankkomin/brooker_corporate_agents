@@ -1,8 +1,8 @@
 """Staging writer node — writes proposals to /data/staging/pending/."""
 from __future__ import annotations
 
-import itertools
 import os
+import uuid
 from datetime import UTC, datetime
 
 import aiofiles
@@ -13,13 +13,10 @@ from ..tools.db_client import DBClient
 
 logger = structlog.get_logger("cac-orchestrator.staging")
 
-# Thread-safe counter for generating proposal IDs (itertools.count is atomic)
-_counter = itertools.count(1)
-
 
 def _next_proposal_id() -> str:
-    """Generate next proposal ID: chg_XXXX."""
-    return f"chg_{next(_counter):04d}"
+    """Generate a collision-resistant proposal ID that survives process restarts."""
+    return f"chg_{uuid.uuid4().hex[:8]}"
 
 
 async def staging_writer(

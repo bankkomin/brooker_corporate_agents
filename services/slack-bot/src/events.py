@@ -141,7 +141,7 @@ async def _process_mention(
     result = await orch_client.query(
         query=query,
         user_id=user_id,
-        channel_id=channel,
+        channel=channel,
         thread_ts=thread_ts,
     )
 

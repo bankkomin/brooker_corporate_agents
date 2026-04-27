@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -176,18 +176,20 @@ async def approve_proposal(request: Request, proposal_id: str) -> JSONResponse:
 
 
 @router.post("/{proposal_id}/reject")
-async def reject_proposal(request: Request, proposal_id: str) -> JSONResponse:
-    """Reject a pending proposal (atomic UPDATE to avoid TOCTOU race)."""
+async def reject_proposal(
+    request: Request,
+    proposal_id: str,
+    body: RejectBody,
+) -> JSONResponse:
+    """Reject a pending proposal.
+
+    Dept access is checked BEFORE the UPDATE to prevent TOCTOU: a caller
+    from a different department cannot mutate a row and have the write land
+    even momentarily before the access check fires.
+    """
     claims = extract_claims(request)
 
-    # Parse body
-    try:
-        body_json = await request.json()
-    except Exception:
-        body_json = {}
-
-    reason = body_json.get("reason") if body_json else None
-    if not reason:
+    if not body.reason:
         return JSONResponse(
             status_code=422,
             content=ErrorResponse(
@@ -198,26 +200,25 @@ async def reject_proposal(request: Request, proposal_id: str) -> JSONResponse:
 
     pool = request.app.state.db_pool
     async with pool.acquire() as conn:
-        # Atomic: only transitions pending -> rejected
-        result = await conn.fetchrow(
-            "UPDATE staging_proposals SET status = 'rejected' "
-            "WHERE id = $1 AND status = 'pending' RETURNING *",
+        # 1. Read the current row — check existence and dept BEFORE writing.
+        existing = await conn.fetchrow(
+            "SELECT id, status, dept FROM staging_proposals WHERE id = $1",
             proposal_id,
         )
-        if result is None:
-            existing = await conn.fetchrow(
-                "SELECT id, status, dept FROM staging_proposals WHERE id = $1",
-                proposal_id,
+        if existing is None:
+            return JSONResponse(
+                status_code=404,
+                content=ErrorResponse(
+                    error="Proposal not found",
+                    code="PROPOSAL_NOT_FOUND",
+                ).model_dump(),
             )
-            if existing is None:
-                return JSONResponse(
-                    status_code=404,
-                    content=ErrorResponse(
-                        error="Proposal not found",
-                        code="PROPOSAL_NOT_FOUND",
-                    ).model_dump(),
-                )
-            check_dept_access(claims, existing["dept"])
+
+        # 2. Dept access check — raises AuthError → 403 if mismatch.
+        check_dept_access(claims, existing["dept"])
+
+        # 3. Guard: must still be pending.
+        if existing["status"] != "pending":
             return JSONResponse(
                 status_code=409,
                 content=ErrorResponse(
@@ -226,7 +227,26 @@ async def reject_proposal(request: Request, proposal_id: str) -> JSONResponse:
                 ).model_dump(),
             )
 
-        check_dept_access(claims, result["dept"])
+        # 4. Atomic transition pending -> rejected (WHERE status = 'pending'
+        #    guards against a concurrent approval between steps 1 and 4).
+        result = await conn.fetchrow(
+            "UPDATE staging_proposals SET status = 'rejected' "
+            "WHERE id = $1 AND status = 'pending' RETURNING *",
+            proposal_id,
+        )
+        if result is None:
+            # Lost the race to a concurrent decision.
+            row = await conn.fetchrow(
+                "SELECT status FROM staging_proposals WHERE id = $1",
+                proposal_id,
+            )
+            return JSONResponse(
+                status_code=409,
+                content=ErrorResponse(
+                    error=f"Proposal is already {row['status'] if row else 'unknown'}",
+                    code="PROPOSAL_NOT_PENDING",
+                ).model_dump(),
+            )
 
         await conn.execute(
             "INSERT INTO approval_decisions "
@@ -235,7 +255,7 @@ async def reject_proposal(request: Request, proposal_id: str) -> JSONResponse:
             proposal_id,
             claims.sub,
             claims.dept,
-            reason,
+            body.reason,
         )
 
     logger.info(
@@ -247,7 +267,7 @@ async def reject_proposal(request: Request, proposal_id: str) -> JSONResponse:
     )
 
     try:
-        await on_proposal_rejected(proposal_id, claims.dept, reason)
+        await on_proposal_rejected(proposal_id, claims.dept, body.reason)
     except Exception as exc:
         logger.error("hook.reject.failed", proposal_id=proposal_id, error=str(exc))
 
@@ -255,17 +275,20 @@ async def reject_proposal(request: Request, proposal_id: str) -> JSONResponse:
 
 
 @router.post("/{proposal_id}/edit")
-async def edit_proposal(request: Request, proposal_id: str) -> JSONResponse:
-    """Edit a proposal value and approve it (atomic UPDATE to avoid TOCTOU race)."""
+async def edit_proposal(
+    request: Request,
+    proposal_id: str,
+    body: EditBody,
+) -> JSONResponse:
+    """Edit a proposal value and approve it.
+
+    Dept access is checked BEFORE the UPDATE to prevent TOCTOU: a caller
+    from a different department cannot mutate a row and have the write land
+    even momentarily before the access check fires.
+    """
     claims = extract_claims(request)
 
-    try:
-        body_json = await request.json()
-    except Exception:
-        body_json = {}
-
-    edited_value = body_json.get("edited_value") if body_json else None
-    if not edited_value:
+    if not body.edited_value:
         return JSONResponse(
             status_code=422,
             content=ErrorResponse(
@@ -276,27 +299,25 @@ async def edit_proposal(request: Request, proposal_id: str) -> JSONResponse:
 
     pool = request.app.state.db_pool
     async with pool.acquire() as conn:
-        # Atomic: transition pending -> approved AND persist edited new_value
-        result = await conn.fetchrow(
-            "UPDATE staging_proposals SET status = 'approved', new_value = $2 "
-            "WHERE id = $1 AND status = 'pending' RETURNING *",
+        # 1. Read the current row — check existence and dept BEFORE writing.
+        existing = await conn.fetchrow(
+            "SELECT id, status, dept FROM staging_proposals WHERE id = $1",
             proposal_id,
-            edited_value,
         )
-        if result is None:
-            existing = await conn.fetchrow(
-                "SELECT id, status, dept FROM staging_proposals WHERE id = $1",
-                proposal_id,
+        if existing is None:
+            return JSONResponse(
+                status_code=404,
+                content=ErrorResponse(
+                    error="Proposal not found",
+                    code="PROPOSAL_NOT_FOUND",
+                ).model_dump(),
             )
-            if existing is None:
-                return JSONResponse(
-                    status_code=404,
-                    content=ErrorResponse(
-                        error="Proposal not found",
-                        code="PROPOSAL_NOT_FOUND",
-                    ).model_dump(),
-                )
-            check_dept_access(claims, existing["dept"])
+
+        # 2. Dept access check — raises AuthError → 403 if mismatch.
+        check_dept_access(claims, existing["dept"])
+
+        # 3. Guard: must still be pending.
+        if existing["status"] != "pending":
             return JSONResponse(
                 status_code=409,
                 content=ErrorResponse(
@@ -305,7 +326,27 @@ async def edit_proposal(request: Request, proposal_id: str) -> JSONResponse:
                 ).model_dump(),
             )
 
-        check_dept_access(claims, result["dept"])
+        # 4. Atomic transition pending -> approved AND persist edited new_value
+        #    (WHERE status = 'pending' guards against concurrent decisions).
+        result = await conn.fetchrow(
+            "UPDATE staging_proposals SET status = 'approved', new_value = $2 "
+            "WHERE id = $1 AND status = 'pending' RETURNING *",
+            proposal_id,
+            body.edited_value,
+        )
+        if result is None:
+            # Lost the race to a concurrent decision.
+            row = await conn.fetchrow(
+                "SELECT status FROM staging_proposals WHERE id = $1",
+                proposal_id,
+            )
+            return JSONResponse(
+                status_code=409,
+                content=ErrorResponse(
+                    error=f"Proposal is already {row['status'] if row else 'unknown'}",
+                    code="PROPOSAL_NOT_PENDING",
+                ).model_dump(),
+            )
 
         await conn.execute(
             "INSERT INTO approval_decisions "
@@ -314,7 +355,7 @@ async def edit_proposal(request: Request, proposal_id: str) -> JSONResponse:
             proposal_id,
             claims.sub,
             claims.dept,
-            edited_value,
+            body.edited_value,
         )
 
     logger.info(

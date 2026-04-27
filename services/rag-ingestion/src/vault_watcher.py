@@ -225,13 +225,19 @@ class VaultWatcher:
         def _record() -> None:
             conn = psycopg2.connect(self._postgres_dsn)
             cur = conn.cursor()
+            # ON CONFLICT updates the mutable fields only.
+            # created_at must NOT be updated — it records the original ingest time.
+            # Overwriting it would make re-indexing look like first-time ingestion.
             cur.execute(
                 "INSERT INTO ingested_documents"
                 " (filename, dept, doc_type, chunks_count, file_hash)"
                 " VALUES (%s, %s, %s, %s, %s)"
                 " ON CONFLICT (file_hash) DO UPDATE"
-                " SET chunks_count = %s, created_at = NOW()",
-                (filename, dept, doc_type, chunks, file_hash, chunks),
+                " SET filename = EXCLUDED.filename,"
+                "     dept = EXCLUDED.dept,"
+                "     doc_type = EXCLUDED.doc_type,"
+                "     chunks_count = EXCLUDED.chunks_count",
+                (filename, dept, doc_type, chunks, file_hash),
             )
             conn.commit()
             cur.close()

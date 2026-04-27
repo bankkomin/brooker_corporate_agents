@@ -23,5 +23,5 @@ export interface AnalyticsSummary {
   pending: number;
   approved_today: number;
   escalations: number;
-  avg_confidence: number;
+  avg_confidence: number | null;
 }

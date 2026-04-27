@@ -1,0 +1,149 @@
+{
+  "filename": "IT_Tracker.xlsx",
+  "tabs": [
+    {
+      "name": "Infrastructure",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "System Availability %",
+          "columns": {
+            "B": "Metric",
+            "C": "SLA Target",
+            "D": "Current Value",
+            "E": "Prior Month"
+          }
+        },
+        {
+          "row": 9,
+          "label": "P1/P2 Incidents (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "MTTR (hrs)"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Capacity Utilisation %",
+          "columns": {
+            "B": "Resource",
+            "C": "Alert Threshold",
+            "D": "Current Value",
+            "E": "Trend"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Disaster Recovery RTO",
+          "columns": {
+            "B": "System",
+            "C": "Target RTO",
+            "D": "Last Tested",
+            "E": "Status"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Overall system uptime (target >99.9%), D9=MTD P1/P2 incident count and MTTR, D10=Compute/storage capacity, D11=DR test results"
+    },
+    {
+      "name": "Security",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Critical Vulnerabilities",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Age (avg days)"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Patch Compliance %",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Overdue Count"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Security Incidents (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Severity"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Phishing Test Pass Rate",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Open critical/high CVEs (target 0 critical), D9=Endpoint patch compliance, D10=MTD security event count, D11=Phishing simulation pass rate"
+    },
+    {
+      "name": "DevOps",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Deployment Frequency",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Month"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Change Failure Rate",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        },
+        {
+          "row": 10,
+          "label": "MTTR (production)",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 11,
+          "label": "CI Pipeline Pass Rate",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Flaky Tests"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Deploys per week (DORA metric), D9=% deployments causing production issues, D10=Mean time to restore (hrs), D11=CI pipeline green rate"
+    }
+  ]
+}

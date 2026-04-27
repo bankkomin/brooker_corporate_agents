@@ -8,6 +8,8 @@ import {
   AlertTriangle,
   BarChart3,
   Activity,
+  Bot,
+  Database,
   Menu,
 } from "lucide-react";
 
@@ -44,6 +46,8 @@ const WIDGET_NAV: Record<
     icon: Activity,
     segment: "activity",
   },
+  agents: { label: "Agents", icon: Bot, segment: "agents" },
+  data: { label: "Data", icon: Database, segment: "data" },
 };
 
 interface AppSidebarProps {

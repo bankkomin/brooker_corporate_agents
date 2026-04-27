@@ -9,7 +9,7 @@ class WikiSettings(BaseSettings):
 
     # LLM
     vllm_base_url: str = "http://host.docker.internal:8000/v1"
-    vllm_model: str = "qwen-3.5-122b"
+    vllm_model: str = "qwen-large"
     llm_temperature: float = 0.3
     llm_max_tokens: int = 4096
 

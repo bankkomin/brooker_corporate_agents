@@ -87,8 +87,7 @@ skills/
   cac/             — CAC-specific SKILL.md files
 config/
   excel_schema/    — Excel tracker structure definitions
-  dept_channels.json
-  hod_emails.json
+  departments.json — single source of truth: HOD emails, Slack channel IDs, agent access
   escalation_rules.json
   obsidian_watch.json
 tests/
@@ -118,7 +117,7 @@ Week 8: UAT + Go-Live
 
 ## Key Config Files
 - `config/excel_schema/alco_tracker.json` — must be populated with real Excel structure before Week 5
-- `config/hod_emails.json` — must have real HOD addresses before Week 6
+- `config/departments.json` — HOD emails (`escalation.hodEmails`) and Slack channel IDs (`slackChannels`) per department; must have real values before Week 6
 - `config/escalation_rules.json` — configurable breach triggers
 - `config/obsidian_watch.json` — vault folders watched by LlamaIndex
 

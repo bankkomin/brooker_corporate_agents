@@ -1,0 +1,144 @@
+{
+  "filename": "Compliance_Tracker.xlsx",
+  "tabs": [
+    {
+      "name": "Compliance",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Open Breaches",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Status"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Overdue Remediation",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Days Overdue"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Training Completion %",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Policy Review Due",
+          "columns": {
+            "B": "Metric",
+            "D": "Count",
+            "E": "Next Due Date"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Open compliance breaches (target 0), D9=Overdue remediation items, D10=Mandatory training completion, D11=Policies due for review"
+    },
+    {
+      "name": "Regulatory",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Regulatory Returns Due",
+          "columns": {
+            "B": "Metric",
+            "D": "Count",
+            "E": "Next Due Date"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Outstanding Queries",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Regulator"
+          }
+        },
+        {
+          "row": 10,
+          "label": "CRAR (Basel III)",
+          "columns": {
+            "B": "Metric",
+            "C": "Regulatory Minimum",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        },
+        {
+          "row": 11,
+          "label": "AML Alerts (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Escalated"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Upcoming regulatory filing deadlines, D9=Open regulator queries, D10=CRAR Basel III ratio, D11=AML alert volume"
+    },
+    {
+      "name": "Contracts",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Contracts Expiring (90d)",
+          "columns": {
+            "B": "Metric",
+            "D": "Count",
+            "E": "Earliest Expiry"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Contracts Under Review",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Status"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Non-Standard Clauses",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Risk Rating"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Pending Execution",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Counterparty"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Contracts expiring within 90 days, D9=Active reviews, D10=Non-standard clause flags, D11=Contracts awaiting execution"
+    }
+  ]
+}

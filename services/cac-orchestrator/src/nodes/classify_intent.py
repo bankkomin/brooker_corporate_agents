@@ -9,12 +9,15 @@ from ..tools.llm_client import LLMClient
 
 logger = structlog.get_logger("cac-orchestrator.classify")
 
-INTENT_CATEGORIES = ["liquidity", "capital", "alm", "funding", "general"]
+INTENT_CATEGORIES = ["liquidity", "capital", "alm", "funding", "cfo", "general"]
 
 SYSTEM_PROMPT = (
     "You are an intent classifier for a Capital Allocation & ALCO Committee AI system.\n"
     "Classify the following query into exactly one of these categories: "
-    "liquidity, capital, alm, funding, general.\n"
+    "liquidity, capital, alm, funding, cfo, general.\n"
+    "Use 'cfo' when the query asks for a whole-of-firm, board-level, or "
+    "cross-domain risk overview that spans multiple domains (liquidity + capital, "
+    "ALM + funding, overall risk posture, composite metrics, etc.).\n"
     'Respond with JSON only: {"intent": "<category>", "confidence": <0.0-1.0>}\n'
     "Do not include any other text."
 )
@@ -29,7 +32,9 @@ async def classify_intent(state: dict, *, llm_client: LLMClient) -> dict:
     ]
     raw_text = ""
     try:
-        raw_text = await llm_client.chat(messages, temperature=0.0, max_tokens=100)
+        raw_text = await llm_client.chat(
+            messages, temperature=0.0, max_tokens=100, seed=42
+        )
         parsed = json.loads(raw_text)
         intent = parsed.get("intent", "general")
         confidence = float(parsed.get("confidence", 0.5))

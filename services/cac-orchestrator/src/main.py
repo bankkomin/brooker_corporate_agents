@@ -1,6 +1,10 @@
 """FastAPI application for CAC Orchestrator."""
 from __future__ import annotations
 
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+
 import logging
 import time
 from collections.abc import AsyncIterator
@@ -32,6 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     llm_client = LLMClient(
         base_url=settings.vllm_large_url,
         model=settings.vllm_large_model,
+        api_key=settings.llm_api_key,
     )
     rag_client = RAGClient(
         host=settings.qdrant_host,
@@ -58,14 +63,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # LangGraph checkpointer -- graceful degradation if Postgres unavailable
     checkpointer = None
+    checkpointer_cm = None
     try:
         from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
-        checkpointer = AsyncPostgresSaver.from_conn_string(settings.postgres_dsn)
+        checkpointer_cm = AsyncPostgresSaver.from_conn_string(settings.postgres_dsn)
+        checkpointer = await checkpointer_cm.__aenter__()
         await checkpointer.setup()
         logger.info("checkpointer_ready")
     except Exception as exc:
         logger.warning("checkpointer_setup_failed", error=str(exc))
+        checkpointer = None
+        checkpointer_cm = None
 
     compiled_graph = build_graph(
         llm_client=llm_client,
@@ -81,6 +90,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     _state["db_pool"] = db_pool
     _state["graph"] = compiled_graph
     _state["checkpointer"] = checkpointer
+    _state["checkpointer_cm"] = checkpointer_cm
 
     logger.info("cac_orchestrator_ready")
     yield
@@ -88,6 +98,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Shutdown
     await llm_client.close()
     await rag_client.close()
+    if checkpointer_cm is not None:
+        await checkpointer_cm.__aexit__(None, None, None)
     if db_pool is not None:
         await db_pool.close()
     logger.info("cac_orchestrator_stopped")
@@ -126,6 +138,8 @@ async def query(req: QueryRequest) -> QueryResponse:
         "agent_name": "",
         "proposed_value": None,
         "proposed_cell": None,
+        "proposed_tab": None,
+        "old_value": "",
         "escalation_triggered": False,
         "escalation_detail": None,
         "excel_nav": None,
@@ -159,8 +173,15 @@ async def query(req: QueryRequest) -> QueryResponse:
     try:
         result = await graph.ainvoke(initial_state, config=config)
     except Exception as exc:
-        logger.error("graph_execution_failed", error=str(exc))
-        raise HTTPException(status_code=500, detail="Query processing failed") from exc
+        logger.error(
+            "graph_execution_failed",
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Query processing failed: {type(exc).__name__}: {exc}",
+        ) from exc
 
     processing_ms = int((time.monotonic() - start) * 1000)
 

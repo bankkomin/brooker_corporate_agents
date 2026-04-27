@@ -1,0 +1,154 @@
+{
+  "filename": "Investment_Tracker.xlsx",
+  "tabs": [
+    {
+      "name": "Portfolio",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "AUM",
+          "columns": {
+            "B": "Metric",
+            "C": "Benchmark",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Portfolio Return (YTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Hurdle Rate",
+            "D": "Current Value",
+            "E": "Benchmark Return"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Sharpe Ratio",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Asset Allocation",
+          "columns": {
+            "B": "Asset Class",
+            "C": "Target Weight",
+            "D": "Current Weight",
+            "E": "Drift"
+          }
+        },
+        {
+          "row": 12,
+          "label": "Cash Drag",
+          "columns": {
+            "B": "Metric",
+            "C": "Max Allowed",
+            "D": "Current Value",
+            "E": "Status"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11", "D12"],
+      "notes": "D8=Total AUM, D9=YTD portfolio return vs hurdle, D10=Risk-adjusted return, D11=Current vs target weights, D12=Uninvested cash %"
+    },
+    {
+      "name": "Valuation",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "NAV",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Mark-to-Market P&L",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "MTD"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Unrealised Gains/Losses",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Asset Class"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Level 3 Assets %",
+          "columns": {
+            "B": "Metric",
+            "C": "Limit",
+            "D": "Current Value",
+            "E": "Status"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Net Asset Value, D9=MTM P&L vs threshold, D10=Unrealised positions, D11=Illiquid (Level 3) exposure"
+    },
+    {
+      "name": "Due Diligence",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Active DD Processes",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Stage"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Pending IC Approval",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Value"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Avg DD Cycle (days)",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Declined Pipeline",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Reason"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Active due diligence processes, D9=Deals pending IC sign-off, D10=Average cycle time, D11=Deals declined in period"
+    }
+  ]
+}

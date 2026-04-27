@@ -131,10 +131,12 @@ async def send_email_with_retry(
                 last_error,
                 next_delay,
             )
+            # Use 'pending' — 'retrying' is not a valid delivery_status value.
+            # email_log CHECK constraint allows only: sent, delivered, failed, bounced, pending.
             await update_email_status(
                 pool,
                 log_id,
-                status="retrying",
+                status="pending",
                 error=last_error,
                 retry_count=attempt + 1,
             )

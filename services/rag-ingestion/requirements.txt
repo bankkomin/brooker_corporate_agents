@@ -11,6 +11,7 @@ psycopg2-binary>=2.9
 minio>=7.2
 watchdog>=4.0
 structlog>=23.0
+google-genai>=1.0
 openpyxl>=3.1
 python-docx>=1.1
 pymupdf>=1.24

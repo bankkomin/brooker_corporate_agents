@@ -33,10 +33,11 @@ async def check_overdue_proposals(
     today_start = datetime.now(tz=UTC).replace(hour=0, minute=0, second=0, microsecond=0)
 
     async with pool.acquire() as conn:
-        # Find proposals pending > 24h
+        # Find proposals pending > 24h.
+        # staging_proposals PK is `id`, not `proposal_id`.
         overdue = await conn.fetch(
             """
-            SELECT proposal_id, dept
+            SELECT id, dept
             FROM staging_proposals
             WHERE status = 'pending'
               AND created_at < $1
@@ -49,8 +50,9 @@ async def check_overdue_proposals(
             logger.info("scheduler.no_overdue_proposals")
             return 0
 
-        # Check which proposals already got a reminder today
-        proposal_ids = [r["proposal_id"] for r in overdue]
+        # Check which proposals already got a reminder today.
+        # email_log.proposal_id stores the value of staging_proposals.id.
+        proposal_ids = [r["id"] for r in overdue]
         already_reminded = await conn.fetch(
             """
             SELECT DISTINCT proposal_id
@@ -67,7 +69,7 @@ async def check_overdue_proposals(
     sent = 0
 
     for row in overdue:
-        pid = row["proposal_id"]
+        pid = row["id"]
         dept = row["dept"]
 
         if pid in reminded_set:

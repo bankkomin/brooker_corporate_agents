@@ -2,20 +2,243 @@
   "triggers": [
     {
       "type": "covenant_ratio",
-      "description": "Debt covenant ratio exceeded",
+      "description": "Debt covenant ratio (Net Debt / EBITDA) exceeded limit",
+      "threshold": 4.0,
+      "condition": ">",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "funding-facilities"
+    },
+    {
+      "type": "covenant_ratio_warning",
+      "description": "Debt covenant ratio approaching limit",
       "threshold": 3.5,
       "condition": ">",
-      "severity": "high",
-      "notify": ["hod", "ceo"]
+      "severity": "medium",
+      "notify": ["hod"],
+      "source_skill": "funding-facilities"
     },
     {
       "type": "liquidity_ratio",
-      "description": "Liquidity ratio below minimum",
-      "threshold": 0.5,
+      "description": "Current ratio below minimum",
+      "threshold": 1.0,
+      "condition": "<",
+      "severity": "high",
+      "notify": ["hod", "ceo"],
+      "source_skill": "liquidity-analysis"
+    },
+    {
+      "type": "car",
+      "description": "Capital Adequacy Ratio below internal target (Total Capital / RWA)",
+      "threshold": 0.125,
       "condition": "<",
       "severity": "critical",
-      "notify": ["hod", "ceo"]
+      "notify": ["hod", "ceo"],
+      "source_skill": "capital-allocation"
+    },
+    {
+      "type": "cet1",
+      "description": "CET1 Ratio below minimum including capital buffers (CET1 Capital / RWA)",
+      "threshold": 0.105,
+      "condition": "<",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "capital-allocation"
+    },
+    {
+      "type": "lcr",
+      "description": "Liquidity Coverage Ratio below regulatory minimum (HQLA / Net Cash Outflows 30d)",
+      "threshold": 1.0,
+      "condition": "<",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "liquidity-analysis"
+    },
+    {
+      "type": "nsfr",
+      "description": "Net Stable Funding Ratio below regulatory minimum (Available Stable Funding / Required Stable Funding)",
+      "threshold": 1.0,
+      "condition": "<",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "liquidity-analysis"
+    },
+    {
+      "type": "duration_gap",
+      "description": "Duration gap exceeds tolerance (Duration of Assets - Duration of Liabilities, in years)",
+      "threshold": 3.0,
+      "condition": ">",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "alm-review"
+    },
+    {
+      "type": "facility_utilization",
+      "description": "Funding facility utilization above warning threshold (Total Drawn / Total Available)",
+      "threshold": 0.9,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod"],
+      "source_skill": "funding-facilities"
+    },
+    {
+      "type": "interest_coverage",
+      "description": "Interest coverage ratio below minimum (EBITDA / Interest Expense)",
+      "threshold": 2.0,
+      "condition": "<",
+      "severity": "high",
+      "notify": ["hod", "ceo"],
+      "source_skill": "covenant-monitoring"
+    },
+
+    {
+      "type": "npl_ratio",
+      "description": "Non-performing loan ratio exceeds critical threshold (NPL Balance / Gross Loans)",
+      "threshold": 0.05,
+      "condition": ">",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "credit-risk"
+    },
+    {
+      "type": "var_limit_breach",
+      "description": "Value-at-Risk (99% 1-day) has exceeded the board-approved trading limit",
+      "threshold": 1.0,
+      "condition": "breach",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "market-risk"
+    },
+    {
+      "type": "single_loss_event",
+      "description": "Single operational loss event exceeds reporting threshold (USD)",
+      "threshold": 1000000,
+      "condition": ">",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "operational-risk"
+    },
+
+    {
+      "type": "regulatory_deadline_imminent",
+      "description": "Regulatory filing or remediation deadline is within 48 hours with no submission on record",
+      "threshold": 48,
+      "condition": "<",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "compliance"
+    },
+    {
+      "type": "aml_sanctions_match",
+      "description": "AML screening or sanctions list has returned a positive match requiring immediate review",
+      "threshold": 1,
+      "condition": ">=",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "compliance"
+    },
+    {
+      "type": "exam_finding_unresolved",
+      "description": "Regulatory examination finding remains unresolved beyond maximum permitted age (days)",
+      "threshold": 60,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod", "ceo"],
+      "source_skill": "regulatory"
+    },
+
+    {
+      "type": "tracking_error",
+      "description": "Portfolio annualised tracking error versus benchmark has exceeded tolerance band",
+      "threshold": 0.02,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod"],
+      "source_skill": "portfolio"
+    },
+    {
+      "type": "level3_assets_ratio",
+      "description": "Level 3 (hard-to-value) assets as a proportion of total AUM has exceeded internal limit",
+      "threshold": 0.15,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod", "ceo"],
+      "source_skill": "valuation"
+    },
+    {
+      "type": "manager_on_watch",
+      "description": "External fund manager has remained on the watch list beyond the review period (months)",
+      "threshold": 6,
+      "condition": ">",
+      "severity": "medium",
+      "notify": ["hod"],
+      "source_skill": "due-diligence"
+    },
+
+    {
+      "type": "sla_breach_rate",
+      "description": "Proportion of SLA-bound service requests breached in the rolling 30-day window",
+      "threshold": 0.05,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod"],
+      "source_skill": "process"
+    },
+    {
+      "type": "critical_maintenance_overdue",
+      "description": "One or more critical-category planned maintenance tasks have passed their due date without completion",
+      "threshold": 1,
+      "condition": ">=",
+      "severity": "high",
+      "notify": ["hod"],
+      "source_skill": "facilities"
+    },
+
+    {
+      "type": "critical_role_vacant",
+      "description": "A business-critical role has been open without a confirmed hire beyond the maximum vacancy period (days)",
+      "threshold": 60,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod"],
+      "source_skill": "talent"
+    },
+    {
+      "type": "pay_equity_gap",
+      "description": "Adjusted gender or ethnicity pay gap within a job band has exceeded the internal equity threshold",
+      "threshold": 0.05,
+      "condition": ">",
+      "severity": "medium",
+      "notify": ["hod"],
+      "source_skill": "compensation"
+    },
+
+    {
+      "type": "p1_incident",
+      "description": "Priority-1 infrastructure or application incident is open (full or partial service outage affecting production)",
+      "threshold": 1,
+      "condition": ">=",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "infrastructure"
+    },
+    {
+      "type": "critical_vulnerability_unpatched",
+      "description": "CVSS Critical (9.0+) vulnerability has remained unpatched in a production system beyond the SLA window (days)",
+      "threshold": 7,
+      "condition": ">",
+      "severity": "critical",
+      "notify": ["hod", "ceo"],
+      "source_skill": "security"
+    },
+    {
+      "type": "deployment_failure_rate",
+      "description": "Proportion of production deployments that have failed or required rollback in the rolling 30-day window",
+      "threshold": 0.10,
+      "condition": ">",
+      "severity": "high",
+      "notify": ["hod"],
+      "source_skill": "devops"
     }
-  ],
-  "_comment": "Add more rules during Stage 5 agent implementation"
+  ]
 }

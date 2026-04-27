@@ -1,7 +1,7 @@
 """Settings from environment variables."""
 import os
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/brooker_agent")
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://agents:changeme@postgres:5432/corporate_agents")
 STAGING_PATH = os.environ.get("STAGING_PATH", "/data/staging")
 ARCHIVE_PATH = os.environ.get("ARCHIVE_PATH", "/data/archive")
 MIRROR_PATH = os.environ.get("MIRROR_PATH", "/data/mirror")

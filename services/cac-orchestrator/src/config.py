@@ -10,9 +10,10 @@ class OrchestratorSettings(BaseSettings):
 
     model_config = {"env_prefix": "", "case_sensitive": False}
 
-    # vLLM large model (via nginx load balancer)
-    vllm_large_url: str = "http://nginx:8080/v1"
-    vllm_large_model: str = "qwen-122b"
+    # LLM — OpenAI-compatible endpoint (vLLM, Gemini, etc.)
+    vllm_large_url: str = "https://generativelanguage.googleapis.com/v1beta/openai"
+    vllm_large_model: str = "gemini-3.1-flash-lite-preview"
+    llm_api_key: str = ""
 
     # Qdrant
     qdrant_host: str = "qdrant"
@@ -41,6 +42,10 @@ class OrchestratorSettings(BaseSettings):
 
     # Email notifier
     email_notifier_url: str = "http://email-notifier:3005"
+
+    # Paperclip
+    paperclip_url: str = "http://paperclip:3100"
+    paperclip_api_key: str = "dev-paperclip-key"
 
     # Logging
     log_level: str = "INFO"

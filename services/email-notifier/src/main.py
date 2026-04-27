@@ -1,6 +1,10 @@
 """Email-notifier service — JWT generation + SMTP sending."""
 from __future__ import annotations
 
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+
 import json
 import os
 import uuid
@@ -66,10 +70,31 @@ def _resolve_hod_email(dept: str) -> str | None:
     return None
 
 
+def _smtp_configured() -> bool:
+    """Return True if SMTP_HOST is set in the environment."""
+    return bool(os.environ.get("SMTP_HOST"))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Create and tear down the asyncpg connection pool and APScheduler."""
     logger.info("email_notifier.startup")
+
+    # Warn loudly if email delivery is disabled — proposals will accumulate
+    # silently with no HOD notification until this is fixed.
+    smtp_enabled = _smtp_configured()
+    app.state.smtp_enabled = smtp_enabled
+    if not smtp_enabled:
+        logger.warning(
+            "email_notifier.smtp_disabled",
+            message=(
+                "SMTP_HOST is not configured. All email notifications will be "
+                "silently dropped. HODs will NOT receive proposal or escalation "
+                "emails until SMTP_HOST (and optionally SMTP_PORT, SMTP_USER, "
+                "SMTP_PASSWORD, SMTP_FROM) are set."
+            ),
+        )
+
     try:
         app.state.db_pool = await asyncpg.create_pool(
             DATABASE_URL, min_size=1, max_size=3
@@ -112,8 +137,14 @@ app = FastAPI(
 
 
 @app.get("/health")
-async def health() -> dict:
-    return {"status": "healthy", "service": "email-notifier"}
+async def health(request: Request) -> dict:
+    smtp_enabled = getattr(request.app.state, "smtp_enabled", _smtp_configured())
+    return {
+        "status": "healthy",
+        "service": "email-notifier",
+        "smtp_configured": smtp_enabled,
+        "email_delivery": "enabled" if smtp_enabled else "disabled — set SMTP_HOST to enable",
+    }
 
 
 @app.post("/notify/escalation")

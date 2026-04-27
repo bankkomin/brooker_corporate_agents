@@ -2,22 +2,18 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, decodeTokenPayload } from "@/lib/auth";
+import { hasActiveSession, getSessionUser } from "@/lib/auth";
 
 export default function RootPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const claims = decodeTokenPayload(token);
-      if (claims?.dept) {
-        router.push(`/${claims.dept}`);
-        return;
-      }
+    if (hasActiveSession()) {
+      const user = getSessionUser();
+      router.replace(`/${user?.dept ?? "cac"}`);
+    } else {
+      router.replace("/login");
     }
-    // Default department for v1
-    router.push("/cac");
   }, [router]);
 
   return (

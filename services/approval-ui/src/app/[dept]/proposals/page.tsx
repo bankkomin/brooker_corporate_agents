@@ -46,33 +46,35 @@ export default function ProposalsPage() {
           <TabsTrigger value="rejected">Rejected</TabsTrigger>
         </TabsList>
 
-        <TabsContent value={filter}>
-          {loading && (
-            <div className="py-12 text-center text-muted-foreground">
-              Loading proposals...
-            </div>
-          )}
+        {(["all", "pending", "approved", "rejected"] as const).map((tab) => (
+          <TabsContent key={tab} value={tab}>
+            {loading && (
+              <div className="py-12 text-center text-muted-foreground">
+                Loading proposals...
+              </div>
+            )}
 
-          {error && (
-            <div className="py-12 text-center text-red-600 dark:text-red-400">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="py-12 text-center text-red-600 dark:text-red-400">
+                {error}
+              </div>
+            )}
 
-          {!loading && !error && proposals.length === 0 && (
-            <div className="py-12 text-center text-muted-foreground">
-              No proposals found.
-            </div>
-          )}
+            {!loading && !error && proposals.length === 0 && (
+              <div className="py-12 text-center text-muted-foreground">
+                No proposals found.
+              </div>
+            )}
 
-          {!loading && !error && proposals.length > 0 && (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {proposals.map((p) => (
-                <ProposalCard key={p.id} proposal={p} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
+            {!loading && !error && proposals.length > 0 && (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {proposals.map((p) => (
+                  <ProposalCard key={p.id} proposal={p} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );

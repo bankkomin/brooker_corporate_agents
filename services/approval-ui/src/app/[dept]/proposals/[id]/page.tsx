@@ -8,6 +8,7 @@ import { ProposalDiff } from "@/components/proposals/proposal-diff";
 import { ProposalReasoning } from "@/components/proposals/proposal-reasoning";
 import { ProposalActions } from "@/components/proposals/proposal-actions";
 import { apiClient } from "@/lib/api-client";
+import { getToken } from "@/lib/auth";
 import { ArrowLeftIcon } from "lucide-react";
 import type { Proposal } from "@/types/proposal";
 
@@ -19,6 +20,11 @@ export default function ProposalDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   const loadProposal = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      router.replace("/approve?error=session_expired");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -29,7 +35,7 @@ export default function ProposalDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [params.id]);
+  }, [params.id, router]);
 
   useEffect(() => {
     loadProposal();

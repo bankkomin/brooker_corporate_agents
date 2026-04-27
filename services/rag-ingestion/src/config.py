@@ -9,9 +9,11 @@ class RAGSettings(BaseSettings):
     model_config = {"env_prefix": "", "case_sensitive": False}
 
     # Embedder
-    embedder_type: str = "mock"
+    embedder_type: str = "gemini"  # "gemini" or "vllm"
     vllm_embed_url: str = "http://host.docker.internal:8002/v1"
     vllm_embed_model: str = "qwen-embed"
+    gemini_api_key: str = ""
+    gemini_embed_model: str = "gemini-embedding-001"
 
     # Qdrant
     qdrant_host: str = "qdrant"

@@ -97,7 +97,7 @@ export function StatsCards({ summary }: StatsCardsProps) {
       />
       <StatCard
         label="Avg Confidence"
-        value={`${Math.round(summary.avg_confidence * 100)}%`}
+        value={`${summary.avg_confidence !== null ? Math.round(summary.avg_confidence * 100) : 0}%`}
         iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
         icon={
           <svg

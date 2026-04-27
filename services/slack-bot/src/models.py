@@ -37,10 +37,20 @@ class QueryRequest(BaseModel):
     """POST /query payload."""
 
     query: str
-    channel_id: str
+    channel: str
     user_id: str
     thread_ts: str | None = None
     context: dict[str, Any] = Field(default_factory=dict)
+
+
+class PostEscalationRequest(BaseModel):
+    """POST /post-escalation payload from paperclip."""
+
+    channel: str = "#escalations"
+    department: str
+    escalation_detail: str
+    agent_name: str = ""
+    severity: str = "high"
 
 
 class Citation(BaseModel):

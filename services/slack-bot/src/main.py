@@ -13,6 +13,7 @@ from slack_bolt.async_app import AsyncApp
 from .clients import OrchestratorClient, RAGIngestionClient
 from .config import SlackBotSettings
 from .events import register_event_handlers
+from .models import PostEscalationRequest
 
 logger = structlog.get_logger("slack-bot")
 
@@ -78,6 +79,44 @@ async def health() -> dict:
         "service": "slack-bot",
         "timestamp": datetime.now(UTC).isoformat(),
     }
+
+
+@app.post("/post-escalation")
+async def post_escalation(body: PostEscalationRequest) -> dict:
+    """Post an escalation alert to the #escalations Slack channel.
+
+    Called by paperclip event_router when an agent triggers an escalation.
+    """
+    severity_emoji = ":rotating_light:" if body.severity.lower() == "high" else ":warning:"
+    text = (
+        f"{severity_emoji} *Escalation — {body.department.upper()}*\n"
+        f"*Agent:* {body.agent_name or 'unknown'}\n"
+        f"*Severity:* {body.severity}\n"
+        f"*Detail:* {body.escalation_detail}"
+    )
+    channel = settings.escalations_channel_id
+
+    try:
+        await bolt_app.client.chat_postMessage(
+            channel=channel,
+            text=text,
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": text},
+                }
+            ],
+        )
+        logger.info(
+            "slack-bot.escalation_posted",
+            channel=channel,
+            department=body.department,
+            severity=body.severity,
+        )
+        return {"status": "posted", "channel": channel}
+    except Exception as exc:
+        logger.error("slack-bot.escalation_post_failed", error=str(exc))
+        raise
 
 
 if __name__ == "__main__":

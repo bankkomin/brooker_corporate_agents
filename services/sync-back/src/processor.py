@@ -37,31 +37,37 @@ async def process_approved(pool: asyncpg.Pool, dept: str | None = None) -> int:
     approved_dir = Path(STAGING_PATH) / "approved"
     approved_dir.mkdir(parents=True, exist_ok=True)
 
+    # staging_proposals has no approved_at/approved_by/synced_at columns.
+    # Those live in approval_decisions (FK: proposal_id → staging_proposals.id).
+    # The staging_proposals PK is `id`, not `proposal_id`.
     query = """
         SELECT
-            proposal_id,
-            agent,
-            file,
-            tab,
-            cell,
-            old_value,
-            new_value,
-            source,
-            confidence,
-            reasoning,
-            status,
-            approved_at,
-            approved_by,
-            dept
-        FROM staging_proposals
-        WHERE status = 'approved'
-          AND synced_at IS NULL
+            sp.id            AS proposal_id,
+            sp.agent,
+            sp.file,
+            sp.tab,
+            sp.cell,
+            sp.old_value,
+            sp.new_value,
+            sp.source,
+            sp.confidence,
+            sp.reasoning,
+            sp.status,
+            sp.dept,
+            ad.decided_at    AS approved_at,
+            ad.decided_by    AS approved_by,
+            ad.synced_at     AS decision_synced_at
+        FROM staging_proposals sp
+        JOIN approval_decisions ad ON ad.proposal_id = sp.id
+        WHERE sp.status = 'approved'
+          AND ad.decision IN ('approved', 'edited')
+          AND ad.synced_at IS NULL
     """
     params: list[object] = []
     if dept is not None:
-        query += "  AND dept = $1\n"
+        query += "  AND sp.dept = $1\n"
         params.append(dept)
-    query += "ORDER BY approved_at ASC"
+    query += "ORDER BY ad.decided_at ASC"
 
     async with pool.acquire() as conn:
         rows = await conn.fetch(query, *params)
@@ -84,8 +90,10 @@ async def process_approved(pool: asyncpg.Pool, dept: str | None = None) -> int:
             confidence=float(row["confidence"]),
             reasoning=row["reasoning"],
             status=row["status"],
+            dept=row["dept"],
             approved_at=row["approved_at"],
             approved_by=row["approved_by"],
+            decision_synced_at=row["decision_synced_at"],
         )
 
         proposal_dir = approved_dir / proposal.proposal_id
@@ -116,11 +124,16 @@ async def process_approved(pool: asyncpg.Pool, dept: str | None = None) -> int:
             await handle_failure(proposal.proposal_id, pool, str(exc))
             continue  # Skip to next proposal
 
-        # Mark as synced in DB
+        # Mark proposal as synced and record timestamp on the decision row.
+        # staging_proposals.id is the PK (not proposal_id).
         async with pool.acquire() as conn:
             await conn.execute(
-                "UPDATE staging_proposals SET synced_at = NOW(), status = 'synced' "
-                "WHERE proposal_id = $1",
+                "UPDATE staging_proposals SET status = 'synced' WHERE id = $1",
+                proposal.proposal_id,
+            )
+            await conn.execute(
+                "UPDATE approval_decisions SET synced_at = NOW() WHERE proposal_id = $1"
+                "  AND decision IN ('approved', 'edited') AND synced_at IS NULL",
                 proposal.proposal_id,
             )
 

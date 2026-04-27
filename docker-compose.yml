@@ -115,10 +115,15 @@ services:
     networks: [agent-net]
     secrets:
       - jwt_public_key
+    extra_hosts: ["host.docker.internal:host-gateway"]
     environment:
       ENV: ${ENV:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
+      BROOKER_JWT_SECRET: ${BROOKER_JWT_SECRET:-}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      BROOKER_DATABASE_URL: ${BROOKER_DATABASE_URL:-}
+      CAC_ORCHESTRATOR_URL: http://cac-orchestrator:3001
       SYNC_BACK_URL: http://sync-back:3006
       EMAIL_NOTIFIER_URL: http://email-notifier:3005
     depends_on:
@@ -237,15 +242,34 @@ services:
       timeout: 5s
       retries: 3
 
-  # sync-mirror:
-  #   build: ./services/sync-mirror
-  #   volumes:
-  #     - mirror_data:/data/mirror:rw
-  #   networks: [agent-net]
-  #   environment:
-  #     MIRROR_SOURCE: ${MIRROR_SOURCE:-smb}
-  #     MIRROR_SYNC_INTERVAL_MINUTES: ${MIRROR_SYNC_INTERVAL_MINUTES:-15}
-  #     POSTGRES_HOST: postgres
+  sync-mirror:
+    build: ./services/sync-mirror
+    ports: ["3008:3008"]
+    restart: unless-stopped
+    volumes:
+      - mirror_data:/data/mirror:rw
+      - staging_data:/data/staging:ro
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    networks: [agent-net]
+    env_file: .env
+    environment:
+      MIRROR_SOURCE: ${MIRROR_SOURCE:-smb}
+      MIRROR_SYNC_INTERVAL_MINUTES: ${MIRROR_SYNC_INTERVAL_MINUTES:-15}
+      MIRROR_PATH: /data/mirror
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   sync-back:
     build:
@@ -281,7 +305,7 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - NEXT_PUBLIC_GATEWAY_URL=http://localhost:3000
+      - NEXT_PUBLIC_GATEWAY_URL=http://localhost:8080
       - JWT_PUBLIC_KEY_PATH=/run/secrets/jwt_public_key
       - PORT=4000
       - NODE_ENV=production

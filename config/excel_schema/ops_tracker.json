@@ -1,0 +1,147 @@
+{
+  "filename": "Ops_Tracker.xlsx",
+  "tabs": [
+    {
+      "name": "Process",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "SLA Compliance %",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Process Exceptions (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Prior Month"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Automation Rate",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Straight-Through Processing",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=SLA compliance rate (target >95%), D9=MTD process exceptions, D10=Automation coverage %, D11=STP rate"
+    },
+    {
+      "name": "Vendor",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Active Vendors",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Critical Tier"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Vendor SLA Breaches",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "MTD"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Contracts Expiring (60d)",
+          "columns": {
+            "B": "Metric",
+            "D": "Count",
+            "E": "Earliest Expiry"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Vendor Risk Score",
+          "columns": {
+            "B": "Vendor Category",
+            "C": "Threshold",
+            "D": "Avg Score",
+            "E": "High Risk Count"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Total active vendor count, D9=Vendor SLA breach count, D10=Contracts expiring in 60 days, D11=Average vendor risk score"
+    },
+    {
+      "name": "Facilities",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Space Utilisation %",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Location"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Maintenance Backlog",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Priority"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Facilities Opex (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Budget",
+            "D": "Actual",
+            "E": "Variance"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Safety Incidents (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Status"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Workplace space utilisation, D9=Open maintenance items, D10=MTD facilities expenditure vs budget, D11=WHS incident count"
+    }
+  ]
+}

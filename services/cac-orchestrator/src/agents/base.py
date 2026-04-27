@@ -108,8 +108,14 @@ class BaseAgent(ABC):
         if messages:
             history_lines = []
             for m in messages[-5:]:
-                msg_type = getattr(m, "type", "unknown")
-                msg_content = getattr(m, "content", str(m))
+                # Messages may be BaseMessage objects (live) or plain dicts
+                # (deserialised from the PostgresSaver checkpointer).
+                if isinstance(m, dict):
+                    msg_type = m.get("type", "unknown")
+                    msg_content = m.get("content", str(m))
+                else:
+                    msg_type = getattr(m, "type", "unknown")
+                    msg_content = getattr(m, "content", str(m))
                 history_lines.append(f"- {msg_type}: {msg_content}")
             parts.append("\nConversation history:\n" + "\n".join(history_lines))
 
@@ -132,7 +138,9 @@ class BaseAgent(ABC):
         try:
             data = json.loads(text)
         except json.JSONDecodeError:
-            logger.warning("agent_json_parse_failed", agent=self.name)
+            logger.warning(
+                "agent_json_parse_failed", agent=self.name, raw_content=raw[:500]
+            )
             return {
                 "agent_response": raw,
                 "agent_name": self.name,

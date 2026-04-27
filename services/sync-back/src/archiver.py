@@ -25,34 +25,37 @@ async def archive_completed(pool: asyncpg.Pool, dept: str | None = None) -> int:
 
     Returns the count of proposals archived.
     """
+    # staging_proposals has no approved_at, approved_by, rejected_at, rejected_by,
+    # synced_at, or archived_at columns. Decision metadata lives in approval_decisions.
+    # Use a LEFT JOIN so rejected proposals without a matching approval_decisions row
+    # are still returned. The PK is staging_proposals.id (not proposal_id).
     query = """
         SELECT
-            proposal_id,
-            agent,
-            file,
-            tab,
-            cell,
-            old_value,
-            new_value,
-            source,
-            confidence,
-            reasoning,
-            status,
-            approved_at,
-            approved_by,
-            rejected_at,
-            rejected_by,
-            synced_at,
-            dept
-        FROM staging_proposals
-        WHERE status IN ('synced', 'rejected')
-          AND archived_at IS NULL
+            sp.id            AS proposal_id,
+            sp.agent,
+            sp.file,
+            sp.tab,
+            sp.cell,
+            sp.old_value,
+            sp.new_value,
+            sp.source,
+            sp.confidence,
+            sp.reasoning,
+            sp.status,
+            sp.dept,
+            ad.decided_at,
+            ad.decided_by,
+            ad.decision      AS ad_decision,
+            ad.synced_at     AS decision_synced_at
+        FROM staging_proposals sp
+        LEFT JOIN approval_decisions ad ON ad.proposal_id = sp.id
+        WHERE sp.status IN ('synced', 'rejected')
     """
     params: list[object] = []
     if dept is not None:
-        query += "  AND dept = $1\n"
+        query += "  AND sp.dept = $1\n"
         params.append(dept)
-    query += "ORDER BY COALESCE(synced_at, rejected_at) ASC"
+    query += "ORDER BY COALESCE(ad.decided_at, sp.created_at) ASC"
 
     async with pool.acquire() as conn:
         rows = await conn.fetch(query, *params)
@@ -67,13 +70,11 @@ async def archive_completed(pool: asyncpg.Pool, dept: str | None = None) -> int:
     for row in rows:
         status = row["status"]
 
-        # Determine decision timestamp and actor
-        if status == "synced":
-            decided_at = row["synced_at"] or now
-            decided_by = row["approved_by"]
-        else:
-            decided_at = row["rejected_at"] or now
-            decided_by = row["rejected_by"]
+        # Decision timestamp and actor come from approval_decisions via the JOIN.
+        # Fall back to now() when the LEFT JOIN found no matching decision row.
+        decided_at = row["decided_at"] or now
+        decided_by = row["decided_by"]
+        decision_synced_at = row["decision_synced_at"]
 
         record = ArchiveRecord(
             proposal_id=row["proposal_id"],
@@ -89,6 +90,7 @@ async def archive_completed(pool: asyncpg.Pool, dept: str | None = None) -> int:
             decision=status,
             decided_at=decided_at,
             decided_by=decided_by,
+            decision_synced_at=decision_synced_at,
             archived_at=now,
         )
 
@@ -126,13 +128,14 @@ async def archive_completed(pool: asyncpg.Pool, dept: str | None = None) -> int:
                 if not dest.exists():
                     shutil.copy2(src_file, dest)
 
-        # Mark as archived in the database
-        async with pool.acquire() as conn:
-            await conn.execute(
-                "UPDATE staging_proposals SET archived_at = $1 WHERE proposal_id = $2",
-                now,
-                record.proposal_id,
-            )
+        # staging_proposals has no archived_at column — there is no such field
+        # to update. The archive record is the permanent audit trail in /data/archive/.
+        # Log the completion so operators can correlate by proposal_id.
+        logger.debug(
+            "archive_completed.db_note",
+            proposal_id=record.proposal_id,
+            note="staging_proposals has no archived_at column; archive is filesystem-only",
+        )
 
         logger.info(
             "archive_completed.archived",

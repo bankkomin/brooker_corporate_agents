@@ -1,4 +1,5 @@
 import { getToken } from "./auth";
+import { env } from "./env";
 import type {
   ProposalListResponse,
   Proposal,
@@ -11,8 +12,7 @@ import type {
   ApiError,
 } from "@/types/api";
 
-const GATEWAY_URL =
-  process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:3000";
+const GATEWAY_URL = env.NEXT_PUBLIC_GATEWAY_URL;
 
 class ApiClient {
   private getHeaders(): HeadersInit {
@@ -107,6 +107,46 @@ class ApiClient {
     });
     return this.handleResponse(resp);
   }
+
+  async uploadDocument(
+    file: File,
+    opts: {
+      dept?: string;
+      docType?: string;
+      collection?: string;
+      category?: string;
+      tags?: string;
+      description?: string;
+      source?: string;
+    } = {}
+  ): Promise<{ status: string; chunks?: number; file_hash?: string; reason?: string }> {
+    const token = getToken();
+    const headers: HeadersInit = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const form = new FormData();
+    form.append("file", file);
+    form.append("dept", opts.dept ?? "cac");
+    form.append("doc_type", opts.docType ?? inferDocType(file.name));
+    form.append("collection", opts.collection ?? "cac_docs");
+    if (opts.category) form.append("category", opts.category);
+    if (opts.tags) form.append("tags", opts.tags);
+    if (opts.description) form.append("description", opts.description);
+    form.append("source", opts.source ?? "manual_upload");
+
+    const resp = await fetch(`${GATEWAY_URL}/api/uploads/document`, {
+      method: "POST",
+      headers,
+      body: form,
+    });
+    return this.handleResponse(resp);
+  }
+}
+
+function inferDocType(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  const map: Record<string, string> = { pdf: "pdf", xlsx: "xlsx", xls: "xlsx", docx: "docx", txt: "txt", md: "md", csv: "csv" };
+  return map[ext] ?? "pdf";
 }
 
 export const apiClient = new ApiClient();

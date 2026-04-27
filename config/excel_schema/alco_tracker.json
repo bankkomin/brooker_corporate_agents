@@ -7,16 +7,195 @@
       "rows": [
         {
           "row": 8,
-          "label": "SCB Facility",
+          "label": "Total Drawn",
           "columns": {
-            "B": "Facility Name",
-            "C": "Limit",
-            "D": "Drawn Amount",
-            "E": "Covenant Threshold"
+            "B": "Metric",
+            "C": "Limit / Threshold",
+            "D": "Current Value",
+            "E": "Covenant Ratio"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Total Available",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Utilization %",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value"
           }
         }
-      ]
+      ],
+      "agent_targets": ["D8", "D9", "D10", "E8"],
+      "notes": "D8=Total Drawn, D9=Total Available, D10=Utilization %, E8=Covenant Ratio (Net Debt/EBITDA)"
+    },
+    {
+      "name": "Liquidity",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Current Ratio",
+          "columns": {
+            "B": "Metric",
+            "C": "Target / Minimum",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Quick Ratio",
+          "columns": {
+            "B": "Metric",
+            "C": "Target / Minimum",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 10,
+          "label": "LCR",
+          "columns": {
+            "B": "Metric",
+            "C": "Regulatory Minimum",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 11,
+          "label": "NSFR",
+          "columns": {
+            "B": "Metric",
+            "C": "Regulatory Minimum",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 12,
+          "label": "Cash Position",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11", "D12"],
+      "notes": "D8=Current Ratio (target >1.20), D9=Quick Ratio (target >1.00), D10=LCR (min 100%), D11=NSFR (min 100%), D12=Cash Position"
+    },
+    {
+      "name": "Capital",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "CAR",
+          "columns": {
+            "B": "Metric",
+            "C": "Regulatory Minimum",
+            "D": "Current Value",
+            "E": "Internal Target"
+          }
+        },
+        {
+          "row": 9,
+          "label": "CET1 Ratio",
+          "columns": {
+            "B": "Metric",
+            "C": "Regulatory Minimum",
+            "D": "Current Value",
+            "E": "Internal Target"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Tier 1 Ratio",
+          "columns": {
+            "B": "Metric",
+            "C": "Regulatory Minimum",
+            "D": "Current Value",
+            "E": "Internal Target"
+          }
+        },
+        {
+          "row": 11,
+          "label": "RWA",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        },
+        {
+          "row": 12,
+          "label": "Leverage Ratio",
+          "columns": {
+            "B": "Metric",
+            "C": "Regulatory Minimum",
+            "D": "Current Value",
+            "E": "Internal Target"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11", "D12"],
+      "notes": "D8=CAR (internal target 12.5%), D9=CET1 (min with buffers 10.5%), D10=Tier 1 Ratio (min 6%), D11=RWA, D12=Leverage Ratio (min 3%)"
+    },
+    {
+      "name": "ALM",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Duration Gap",
+          "columns": {
+            "B": "Metric",
+            "C": "Tolerance",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 9,
+          "label": "NII Sensitivity",
+          "columns": {
+            "B": "Metric",
+            "C": "Scenario",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 10,
+          "label": "EVE Sensitivity",
+          "columns": {
+            "B": "Metric",
+            "C": "Scenario",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Repricing Gap",
+          "columns": {
+            "B": "Metric",
+            "C": "Time Bucket",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Duration Gap (target <2.0y, critical >3.0y), D9=NII Sensitivity (+/-100bps), D10=EVE Sensitivity (+/-200bps), D11=Repricing Gap"
     }
-  ],
-  "_comment": "Populate with real Excel structure during Stage 8 UAT"
+  ]
 }

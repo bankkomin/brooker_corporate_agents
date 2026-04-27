@@ -127,16 +127,22 @@ class DBClient:
         confidence: float,
         reasoning: str,
         interaction_id: int | None = None,
+        dept: str = "cac",
     ) -> None:
-        """INSERT into staging_proposals."""
+        """INSERT into staging_proposals.
+
+        The `dept` column was added in migration 003_dept_columns.sql with a
+        NOT NULL DEFAULT 'cac' constraint. Passing it explicitly lets callers
+        scope proposals to the correct department at write time.
+        """
         if self._pool is None:
             logger.warning("db_pool_unavailable", operation="log_proposal")
             return
         sql = """
             INSERT INTO staging_proposals
                 (id, agent, file, tab, cell, old_value, new_value,
-                 source, confidence, reasoning, status, interaction_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', $11)
+                 source, confidence, reasoning, status, interaction_id, dept)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', $11, $12)
         """
         await self._pool.execute(
             sql,
@@ -151,8 +157,9 @@ class DBClient:
             confidence,
             reasoning,
             interaction_id,
+            dept,
         )
-        logger.info("proposal_logged", id=proposal_id)
+        logger.info("proposal_logged", id=proposal_id, dept=dept)
 
     async def log_escalation(
         self,

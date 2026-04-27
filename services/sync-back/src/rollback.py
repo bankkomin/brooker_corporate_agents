@@ -37,11 +37,13 @@ async def handle_failure(
         shutil.rmtree(staging_dir)
         logger.info("rollback.staging_cleaned", proposal_id=proposal_id, path=str(staging_dir))
 
-    # 2. Revert DB status to pending
+    # 2. Revert DB status to pending.
+    # staging_proposals PK is `id`, not `proposal_id`.
+    # There is no synced_at column on staging_proposals — it lives on approval_decisions.
     async with pool.acquire() as conn:
         await conn.execute(
-            "UPDATE staging_proposals SET status = 'pending', synced_at = NULL "
-            "WHERE proposal_id = $1 AND status = 'approved'",
+            "UPDATE staging_proposals SET status = 'pending' "
+            "WHERE id = $1 AND status = 'approved'",
             proposal_id,
         )
     logger.info("rollback.db_reverted", proposal_id=proposal_id)

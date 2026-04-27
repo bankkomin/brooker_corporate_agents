@@ -42,6 +42,8 @@ class WikiCompiler:
             model=settings.vllm_model,
             temperature=settings.llm_temperature,
             max_tokens=settings.llm_max_tokens,
+            request_timeout=180,
+            max_retries=3,
         )
         schema_path = Path(settings.wiki_schema_path)
         self.schema: dict[str, Any] = json.loads(schema_path.read_text())
@@ -68,7 +70,17 @@ class WikiCompiler:
         system_prompt = self._build_system_prompt(article_type)
         user_prompt = self._build_user_prompt(event)
 
-        raw = await self._call_llm(system_prompt, user_prompt)
+        try:
+            raw = await self._call_llm(system_prompt, user_prompt)
+        except Exception:
+            logger.error(
+                "WikiCompiler.compile_event LLM call failed",
+                event_type=event.event_type,
+                article_type=article_type,
+                dept_id=event.dept_id,
+                source_id=event.source_id,
+            )
+            raise
         article = self._parse_response(raw, event)
         logger.info("Compiled wiki article", file_path=article.file_path)
         return article
@@ -77,17 +89,17 @@ class WikiCompiler:
     # Prompt builders
     # ------------------------------------------------------------------
 
-    def _build_system_prompt(self, event_type: str) -> str:
+    def _build_system_prompt(self, article_type: str) -> str:
         """Build a system prompt for the given article type using the schema."""
         article_types: dict[str, Any] = self.schema.get("article_types", {})
-        article_spec = article_types.get(event_type)
+        article_spec = article_types.get(article_type)
 
         if article_spec:
             sections = article_spec.get("sections", [])
             section_list = "\n".join(f"- ## {s}" for s in sections)
             return (
                 "You are a professional knowledge-base writer for a financial institution.\n"
-                f"Write a wiki article of type '{event_type}'.\n"
+                f"Write a wiki article of type '{article_type}'.\n"
                 "The article MUST use the following Markdown sections in order:\n"
                 f"{section_list}\n\n"
                 "Return the article as a Markdown file with YAML frontmatter delimited by ---.\n"
@@ -126,12 +138,20 @@ class WikiCompiler:
         """Invoke the LLM and return the raw string content."""
         from langchain_core.messages import HumanMessage, SystemMessage  # noqa: PLC0415
 
-        response = await self._llm.ainvoke(
-            [
-                SystemMessage(content=system_prompt),
-                HumanMessage(content=user_prompt),
-            ]
-        )
+        try:
+            response = await self._llm.ainvoke(
+                [
+                    SystemMessage(content=system_prompt),
+                    HumanMessage(content=user_prompt),
+                ]
+            )
+        except Exception:
+            logger.exception(
+                "WikiCompiler._call_llm failed",
+                model=self._settings.vllm_model,
+                base_url=self._settings.vllm_base_url,
+            )
+            raise
         return str(response.content)
 
     # ------------------------------------------------------------------

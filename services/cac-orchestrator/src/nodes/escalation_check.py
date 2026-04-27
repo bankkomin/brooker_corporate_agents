@@ -20,9 +20,27 @@ def _load_rules(rules_path: str) -> list[dict]:
         return []
 
 
-def _extract_numbers(text: str) -> list[float]:
-    """Extract all decimal numbers from text."""
-    return [float(m) for m in re.findall(r'\b\d+\.?\d*\b', text)]
+_NUMBER_RE = re.compile(r'\b\d+\.?\d*\b')
+
+_PROXIMITY_WINDOW = 200  # characters either side of the matched number
+
+
+def _extract_numbers_near_keywords(text: str, keywords: list[str]) -> list[float]:
+    """Extract numbers that appear within PROXIMITY_WINDOW chars of a keyword.
+
+    This prevents dates (2026), citation indices ([1]), and cell references
+    (E8) from triggering breach rules that are unrelated to the found number.
+    """
+    text_lower = text.lower()
+    results: list[float] = []
+    for match in _NUMBER_RE.finditer(text):
+        start = match.start()
+        window_start = max(0, start - _PROXIMITY_WINDOW)
+        window_end = min(len(text), start + len(match.group()) + _PROXIMITY_WINDOW)
+        surrounding = text_lower[window_start:window_end]
+        if any(kw.lower() in surrounding for kw in keywords):
+            results.append(float(match.group()))
+    return results
 
 
 async def escalation_check(state: dict, *, rules_path: str) -> dict:
@@ -47,8 +65,8 @@ async def escalation_check(state: dict, *, rules_path: str) -> dict:
         if not any(kw.lower() in agent_response.lower() for kw in keywords):
             continue
 
-        # Extract numbers and check against threshold
-        numbers = _extract_numbers(agent_response)
+        # Extract only numbers that appear close to the relevant keywords
+        numbers = _extract_numbers_near_keywords(agent_response, keywords)
         for num in numbers:
             ops = {">": num > threshold, "<": num < threshold,
                    ">=": num >= threshold, "<=": num <= threshold}

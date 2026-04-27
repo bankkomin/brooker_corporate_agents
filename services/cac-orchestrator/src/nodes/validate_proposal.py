@@ -10,19 +10,10 @@ from ..tools.llm_client import LLMClient
 
 logger = structlog.get_logger("cac-orchestrator.validate")
 
-VALIDATION_PROMPT = """\
+VALIDATION_SYSTEM_PROMPT = """\
 You are a proposal reviewer for a Capital Allocation committee AI system.
 Your job is to validate that a proposed spreadsheet change is correct \
 before it goes to a human for approval.
-
-Proposed change:
-- Cell: {cell}
-- Old value: {old_value}
-- New value: {new_value}
-- Agent reasoning: {reasoning}
-- Source excerpt: {source_excerpt}
-- Excel navigation: {excel_nav}
-{history_section}
 
 Check these items:
 1. SOURCE ACCURACY: Does the new_value actually appear in or follow from \
@@ -34,12 +25,22 @@ given the Excel navigation context?
 recent proposals?
 
 Respond with JSON only:
-{{"passed": true/false, "confidence_adjustment": 0.0, \
-"warnings": [], "blocking_reason": null}}
+{"passed": true/false, "confidence_adjustment": 0.0, \
+"warnings": [], "blocking_reason": null}
 
 - Set passed=false and blocking_reason if there's a clear error
 - Set confidence_adjustment to a negative number (e.g., -0.1) if borderline
 - Add warnings for minor concerns that don't block the proposal"""
+
+VALIDATION_USER_TEMPLATE = """\
+Proposed change:
+- Cell: {cell}
+- Old value: {old_value}
+- New value: {new_value}
+- Agent reasoning: {reasoning}
+- Source excerpt: {source_excerpt}
+- Excel navigation: {excel_nav}
+{history_section}"""
 
 
 async def validate_proposal(
@@ -64,7 +65,7 @@ async def validate_proposal(
 
     # History cross-check
     file = state.get("file", "ALCO_Tracker.xlsx")
-    tab = state.get("tab", "")
+    tab = state.get("proposed_tab", "")
     recent = await db_client.get_recent_proposals_for_cell(file, tab, proposed_cell)
 
     history_section = ""
@@ -82,19 +83,22 @@ async def validate_proposal(
             )
         history_section = "\nRecent proposals for the same cell:\n" + "\n".join(history_lines)
 
-    prompt = VALIDATION_PROMPT.format(
+    user_message = VALIDATION_USER_TEMPLATE.format(
         cell=proposed_cell,
         old_value=state.get("old_value", "(empty)"),
         new_value=proposed_value,
         reasoning=state.get("agent_response", ""),
-        source_excerpt=state.get("context_text", "")[:500],
+        source_excerpt=state.get("context_text", "")[:2000],
         excel_nav=state.get("excel_nav", ""),
         history_section=history_section,
     )
 
     try:
         raw = await llm_client.chat(
-            [{"role": "system", "content": prompt}],
+            [
+                {"role": "system", "content": VALIDATION_SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
             temperature=0.0,
             max_tokens=500,
         )

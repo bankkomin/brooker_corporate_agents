@@ -1,0 +1,149 @@
+{
+  "filename": "Risk_Dashboard.xlsx",
+  "tabs": [
+    {
+      "name": "Credit Risk",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "NPL Ratio",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Provision Coverage",
+          "columns": {
+            "B": "Metric",
+            "C": "Minimum",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Expected Credit Loss",
+          "columns": {
+            "B": "Metric",
+            "C": "Scenario",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Concentration Limit",
+          "columns": {
+            "B": "Metric",
+            "C": "Limit",
+            "D": "Current Value",
+            "E": "Utilisation %"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=NPL Ratio (threshold <3%), D9=Provision Coverage (min 80%), D10=ECL, D11=Single-name concentration"
+    },
+    {
+      "name": "Market Risk",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "VaR (1-day 99%)",
+          "columns": {
+            "B": "Metric",
+            "C": "Limit",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Stressed VaR",
+          "columns": {
+            "B": "Metric",
+            "C": "Limit",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 10,
+          "label": "DV01",
+          "columns": {
+            "B": "Metric",
+            "C": "Limit",
+            "D": "Current Value",
+            "E": "Prior Period"
+          }
+        },
+        {
+          "row": 11,
+          "label": "FX Exposure",
+          "columns": {
+            "B": "Metric",
+            "C": "Limit",
+            "D": "Current Value",
+            "E": "Currency"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=1-day 99% VaR, D9=Stressed VaR, D10=DV01 sensitivity, D11=Aggregate FX exposure"
+    },
+    {
+      "name": "Operational Risk",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Incident Count (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Prior Month"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Loss Amount (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Prior Month"
+          }
+        },
+        {
+          "row": 10,
+          "label": "RCSA Score",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Last Assessment"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Control Failures",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Status"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=MTD incident count, D9=MTD operational loss, D10=RCSA composite score, D11=Open control failures"
+    }
+  ]
+}

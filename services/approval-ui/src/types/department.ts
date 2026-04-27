@@ -3,6 +3,8 @@ export interface DataAccess {
   mirrorPaths: string[];
   excelFiles: string[];
   sensitivityLevel: "public" | "internal" | "confidential" | "restricted";
+  vaultPath?: string;
+  wikiCollection?: string;
 }
 
 export interface Escalation {

@@ -20,11 +20,193 @@
         "canEscalateTo": ["cfo", "ceo"],
         "hodEmails": ["${CAC_HOD_EMAIL}"]
       },
-      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity"],
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
       "slackChannels": {
         "general": "${CAC_CHANNEL_ID}",
         "approvals": "${APPROVALS_CHANNEL_ID}",
         "escalations": "${ESCALATIONS_CHANNEL_ID}"
+      }
+    },
+    "risk": {
+      "name": "Risk Committee",
+      "shortName": "RISK",
+      "description": "Credit risk, market risk, and operational risk oversight",
+      "color": "#ef4444",
+      "icon": "shield-alert",
+      "agents": ["credit-risk", "market-risk", "operational-risk"],
+      "dataAccess": {
+        "qdrantCollections": ["risk_docs", "risk_chat", "risk_knowledge", "shared_policies"],
+        "mirrorPaths": ["/data/mirror/risk/"],
+        "excelFiles": ["Risk_Dashboard.xlsx"],
+        "sensitivityLevel": "restricted",
+        "vaultPath": "/mnt/obsidian-vault/risk",
+        "wikiCollection": "risk_knowledge"
+      },
+      "escalation": {
+        "canEscalateTo": ["ceo"],
+        "hodEmails": ["${RISK_HOD_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "slackChannels": {
+        "general": "${RISK_CHANNEL_ID}",
+        "approvals": "${RISK_APPROVALS_CHANNEL_ID}",
+        "escalations": "${RISK_ESCALATIONS_CHANNEL_ID}"
+      }
+    },
+    "legal": {
+      "name": "Legal & Compliance",
+      "shortName": "LEGAL",
+      "description": "Compliance, regulatory affairs, and contract review",
+      "color": "#8b5cf6",
+      "icon": "gavel",
+      "agents": ["compliance", "regulatory", "contract-review"],
+      "dataAccess": {
+        "qdrantCollections": ["legal_docs", "legal_chat", "legal_knowledge", "shared_policies"],
+        "mirrorPaths": ["/data/mirror/legal/"],
+        "excelFiles": ["Compliance_Tracker.xlsx"],
+        "sensitivityLevel": "restricted",
+        "vaultPath": "/mnt/obsidian-vault/legal",
+        "wikiCollection": "legal_knowledge"
+      },
+      "escalation": {
+        "canEscalateTo": ["ceo"],
+        "hodEmails": ["${LEGAL_HOD_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "slackChannels": {
+        "general": "${LEGAL_CHANNEL_ID}",
+        "approvals": "${LEGAL_APPROVALS_CHANNEL_ID}",
+        "escalations": "${LEGAL_ESCALATIONS_CHANNEL_ID}"
+      }
+    },
+    "invest": {
+      "name": "Investment Committee",
+      "shortName": "IC",
+      "description": "Portfolio management, valuation, and due diligence",
+      "color": "#f59e0b",
+      "icon": "pie-chart",
+      "agents": ["portfolio", "valuation", "due-diligence"],
+      "dataAccess": {
+        "qdrantCollections": ["invest_docs", "invest_chat", "invest_knowledge", "shared_policies"],
+        "mirrorPaths": ["/data/mirror/investments/"],
+        "excelFiles": ["Investment_Tracker.xlsx"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/invest",
+        "wikiCollection": "invest_knowledge"
+      },
+      "escalation": {
+        "canEscalateTo": ["ceo"],
+        "hodEmails": ["${INVEST_HOD_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "slackChannels": {
+        "general": "${INVEST_CHANNEL_ID}",
+        "approvals": "${INVEST_APPROVALS_CHANNEL_ID}",
+        "escalations": "${INVEST_ESCALATIONS_CHANNEL_ID}"
+      }
+    },
+    "ops": {
+      "name": "Operations",
+      "shortName": "OPS",
+      "description": "Process optimisation, vendor management, and facilities",
+      "color": "#06b6d4",
+      "icon": "wrench",
+      "agents": ["process", "vendor", "facilities"],
+      "dataAccess": {
+        "qdrantCollections": ["ops_docs", "ops_chat", "ops_knowledge", "shared_policies"],
+        "mirrorPaths": ["/data/mirror/operations/"],
+        "excelFiles": ["Ops_Tracker.xlsx"],
+        "sensitivityLevel": "internal",
+        "vaultPath": "/mnt/obsidian-vault/ops",
+        "wikiCollection": "ops_knowledge"
+      },
+      "escalation": {
+        "canEscalateTo": ["coo", "ceo"],
+        "hodEmails": ["${OPS_HOD_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "slackChannels": {
+        "general": "${OPS_CHANNEL_ID}",
+        "approvals": "${OPS_APPROVALS_CHANNEL_ID}",
+        "escalations": "${OPS_ESCALATIONS_CHANNEL_ID}"
+      }
+    },
+    "hr": {
+      "name": "Human Resources",
+      "shortName": "HR",
+      "description": "Talent acquisition, compensation, and HR policy",
+      "color": "#ec4899",
+      "icon": "users",
+      "agents": ["talent", "compensation", "policy"],
+      "dataAccess": {
+        "qdrantCollections": ["hr_docs", "hr_chat", "hr_knowledge", "shared_policies"],
+        "mirrorPaths": ["/data/mirror/hr/"],
+        "excelFiles": ["HR_Tracker.xlsx"],
+        "sensitivityLevel": "restricted",
+        "vaultPath": "/mnt/obsidian-vault/hr",
+        "wikiCollection": "hr_knowledge"
+      },
+      "escalation": {
+        "canEscalateTo": ["ceo"],
+        "hodEmails": ["${HR_HOD_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "slackChannels": {
+        "general": "${HR_CHANNEL_ID}",
+        "approvals": "${HR_APPROVALS_CHANNEL_ID}",
+        "escalations": "${HR_ESCALATIONS_CHANNEL_ID}"
+      }
+    },
+    "it": {
+      "name": "Information Technology",
+      "shortName": "IT",
+      "description": "Infrastructure, security, and DevOps operations",
+      "color": "#10b981",
+      "icon": "monitor",
+      "agents": ["infrastructure", "security", "devops"],
+      "dataAccess": {
+        "qdrantCollections": ["it_docs", "it_chat", "it_knowledge", "shared_policies"],
+        "mirrorPaths": ["/data/mirror/it/"],
+        "excelFiles": ["IT_Tracker.xlsx"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/it",
+        "wikiCollection": "it_knowledge"
+      },
+      "escalation": {
+        "canEscalateTo": ["cto", "ceo"],
+        "hodEmails": ["${IT_HOD_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "slackChannels": {
+        "general": "${IT_CHANNEL_ID}",
+        "approvals": "${IT_APPROVALS_CHANNEL_ID}",
+        "escalations": "${IT_ESCALATIONS_CHANNEL_ID}"
+      }
+    },
+    "ceo": {
+      "name": "CEO Office",
+      "shortName": "CEO",
+      "description": "Executive office — receives escalations from all departments",
+      "color": "#1e293b",
+      "icon": "crown",
+      "agents": [],
+      "dataAccess": {
+        "qdrantCollections": ["shared_policies"],
+        "mirrorPaths": ["/data/mirror/"],
+        "excelFiles": [],
+        "sensitivityLevel": "restricted",
+        "vaultPath": "/mnt/obsidian-vault/ceo",
+        "wikiCollection": "shared_policies"
+      },
+      "escalation": {
+        "canEscalateTo": [],
+        "hodEmails": ["${CEO_EMAIL}"]
+      },
+      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "slackChannels": {
+        "general": "${CEO_CHANNEL_ID}",
+        "approvals": "${CEO_APPROVALS_CHANNEL_ID}",
+        "escalations": "${CEO_ESCALATIONS_CHANNEL_ID}"
       }
     }
   },
@@ -32,7 +214,13 @@
     "sharedCollections": ["shared_policies"],
     "roles": {
       "ceo": { "canRead": ["*"], "canApprove": ["*"] },
-      "cfo": { "canRead": ["cac", "risk"], "canApprove": ["cac"] }
+      "cfo": { "canRead": ["cac", "risk"], "canApprove": ["cac"] },
+      "cro": { "canRead": ["risk", "cac"], "canApprove": ["risk"] },
+      "clo": { "canRead": ["legal"], "canApprove": ["legal"] },
+      "cio": { "canRead": ["invest"], "canApprove": ["invest"] },
+      "coo": { "canRead": ["ops"], "canApprove": ["ops"] },
+      "chro": { "canRead": ["hr"], "canApprove": ["hr"] },
+      "cto": { "canRead": ["it"], "canApprove": ["it"] }
     }
   }
 }

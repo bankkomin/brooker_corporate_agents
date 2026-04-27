@@ -9,6 +9,7 @@ from langgraph.graph import END, StateGraph
 
 from .agents.alm import AlmAgent
 from .agents.capital import CapitalAgent
+from .agents.cfo import CFOAgent
 from .agents.funding import FundingAgent
 from .agents.liquidity import LiquidityAgent
 from .nodes.classify_intent import classify_intent
@@ -51,9 +52,10 @@ def _make_should_validate(threshold: float):
 
 
 def _validation_result(state: dict) -> str:
-    """Route: if validation passed, write staging; otherwise skip to synthesise."""
+    """Route: if validation passed, create paperclip ticket then write staging;
+    otherwise skip to synthesise."""
     if state.get("validation_passed", False):
-        return "staging_writer"
+        return "paperclip_ticket"
     return "synthesise"
 
 
@@ -92,6 +94,9 @@ def build_graph(
             "capital": CapitalAgent(llm_client, skills_loader),
             "alm": AlmAgent(llm_client, skills_loader),
             "funding": FundingAgent(llm_client, skills_loader),
+            # CFO is a cross-domain synthesiser; routed by classify_intent
+            # when the query requires a whole-of-firm view.
+            "cfo": CFOAgent(llm_client, skills_loader),
         }
 
     def _route_to_agent(state: dict) -> str:
@@ -148,23 +153,32 @@ def build_graph(
         ),
     )
     graph.add_node("synthesise", partial(synthesise_response, llm_client=llm_client))
-    graph.add_node("paperclip_ticket", create_paperclip_ticket)
+    graph.add_node(
+        "paperclip_ticket",
+        partial(
+            create_paperclip_ticket,
+            paperclip_url=cfg.paperclip_url,
+            paperclip_api_key=cfg.paperclip_api_key,
+        ),
+    )
 
     # --- Add edges ---
     graph.set_entry_point("classify_intent")
     graph.add_edge("classify_intent", "retrieve_context")
 
-    # Conditional: route to correct agent
+    # Conditional: route to correct agent.
+    # Build the map dynamically so it only references nodes that were actually
+    # registered above.  When llm_client/skills_loader is None the agents dict
+    # is empty and none of the specialist node names exist in the graph.
+    _agent_edge_map: dict[str, str] = {
+        f"{name}_agent": f"{name}_agent" for name in agents
+    }
+    _agent_edge_map["general_handler"] = "general_handler"
+
     graph.add_conditional_edges(
         "retrieve_context",
         _route_to_agent,
-        {
-            "liquidity_agent": "liquidity_agent",
-            "capital_agent": "capital_agent",
-            "alm_agent": "alm_agent",
-            "funding_agent": "funding_agent",
-            "general_handler": "general_handler",
-        },
+        _agent_edge_map,
     )
 
     # All agents converge to escalation_check
@@ -186,18 +200,21 @@ def build_graph(
         },
     )
 
-    # Conditional: write staging if validation passed
+    # Conditional: if validation passed, create ticket then write staging;
+    # otherwise skip straight to synthesise.
+    # paperclip_ticket runs BEFORE staging_writer so the ticket ID is present
+    # in state when the manifest is written.
     graph.add_conditional_edges(
         "validate_proposal",
         _validation_result,
         {
-            "staging_writer": "staging_writer",
+            "paperclip_ticket": "paperclip_ticket",
             "synthesise": "synthesise",
         },
     )
 
+    graph.add_edge("paperclip_ticket", "staging_writer")
     graph.add_edge("staging_writer", "synthesise")
-    graph.add_edge("synthesise", "paperclip_ticket")
-    graph.add_edge("paperclip_ticket", END)
+    graph.add_edge("synthesise", END)
 
     return graph.compile(checkpointer=checkpointer)

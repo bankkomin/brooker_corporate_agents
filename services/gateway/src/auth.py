@@ -1,13 +1,18 @@
 """JWT authentication middleware for the gateway service.
 
-Validates RS256 JSON Web Tokens and enforces department-level access control.
+Validates two token types:
+1. RS256 JWTs — issued by the CAC system (approval-ui email links).
+2. HS256 JWTs — issued by brooker-internal-company (employee login).
+
+Both are normalised into JWTClaims.  For Brooker tokens the caller's
+permissions are resolved from the agent_access table.
 """
 from __future__ import annotations
 
 import json
 import os
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 
@@ -25,11 +30,13 @@ class JWTClaims:
     """Decoded, validated claims extracted from a JWT.
 
     Attributes:
-        sub: Subject identifier (employee/user ID).
+        sub: Subject identifier (employee UUID or legacy user ID).
         dept: Department the token was issued for.
         role: Role of the subject within the department.
         permissions: Sequence of permission strings granted to the subject.
         proposal_id: Optional proposal ID associated with the request.
+        email: Employee email (present for Brooker tokens).
+        source: Which JWT issuer: "cac" or "brooker".
     """
 
     sub: str
@@ -37,16 +44,12 @@ class JWTClaims:
     role: str
     permissions: Sequence[str]
     proposal_id: str | None
+    email: str | None = None
+    source: str = "cac"
 
 
 class AuthError(Exception):
-    """Raised when JWT validation or access-control checks fail.
-
-    Attributes:
-        code: Machine-readable error code (e.g. TOKEN_EXPIRED, DEPT_MISMATCH).
-        message: Human-readable description of the error.
-        status_code: HTTP status code to return to the caller.
-    """
+    """Raised when JWT validation or access-control checks fail."""
 
     def __init__(self, code: str, message: str, status_code: int = 401) -> None:
         super().__init__(message)
@@ -55,73 +58,182 @@ class AuthError(Exception):
         self.status_code = status_code
 
 
-def _load_public_key() -> bytes:
-    """Load the RS256 public key from the configured path.
+# ---------------------------------------------------------------------------
+# Key loading
+# ---------------------------------------------------------------------------
 
-    Reads the path from the ``JWT_PUBLIC_KEY_PATH`` environment variable,
-    falling back to ``secrets/jwt_public.pem`` when the variable is absent.
-
-    Returns:
-        Raw PEM bytes of the public key.
-
-    Raises:
-        AuthError: If the file cannot be read.
-    """
+def _load_public_key() -> bytes | None:
+    """Load the RS256 public key. Returns None if unavailable."""
     path = os.getenv("JWT_PUBLIC_KEY_PATH", _DEFAULT_PUBLIC_KEY_PATH)
     try:
         with open(path, "rb") as fh:
             return fh.read()
     except OSError as exc:
         logger.warning("jwt_public_key_load_failed", path=path, error=str(exc))
-        raise AuthError("CONFIG_ERROR", f"Cannot read public key from {path}") from exc
+        return None
 
 
-def validate_jwt(token: str, public_key: bytes | None = None) -> JWTClaims:
-    """Decode and validate an RS256 JWT.
+def _get_brooker_secret() -> str | None:
+    """Return the HS256 secret shared with brooker-internal-company."""
+    return os.getenv("BROOKER_JWT_SECRET")
 
-    Args:
-        token: Raw JWT string (header.payload.signature).
-        public_key: PEM-encoded RS256 public key bytes. When *None* the key is
-            loaded from disk via :func:`_load_public_key`.
 
-    Returns:
-        :class:`JWTClaims` populated from the verified token payload.
+# ---------------------------------------------------------------------------
+# Token validation
+# ---------------------------------------------------------------------------
 
-    Raises:
-        AuthError: With code ``TOKEN_EXPIRED`` if the token has expired, or
-            ``TOKEN_INVALID`` for any other validation failure (bad signature,
-            wrong algorithm, malformed structure, missing required claims, …).
-    """
-    key: bytes = public_key if public_key is not None else _load_public_key()
-
+def _try_rs256(token: str) -> JWTClaims | None:
+    """Attempt RS256 (CAC-issued) validation.  Returns None on failure."""
+    public_key = _load_public_key()
+    if public_key is None:
+        return None
     try:
         payload: dict = jwt.decode(
-            token,
-            key,
-            algorithms=["RS256"],
+            token, public_key, algorithms=["RS256"],
             options={"require": ["sub", "dept", "role", "exp", "iat"]},
         )
-    except jwt.ExpiredSignatureError as exc:
-        logger.warning("jwt_expired", error=str(exc))
-        raise AuthError("TOKEN_EXPIRED", "Token has expired") from exc
-    except jwt.PyJWTError as exc:
-        logger.warning("jwt_invalid", error=str(exc))
-        raise AuthError("TOKEN_INVALID", f"Token validation failed: {exc}") from exc
-
-    try:
-        claims = JWTClaims(
+        return JWTClaims(
             sub=str(payload["sub"]),
             dept=str(payload["dept"]),
             role=str(payload["role"]),
             permissions=list(payload.get("permissions", [])),
             proposal_id=payload.get("proposal_id"),
+            source="cac",
         )
-    except (KeyError, TypeError) as exc:
-        logger.warning("jwt_claims_parse_failed", error=str(exc))
-        raise AuthError("TOKEN_INVALID", f"Missing required claim: {exc}") from exc
+    except jwt.PyJWTError:
+        return None
 
-    return claims
 
+def _try_hs256(token: str) -> JWTClaims | None:
+    """Attempt HS256 (Brooker-issued) validation.  Returns None on failure."""
+    secret = _get_brooker_secret()
+    if not secret:
+        return None
+    try:
+        payload: dict = jwt.decode(
+            token, secret, algorithms=["HS256"],
+            options={"require": ["sub", "exp"]},
+        )
+        return JWTClaims(
+            sub=str(payload["sub"]),
+            dept=str(payload.get("departmentSlug", "")),
+            role=str(payload.get("role", "employee")),
+            permissions=[],          # resolved later from agent_access
+            proposal_id=None,
+            email=payload.get("email"),
+            source="brooker",
+        )
+    except jwt.PyJWTError:
+        return None
+
+
+def validate_jwt(token: str, public_key: bytes | None = None) -> JWTClaims:
+    """Decode and validate a JWT — tries RS256 first, then HS256.
+
+    Args:
+        token: Raw JWT string.
+        public_key: Optional PEM key override (for tests).
+
+    Returns:
+        JWTClaims on success.
+
+    Raises:
+        AuthError on any failure.
+    """
+    # 1. Try RS256 (CAC system tokens — approval links, email-notifier)
+    if public_key is not None:
+        # Explicit key passed (tests / legacy call-sites)
+        try:
+            payload: dict = jwt.decode(
+                token, public_key, algorithms=["RS256"],
+                options={"require": ["sub", "dept", "role", "exp", "iat"]},
+            )
+            return JWTClaims(
+                sub=str(payload["sub"]),
+                dept=str(payload["dept"]),
+                role=str(payload["role"]),
+                permissions=list(payload.get("permissions", [])),
+                proposal_id=payload.get("proposal_id"),
+                source="cac",
+            )
+        except jwt.ExpiredSignatureError as exc:
+            raise AuthError("TOKEN_EXPIRED", "Token has expired") from exc
+        except jwt.PyJWTError as exc:
+            raise AuthError("TOKEN_INVALID", f"Token validation failed: {exc}") from exc
+
+    # Auto-detect: try RS256, then HS256
+    claims = _try_rs256(token)
+    if claims is not None:
+        return claims
+
+    claims = _try_hs256(token)
+    if claims is not None:
+        return claims
+
+    raise AuthError("TOKEN_INVALID", "Token could not be validated with any known method")
+
+
+# ---------------------------------------------------------------------------
+# Agent access resolution (for Brooker tokens)
+# ---------------------------------------------------------------------------
+
+async def resolve_agent_permissions(
+    pool, employee_id: str | None, email: str | None, department_name: str = "cac",
+) -> dict:
+    """Look up agent_access row for an employee.
+
+    Tries employee_id first, falls back to email.
+    Returns a dict of permissions or raises AuthError if no access.
+    """
+    if pool is None:
+        raise AuthError("CONFIG_ERROR", "Database pool not available", 500)
+
+    async with pool.acquire() as conn:
+        row = None
+
+        if employee_id:
+            row = await conn.fetchrow(
+                "SELECT can_query, can_approve, can_view_proposals, can_escalate "
+                "FROM agent_access "
+                "WHERE employee_id = $1 AND department_name = $2 AND revoked_at IS NULL",
+                employee_id, department_name,
+            )
+
+        if row is None and email:
+            row = await conn.fetchrow(
+                "SELECT can_query, can_approve, can_view_proposals, can_escalate "
+                "FROM agent_access "
+                "WHERE employee_email = $1 AND department_name = $2 AND revoked_at IS NULL",
+                email, department_name,
+            )
+
+    if row is None:
+        raise AuthError(
+            "NO_AGENT_ACCESS",
+            f"No agent access granted for department '{department_name}'",
+            status_code=403,
+        )
+
+    return dict(row)
+
+
+def permissions_from_access(access: dict) -> list[str]:
+    """Convert agent_access booleans to permission strings."""
+    perms = []
+    if access.get("can_query"):
+        perms.append("query")
+    if access.get("can_approve"):
+        perms.append("approve")
+    if access.get("can_view_proposals"):
+        perms.append("view_proposals")
+    if access.get("can_escalate"):
+        perms.append("escalate")
+    return perms
+
+
+# ---------------------------------------------------------------------------
+# Department RBAC
+# ---------------------------------------------------------------------------
 
 _DEPARTMENTS_PATH = os.environ.get(
     "DEPARTMENTS_JSON_PATH",
@@ -147,16 +259,13 @@ def check_dept_access(claims: JWTClaims, resource_dept: str) -> None:
     Access is granted if:
     1. claims.dept matches resource_dept (same department), OR
     2. claims.role appears in globalAccess.roles and resource_dept is in canRead
-       (or canRead contains "*")
-
-    Args:
-        claims: Validated JWT claims for the requesting user.
-        resource_dept: Department identifier of the resource being accessed.
-
-    Raises:
-        AuthError: With code ``DEPT_MISMATCH`` and HTTP 403 when neither
-            condition is satisfied.
+       (or canRead contains "*"), OR
+    3. Token is from Brooker (agent_access already checked upstream).
     """
+    # Brooker tokens: agent_access was already verified by the middleware
+    if claims.source == "brooker":
+        return
+
     # Same department always passes
     if claims.dept == resource_dept:
         return

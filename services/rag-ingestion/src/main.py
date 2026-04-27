@@ -2,6 +2,10 @@
 """rag-ingestion service — FastAPI app for document and message ingestion."""
 from __future__ import annotations
 
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+
 import contextlib
 import hashlib
 import os
@@ -29,7 +33,7 @@ from .qdrant_store import COLLECTIONS, QdrantStore
 logger = structlog.get_logger("rag-ingestion")
 
 settings = RAGSettings()
-WIKI_COMPILER_URL = os.getenv("WIKI_COMPILER_URL", "http://wiki-compiler:3007")
+WIKI_COMPILER_URL = os.getenv("WIKI_COMPILER_URL", "http://localhost:3007")
 
 
 @contextlib.asynccontextmanager
@@ -42,12 +46,38 @@ async def lifespan(app: FastAPI):
     chunker = DocumentChunker(settings)
     chat_indexer = ChatIndexer(embedder=embedder, store=store)
 
-    # Get embedding dimension and ensure collections
-    try:
-        dim = await embedder.get_dimension()
-    except Exception:
-        dim = 1536  # fallback dimension
-        logger.warning("rag-ingestion.embed_dim_fallback", dim=dim)
+    # Get embedding dimension and ensure collections.
+    # Priority: EMBEDDING_DIM env var > auto-detect from vLLM > fail fast.
+    # Qwen3.5 9B produces 4096-dimensional vectors; 1536 would silently corrupt
+    # all Qdrant collections created at startup, so we never fall back silently.
+    _env_dim = os.getenv("EMBEDDING_DIM")
+    if _env_dim:
+        try:
+            dim = int(_env_dim)
+        except ValueError as exc:
+            logger.error(
+                "rag-ingestion.startup.invalid_embedding_dim",
+                embedding_dim_env=_env_dim,
+                error=str(exc),
+            )
+            raise RuntimeError(
+                f"EMBEDDING_DIM env var is not a valid integer: {_env_dim!r}"
+            ) from exc
+        logger.info("rag-ingestion.startup.embedding_dim_from_env", dim=dim)
+    else:
+        try:
+            dim = await embedder.get_dimension()
+            logger.info("rag-ingestion.startup.embedding_dim_detected", dim=dim)
+        except Exception as exc:
+            logger.error(
+                "rag-ingestion.startup.embedding_dim_detection_failed",
+                vllm_embed_url=settings.vllm_embed_url,
+                error=str(exc),
+            )
+            raise RuntimeError(
+                "Cannot determine embedding dimension: vLLM embed endpoint is unreachable "
+                f"({settings.vllm_embed_url}). Set EMBEDDING_DIM env var to override."
+            ) from exc
 
     await store.ensure_collections(vector_size=dim)
 

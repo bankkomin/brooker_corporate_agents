@@ -5,6 +5,10 @@ Endpoints:
   POST /process-approved   — copy approved proposal manifests to staging/approved/
   POST /archive-completed  — move synced/rejected proposals to archive
 """
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 

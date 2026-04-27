@@ -25,7 +25,7 @@ async def excel_navigator(state: dict, *, schema_path: str) -> dict:
     """
     proposed_cell = state.get("proposed_cell")
     if not proposed_cell:
-        return {"excel_nav": None}
+        return {"excel_nav": None, "old_value": "(current value not available)"}
 
     schema = _load_schema(schema_path)
     filename = schema.get("filename", "Unknown")
@@ -41,11 +41,20 @@ async def excel_navigator(state: dict, *, schema_path: str) -> dict:
 
     if not col_match or not row_num:
         logger.warning("invalid_cell_reference", cell=proposed_cell)
-        return {"excel_nav": f"{filename} → Cell {proposed_cell}"}
+        return {
+            "excel_nav": f"{filename} → Cell {proposed_cell}",
+            "old_value": "(current value not available)",
+        }
 
-    # Find the matching tab, row, and column label
+    # If proposed_tab is set, restrict search to that tab only; otherwise
+    # search all tabs (original fallback behaviour).
+    proposed_tab = state.get("proposed_tab", "")
+
     for tab in schema.get("tabs", []):
         tab_name = tab.get("name", "")
+        # FIX 12: skip tabs that don't match proposed_tab when it is provided
+        if proposed_tab and tab_name != proposed_tab:
+            continue
         for row_def in tab.get("rows", []):
             if row_def.get("row") == row_num:
                 col_label = row_def.get("columns", {}).get(col_match, col_match)
@@ -54,9 +63,15 @@ async def excel_navigator(state: dict, *, schema_path: str) -> dict:
                     f"Row {row_num} → Column {col_match}: {col_label}"
                 )
                 logger.info("excel_nav_resolved", nav=nav)
-                return {"excel_nav": nav}
+                # FIX 5: expose old_value from schema metadata if available,
+                # otherwise use a safe sentinel so staging_writer/validate_proposal
+                # always find a non-None value in state.
+                old_value = row_def.get("columns_current_values", {}).get(
+                    col_match, "(current value not available)"
+                )
+                return {"excel_nav": nav, "old_value": old_value}
 
     # Fallback: no matching tab/row found
     nav = f"{filename} → Cell {proposed_cell}"
     logger.info("excel_nav_fallback", nav=nav)
-    return {"excel_nav": nav}
+    return {"excel_nav": nav, "old_value": "(current value not available)"}

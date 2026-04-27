@@ -1,0 +1,147 @@
+{
+  "filename": "HR_Tracker.xlsx",
+  "tabs": [
+    {
+      "name": "Talent",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Headcount",
+          "columns": {
+            "B": "Metric",
+            "C": "Budget",
+            "D": "Current Value",
+            "E": "Variance"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Open Requisitions",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Critical Roles"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Attrition Rate (YTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Year"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Time to Fill (avg days)",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Prior Quarter"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=Total headcount vs approved budget, D9=Open requisitions, D10=YTD attrition rate (target <10%), D11=Average days to fill"
+    },
+    {
+      "name": "Compensation",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Total Payroll (MTD)",
+          "columns": {
+            "B": "Metric",
+            "C": "Budget",
+            "D": "Actual",
+            "E": "Variance"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Salary Band Compliance %",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Out-of-Band Count"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Bonus Accrual",
+          "columns": {
+            "B": "Metric",
+            "C": "Budget",
+            "D": "Accrued",
+            "E": "Utilisation %"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Pay Equity Index",
+          "columns": {
+            "B": "Metric",
+            "C": "Target",
+            "D": "Current Value",
+            "E": "Last Audit"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=MTD payroll vs budget, D9=Employees within approved salary bands, D10=Bonus pool accrual, D11=Gender pay equity ratio"
+    },
+    {
+      "name": "Policy",
+      "header_row": 7,
+      "rows": [
+        {
+          "row": 8,
+          "label": "Policies Due for Review",
+          "columns": {
+            "B": "Metric",
+            "D": "Count",
+            "E": "Next Due Date"
+          }
+        },
+        {
+          "row": 9,
+          "label": "Policy Exceptions (Open)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Status"
+          }
+        },
+        {
+          "row": 10,
+          "label": "Grievances (Open)",
+          "columns": {
+            "B": "Metric",
+            "C": "Threshold",
+            "D": "Current Value",
+            "E": "Age (avg days)"
+          }
+        },
+        {
+          "row": 11,
+          "label": "Disciplinary Actions (MTD)",
+          "columns": {
+            "B": "Metric",
+            "D": "Current Value",
+            "E": "Prior Month"
+          }
+        }
+      ],
+      "agent_targets": ["D8", "D9", "D10", "D11"],
+      "notes": "D8=HR policies requiring review, D9=Open policy exceptions, D10=Active grievance cases, D11=MTD disciplinary proceedings"
+    }
+  ]
+}

@@ -1,0 +1,1379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Claude Code" version="24.0.0" pages="8">
+
+  <!-- ==================== PAGE 1: DATA ZONE ARCHITECTURE ==================== -->
+  <diagram id="data-zones" name="2. Data Zone Architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="dz-title" value="&lt;b&gt;DATA ZONE ARCHITECTURE&lt;/b&gt;&lt;br&gt;Corporate AI Agent System — Data Safety Model" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=18;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="527" y="20" width="600" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Subtitle -->
+        <mxCell id="dz-subtitle" value="Agents NEVER write to corporate data directly. All changes require human approval." style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=13;fontFamily=Helvetica;fontColor=#D32F2F;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="477" y="70" width="700" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ZONE 0: Corporate Data ===== -->
+        <mxCell id="z0-container" value="&lt;b&gt;ZONE 0&lt;/b&gt;&lt;br&gt;Corporate Data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=2;dashed=1;verticalAlign=top;fontSize=14;fontFamily=Helvetica;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="240" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="z0-excel" value="📊 Excel Trackers&lt;br&gt;(ALCO, Treasury)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="70" y="200" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="z0-docs" value="📄 Documents &amp; PDFs&lt;br&gt;(Policies, Reports)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="70" y="260" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="z0-db" value="🗄️ Database Snapshots" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="70" y="320" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="z0-label" value="&lt;b&gt;Source of Truth&lt;/b&gt;&lt;br&gt;External — Never agent-accessible" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;fontColor=#37474F;" vertex="1" parent="1">
+          <mxGeometry x="60" y="390" width="200" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- BARRIER: One-Way Pull -->
+        <mxCell id="barrier-1" value="" style="shape=mxgraph.basic.partitioned_rect;dx=0;fillColor=#D32F2F;strokeColor=#D32F2F;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="300" y="180" width="10" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="barrier-1-label" value="🔒 ONE-WAY&lt;br&gt;PULL ONLY" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;fontColor=#D32F2F;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="282" y="450" width="100" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow Zone 0 → Zone 1 -->
+        <mxCell id="z0-z1-arrow" value="sync-mirror pulls&lt;br&gt;every 15 min" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jetSize=auto;html=1;strokeWidth=2;strokeColor=#37474F;fontSize=10;fontFamily=Helvetica;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="z0-container" target="z1-container" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ZONE 1: Mirror ===== -->
+        <mxCell id="z1-container" value="&lt;b&gt;ZONE 1&lt;/b&gt;&lt;br&gt;/data/mirror/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;verticalAlign=top;fontSize=14;fontFamily=Helvetica;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="340" y="140" width="220" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1-alco" value="📊 ALCO_Tracker.xlsx" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="360" y="200" width="180" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1-policy" value="📄 Treasury_Policy_v4.pdf" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="360" y="250" width="180" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1-hr" value="📊 HR_Tracker.xlsx" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="360" y="300" width="180" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1-lock" value="🔒 &lt;b&gt;READ-ONLY&lt;/b&gt;&lt;br&gt;Docker mount :ro enforced&lt;br&gt;Agents can read, never write" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;fontColor=#E65100;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="355" y="360" width="190" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow Zone 1 → Zone 2 -->
+        <mxCell id="z1-z2-arrow" value="Agents read Zone 1,&lt;br&gt;write proposals to Zone 2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jetSize=auto;html=1;strokeWidth=2;strokeColor=#5E35B1;fontSize=10;fontFamily=Helvetica;" edge="1" source="z1-container" target="z2-container" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ZONE 2: Staging ===== -->
+        <mxCell id="z2-container" value="&lt;b&gt;ZONE 2&lt;/b&gt;&lt;br&gt;/data/staging/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;verticalAlign=top;fontSize=14;fontFamily=Helvetica;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="620" y="140" width="220" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2-pending" value="📁 pending/&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;New proposals awaiting review&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="645" y="200" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2-approved" value="📁 approved/&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;HOD approved — ready to sync&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="645" y="260" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2-rejected" value="📁 rejected/&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;HOD rejected or deferred&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="645" y="320" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2-manifest" value="&lt;font style=&quot;font-size:9px&quot;&gt;manifest.json: { agent, file, tab,&lt;br&gt;cell, old_value, new_value,&lt;br&gt;confidence: 0.91, reasoning }&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=9;fontFamily=Courier New;fontColor=#5E35B1;" vertex="1" parent="1">
+          <mxGeometry x="630" y="385" width="200" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- SHIELD: Human Approval -->
+        <mxCell id="shield" value="" style="shape=mxgraph.basic.partitioned_rect;dx=0;fillColor=#388E3C;strokeColor=#388E3C;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="860" y="180" width="10" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="shield-label" value="🛡️ HUMAN&lt;br&gt;APPROVAL&lt;br&gt;REQUIRED" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;fontColor=#388E3C;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="838" y="450" width="100" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow Zone 2 → Zone 3 -->
+        <mxCell id="z2-z3-arrow" value="HOD reviews diff&lt;br&gt;in browser" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jetSize=auto;html=1;strokeWidth=2;strokeColor=#D32F2F;fontSize=10;fontFamily=Helvetica;" edge="1" source="z2-container" target="z3-container" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ZONE 3: Approval Gate ===== -->
+        <mxCell id="z3-container" value="&lt;b&gt;ZONE 3&lt;/b&gt;&lt;br&gt;Approval Gate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=3;verticalAlign=top;fontSize=14;fontFamily=Helvetica;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="900" y="140" width="260" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3-ui" value="🌐 Approval UI&lt;br&gt;(port 4000)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="200" width="200" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3-hod" value="👤 Head of Department (HOD)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="930" y="260" width="200" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3-buttons" value="&lt;font color=&quot;#388E3C&quot;&gt;✓ Approve&lt;/font&gt; &amp;nbsp;|&amp;nbsp; ✏️ Edit &amp;nbsp;|&amp;nbsp; &lt;font color=&quot;#D32F2F&quot;&gt;✗ Reject&lt;/font&gt; &amp;nbsp;|&amp;nbsp; ⏳ Defer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D32F2F;fontSize=10;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="920" y="315" width="220" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3-note" value="&lt;b&gt;HUMAN DECISION REQUIRED&lt;/b&gt;&lt;br&gt;No automatic sync — ever" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;fontColor=#D32F2F;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="930" y="370" width="200" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow Zone 3 → Zone 4 -->
+        <mxCell id="z3-z4-arrow" value="Approved changes&lt;br&gt;archived + synced back" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jetSize=auto;html=1;strokeWidth=2;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" edge="1" source="z3-container" target="z4-container" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ZONE 4: Archive ===== -->
+        <mxCell id="z4-container" value="&lt;b&gt;ZONE 4&lt;/b&gt;&lt;br&gt;/data/archive/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;verticalAlign=top;fontSize=14;fontFamily=Helvetica;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="140" width="220" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4-audit" value="📋 Audit Records&lt;br&gt;(every decision logged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="200" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4-manifest" value="📄 chg_0142_approved&lt;br&gt;_JohnD.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="260" width="170" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4-label" value="&lt;b&gt;Permanent Audit Trail&lt;/b&gt;&lt;br&gt;Full traceability" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="320" width="160" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow Zone 4 → Zone 0 (sync back) -->
+        <mxCell id="z4-z0-arrow" value="sync-back writes to corporate&lt;br&gt;(approved changes ONLY)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jetSize=auto;html=1;strokeWidth=2;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" source="z4-container" target="z0-container" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1330" y="550"/>
+              <mxPoint x="160" y="550"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="dz-legend" value="&lt;b&gt;Legend&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;verticalAlign=top;fontSize=12;fontFamily=Helvetica;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="400" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-ro" value="&lt;font color=&quot;#E65100&quot;&gt;■&lt;/font&gt; Read-Only Zone &amp;nbsp;&amp;nbsp; &lt;font color=&quot;#5E35B1&quot;&gt;■&lt;/font&gt; Agent Write Zone &amp;nbsp;&amp;nbsp; &lt;font color=&quot;#D32F2F&quot;&gt;■&lt;/font&gt; Human Decision &amp;nbsp;&amp;nbsp; &lt;font color=&quot;#388E3C&quot;&gt;■&lt;/font&gt; Approved / Archive" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="55" y="550" width="380" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== PAGE 2: SYSTEM ARCHITECTURE OVERVIEW ==================== -->
+  <diagram id="sys-arch" name="1. System Architecture Overview">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="sa-title" value="&lt;b&gt;SYSTEM ARCHITECTURE OVERVIEW&lt;/b&gt;&lt;br&gt;Corporate AI Agent System — 14 Services" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=18;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="527" y="15" width="600" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ROW 1: External / Host ===== -->
+        <mxCell id="r1-group" value="&lt;b&gt;External / Host (DGX Spark)&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=2;dashed=1;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="1400" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="llm-large" value="&lt;b&gt;Qwen 3.5 122B&lt;/b&gt;&lt;br&gt;Reasoning&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:8000&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r1-group">
+          <mxGeometry x="30" y="35" width="150" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="llm-embed" value="&lt;b&gt;Qwen 3.5 9B&lt;/b&gt;&lt;br&gt;Embedding&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:8002&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r1-group">
+          <mxGeometry x="210" y="35" width="150" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="nginx-lb" value="&lt;b&gt;Nginx LB&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:8080&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r1-group">
+          <mxGeometry x="400" y="35" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="corp-data" value="&lt;b&gt;Corporate Data&lt;/b&gt;&lt;br&gt;(External Systems)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=2;dashed=1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r1-group">
+          <mxGeometry x="1180" y="35" width="180" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ROW 2: User Interfaces ===== -->
+        <mxCell id="r2-group" value="&lt;b&gt;User Interfaces&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="210" width="1400" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="slack-bot" value="&lt;b&gt;Slack Bot&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3003 | Slack Bolt&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r2-group">
+          <mxGeometry x="30" y="35" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="approval-ui" value="&lt;b&gt;Approval UI&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:4000 | Next.js 15&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r2-group">
+          <mxGeometry x="230" y="35" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="obsidian" value="&lt;b&gt;Obsidian Vault&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Knowledge Base (Desktop)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;dashed=1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r2-group">
+          <mxGeometry x="430" y="35" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ROW 3: API & Orchestration ===== -->
+        <mxCell id="r3-group" value="&lt;b&gt;API &amp; Orchestration Layer&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="330" width="1400" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="gateway" value="&lt;b&gt;Gateway&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3000 | JWT Auth + RBAC&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r3-group">
+          <mxGeometry x="30" y="35" width="180" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="cac-orch" value="&lt;b&gt;CAC Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3001 | LangGraph + 4 Agents&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r3-group">
+          <mxGeometry x="240" y="35" width="200" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="hr-orch" value="&lt;b&gt;HR Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3002 | LangGraph + 4 Agents&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r3-group">
+          <mxGeometry x="470" y="35" width="200" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="paperclip" value="&lt;b&gt;Paperclip Hub&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3100 | Audit + Events&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r3-group">
+          <mxGeometry x="700" y="35" width="180" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ROW 4: Workers & Background ===== -->
+        <mxCell id="r4-group" value="&lt;b&gt;Workers &amp; Background Services&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="460" width="1400" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag" value="&lt;b&gt;RAG Ingestion&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3004 | Chunk + Embed&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r4-group">
+          <mxGeometry x="30" y="35" width="160" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="wiki" value="&lt;b&gt;Wiki Compiler&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3007 | Knowledge Base&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r4-group">
+          <mxGeometry x="210" y="35" width="160" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="openclaw" value="&lt;b&gt;OpenClaw&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3200 | Worker&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r4-group">
+          <mxGeometry x="400" y="35" width="140" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="sync-mirror" value="&lt;b&gt;Sync-Mirror&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Pull from corporate&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r4-group">
+          <mxGeometry x="570" y="35" width="150" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="sync-back" value="&lt;b&gt;Sync-Back&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3006 | Write approved&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r4-group">
+          <mxGeometry x="750" y="35" width="160" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="email" value="&lt;b&gt;Email Notifier&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3005 | SMTP/SendGrid&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r4-group">
+          <mxGeometry x="940" y="35" width="160" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ROW 5: Infrastructure ===== -->
+        <mxCell id="r5-group" value="&lt;b&gt;Infrastructure&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="1400" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="postgres" value="&lt;b&gt;PostgreSQL 16&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:5432 | 7+ tables&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;size=10;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r5-group">
+          <mxGeometry x="100" y="30" width="160" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="qdrant" value="&lt;b&gt;Qdrant&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:6333 | 8 collections&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;size=10;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r5-group">
+          <mxGeometry x="360" y="30" width="160" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="minio" value="&lt;b&gt;MinIO&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:9000 | Object Storage&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;size=10;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="r5-group">
+          <mxGeometry x="620" y="30" width="160" height="65" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== KEY ARROWS ===== -->
+        <!-- Slack Bot → CAC Orchestrator -->
+        <mxCell id="a-sb-cac" value="queries" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;html=1;strokeWidth=2;strokeColor=#5E35B1;fontSize=9;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="slack-bot" target="cac-orch">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Approval UI → Gateway -->
+        <mxCell id="a-ui-gw" value="API calls" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;html=1;strokeWidth=2;strokeColor=#1565C0;fontSize=9;fontFamily=Helvetica;" edge="1" parent="1" source="approval-ui" target="gateway">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="sa-legend" value="&lt;b&gt;Color Legend&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#388E3C&quot;&gt;■&lt;/font&gt; User Interface &amp;nbsp; &lt;font color=&quot;#1565C0&quot;&gt;■&lt;/font&gt; API/Gateway &amp;nbsp; &lt;font color=&quot;#5E35B1&quot;&gt;■&lt;/font&gt; Orchestration &amp;nbsp; &lt;font color=&quot;#7B1FA2&quot;&gt;■&lt;/font&gt; Background &amp;nbsp; &lt;font color=&quot;#E65100&quot;&gt;■&lt;/font&gt; Storage &amp;nbsp; &lt;font color=&quot;#C62828&quot;&gt;■&lt;/font&gt; LLM/AI &amp;nbsp; &lt;font color=&quot;#F57F17&quot;&gt;■&lt;/font&gt; Worker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=10;fontFamily=Helvetica;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="720" width="800" height="50" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== PAGE 3: APPROVAL & SYNC PIPELINE ==================== -->
+  <diagram id="approval-flow" name="5. Approval &amp; Sync Pipeline">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="ap-title" value="&lt;b&gt;APPROVAL &amp; SYNC PIPELINE&lt;/b&gt;&lt;br&gt;Human-in-the-Loop Governance" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="527" y="15" width="600" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Column 1: Agent Proposes ===== -->
+        <mxCell id="ap-c1" value="&lt;b&gt;1. Agent Proposes&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="300" height="400" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-agent" value="&lt;b&gt;Specialist Agent&lt;/b&gt;&lt;br&gt;(e.g., Funding Agent)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="ap-c1">
+          <mxGeometry x="30" y="40" width="240" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-validate" value="Validate Proposal&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Independent LLM cross-check&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="ap-c1">
+          <mxGeometry x="30" y="100" width="240" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-stage" value="&lt;b&gt;staging_writer&lt;/b&gt;&lt;br&gt;Write manifest.json to&lt;br&gt;/data/staging/pending/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="ap-c1">
+          <mxGeometry x="30" y="165" width="240" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-manifest" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size:9px&quot;&gt;{&lt;br&gt;&amp;nbsp; &quot;file&quot;: &quot;ALCO_Tracker.xlsx&quot;,&lt;br&gt;&amp;nbsp; &quot;tab&quot;: &quot;Funding Facilities&quot;,&lt;br&gt;&amp;nbsp; &quot;cell&quot;: &quot;E8&quot;,&lt;br&gt;&amp;nbsp; &quot;old_value&quot;: null,&lt;br&gt;&amp;nbsp; &quot;new_value&quot;: &quot;3.15&quot;,&lt;br&gt;&amp;nbsp; &quot;confidence&quot;: 0.91&lt;br&gt;}&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;align=left;" vertex="1" parent="ap-c1">
+          <mxGeometry x="30" y="240" width="240" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow C1 → C2 -->
+        <mxCell id="ap-a12" value="triggers email" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#7B1FA2;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="ap-c1" target="ap-c2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Column 2: HOD Notified ===== -->
+        <mxCell id="ap-c2" value="&lt;b&gt;2. HOD Notified&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="90" width="300" height="400" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-notifier" value="&lt;b&gt;Email Notifier&lt;/b&gt;&lt;br&gt;(port 3005)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="ap-c2">
+          <mxGeometry x="30" y="40" width="240" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-email" value="📧 &lt;b&gt;Email to HOD&lt;/b&gt;&lt;br&gt;Subject: [Action Required]&lt;br&gt;New AI Proposal —&lt;br&gt;ALCO_Tracker.xlsx" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7B1FA2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="ap-c2">
+          <mxGeometry x="30" y="105" width="240" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-jwt" value="&lt;b&gt;[Review Now]&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;JWT deep-link to Approval UI&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontFamily=Helvetica;fontSize=11;fontStyle=1;" vertex="1" parent="ap-c2">
+          <mxGeometry x="60" y="195" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-reminder" value="⏰ 24h Reminder&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;If no action, re-send email&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;dashed=1;" vertex="1" parent="ap-c2">
+          <mxGeometry x="60" y="270" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-note2" value="HODs only need email +&lt;br&gt;browser — no Slack required" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;fontColor=#7B1FA2;fontStyle=2;" vertex="1" parent="ap-c2">
+          <mxGeometry x="30" y="340" width="240" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow C2 → C3 -->
+        <mxCell id="ap-a23" value="HOD clicks link" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#D32F2F;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="ap-c2" target="ap-c3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Column 3: HOD Reviews ===== -->
+        <mxCell id="ap-c3" value="&lt;b&gt;3. HOD Reviews&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=3;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="90" width="300" height="400" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-browser" value="&lt;b&gt;Approval UI (port 4000)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;fontFamily=Helvetica;fontSize=12;fontStyle=1;" vertex="1" parent="ap-c3">
+          <mxGeometry x="20" y="40" width="260" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-diff" value="&lt;b&gt;Diff View&lt;/b&gt;&lt;br&gt;Cell E8: &lt;font color=&quot;#999999&quot;&gt;null&lt;/font&gt; → &lt;font color=&quot;#388E3C&quot;&gt;&lt;b&gt;3.15&lt;/b&gt;&lt;/font&gt;&lt;br&gt;Source: CFO Slack update&lt;br&gt;Agent: funding-agent&lt;br&gt;Confidence: &lt;font color=&quot;#388E3C&quot;&gt;91%&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D32F2F;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="ap-c3">
+          <mxGeometry x="20" y="90" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-actions" value="&lt;font color=&quot;#388E3C&quot;&gt;&lt;b&gt;Approve&lt;/b&gt;&lt;/font&gt; &amp;nbsp;|&amp;nbsp; ✏️ &lt;b&gt;Edit&lt;/b&gt; &amp;nbsp;|&amp;nbsp; &lt;font color=&quot;#D32F2F&quot;&gt;&lt;b&gt;Reject&lt;/b&gt;&lt;/font&gt; &amp;nbsp;|&amp;nbsp; ⏳ &lt;b&gt;Defer&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D32F2F;fontFamily=Helvetica;fontSize=11;strokeWidth=2;" vertex="1" parent="ap-c3">
+          <mxGeometry x="20" y="200" width="260" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-human" value="&lt;b&gt;HUMAN DECISION&lt;/b&gt;&lt;br&gt;No automatic sync — ever" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontFamily=Helvetica;fontColor=#D32F2F;fontStyle=1;" vertex="1" parent="ap-c3">
+          <mxGeometry x="20" y="260" width="260" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow C3 → C4 -->
+        <mxCell id="ap-a34" value="decision" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="ap-c3" target="ap-c4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Column 4: Outcome ===== -->
+        <mxCell id="ap-c4" value="&lt;b&gt;4. Outcome&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="90" width="300" height="400" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-approve-path" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;APPROVED&lt;/b&gt;&lt;br&gt;→ /data/staging/approved/&lt;br&gt;→ sync-back writes to Excel&lt;br&gt;→ /data/archive/ (audit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;strokeWidth=2;" vertex="1" parent="ap-c4">
+          <mxGeometry x="20" y="40" width="260" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-edit-path" value="✏️ &lt;b&gt;EDITED + APPROVED&lt;/b&gt;&lt;br&gt;→ HOD modifies value&lt;br&gt;→ Same flow as Approved" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="ap-c4">
+          <mxGeometry x="20" y="130" width="260" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-reject-path" value="&lt;font color=&quot;#D32F2F&quot;&gt;✗&lt;/font&gt; &lt;b&gt;REJECTED&lt;/b&gt;&lt;br&gt;→ /data/staging/rejected/&lt;br&gt;→ /data/archive/ (logged, no sync)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="ap-c4">
+          <mxGeometry x="20" y="210" width="260" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ap-defer-path" value="⏳ &lt;b&gt;DEFERRED&lt;/b&gt;&lt;br&gt;→ Stays in pending/&lt;br&gt;→ Reminder email at 24h" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;dashed=1;" vertex="1" parent="ap-c4">
+          <mxGeometry x="20" y="290" width="260" height="60" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== PAGE 4: MESSAGE FLOW / QUERY PIPELINE ==================== -->
+  <diagram id="msg-flow" name="3. Message Flow Pipeline">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="mf-title" value="&lt;b&gt;MESSAGE FLOW — QUERY PIPELINE&lt;/b&gt;&lt;br&gt;From Slack Question to Cited Answer" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="527" y="15" width="600" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 1 -->
+        <mxCell id="mf-1" value="&lt;b&gt;1&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s1" value="&lt;b&gt;Committee Member&lt;/b&gt; posts question in &lt;b&gt;Slack #cac-committee&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="85" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 2 -->
+        <mxCell id="mf-2" value="&lt;b&gt;2&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s2" value="&lt;b&gt;Slack Bot&lt;/b&gt; (:3003) acknowledges &lt; 100ms, creates background task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="145" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 3 -->
+        <mxCell id="mf-3" value="&lt;b&gt;3&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="210" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s3" value="&lt;b&gt;CAC Orchestrator&lt;/b&gt; (:3001) receives POST /query — starts LangGraph pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="205" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 4 -->
+        <mxCell id="mf-4" value="&lt;b&gt;4&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="270" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s4" value="&lt;b&gt;Classify Intent&lt;/b&gt; — Qwen 122B determines: liquidity / capital / ALM / funding / general" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="265" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 5 -->
+        <mxCell id="mf-5" value="&lt;b&gt;5&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="330" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s5" value="&lt;b&gt;Retrieve Context&lt;/b&gt; — Search Qdrant: cac_docs + cac_chat + cac_knowledge (top-8, min 0.70)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="325" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 6: Agent Fan-out -->
+        <mxCell id="mf-6" value="&lt;b&gt;6&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="395" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s6-label" value="&lt;b&gt;Route to Specialist Agent&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="110" y="395" width="200" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-liquidity" value="Liquidity&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="110" y="425" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-capital" value="Capital&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="225" y="425" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-alm" value="ALM&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="425" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-funding" value="Funding&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="455" y="425" width="100" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 7 -->
+        <mxCell id="mf-7" value="&lt;b&gt;7&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="490" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s7" value="&lt;b&gt;Escalation Check&lt;/b&gt; — Match against breach thresholds → if triggered: email HOD + CEO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="485" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 8 -->
+        <mxCell id="mf-8" value="&lt;b&gt;8&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="550" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s8" value="&lt;b&gt;Excel Navigator&lt;/b&gt; — Map proposed change to exact cell: Tab → Row → Column" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="545" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 9: Decision -->
+        <mxCell id="mf-9" value="&lt;b&gt;9&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="610" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-decision" value="Confidence &amp;ge; 85%?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="150" y="600" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-yes" value="&lt;b&gt;Yes&lt;/b&gt; → Validate Proposal → Staging Writer&lt;br&gt;Write manifest to /data/staging/pending/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="350" y="600" width="260" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 10-11 -->
+        <mxCell id="mf-10" value="&lt;b&gt;10&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="685" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s10" value="&lt;b&gt;Synthesize Response&lt;/b&gt; — Generate cited answer with [Source: filename | date | page]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="680" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 11 -->
+        <mxCell id="mf-11" value="&lt;b&gt;11&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="745" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s11" value="&lt;b&gt;Paperclip Ticket&lt;/b&gt; — Create audit record PPC-XXXX for full traceability" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="740" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Step 12 -->
+        <mxCell id="mf-12" value="&lt;b&gt;12&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#5E35B1;strokeColor=#5E35B1;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="805" width="35" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mf-s12" value="&lt;b&gt;Reply in Slack Thread&lt;/b&gt; — Answer + sources + Excel nav + confidence + proposal ID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="800" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Vertical spine arrows -->
+        <mxCell id="mf-arr-12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1" source="mf-s1" target="mf-s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="mf-arr-23" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1" source="mf-s2" target="mf-s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="mf-arr-34" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1" source="mf-s3" target="mf-s4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="mf-arr-45" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1" source="mf-s4" target="mf-s5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="mf-arr-910" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1" source="mf-s7" target="mf-s8"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="mf-arr-1011" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1" source="mf-s10" target="mf-s11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="mf-arr-1112" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1" source="mf-s11" target="mf-s12"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Right side: sample response -->
+        <mxCell id="mf-sample" value="&lt;b&gt;Sample Response&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Based on the latest CFO update, the net&lt;br&gt;debt/EBITDA ratio stands at 3.15x...&lt;br&gt;&lt;br&gt;Sources:&lt;br&gt;[Source: Slack #cac | Jane Doe | Mar 24]&lt;br&gt;&lt;br&gt;Excel: ALCO Tracker → Funding → Row 8 → E&lt;br&gt;&lt;br&gt;Confidence: &lt;font color=&quot;#388E3C&quot;&gt;High (91%)&lt;/font&gt;&lt;br&gt;Proposal PPC-0142 staged.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="430" width="250" height="200" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== PAGE 5: LANGGRAPH AGENT GRAPH ==================== -->
+  <diagram id="langgraph" name="4. LangGraph Agent Graph">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="lg-title" value="&lt;b&gt;LANGGRAPH AGENT GRAPH&lt;/b&gt;&lt;br&gt;CAC Orchestrator Internal Pipeline (graph.py)" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="477" y="15" width="700" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- START -->
+        <mxCell id="lg-start" value="START" style="ellipse;whiteSpace=wrap;html=1;fillColor=#37474F;strokeColor=#37474F;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="80" width="80" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Node 1: classify_intent -->
+        <mxCell id="lg-classify" value="&lt;b&gt;classify_intent&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Qwen 122B classifies query intent&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="150" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#37474F;" edge="1" parent="1" source="lg-start" target="lg-classify"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Node 2: retrieve_context -->
+        <mxCell id="lg-retrieve" value="&lt;b&gt;retrieve_context&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Qdrant search: 3 collections, top-8&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="230" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#37474F;" edge="1" parent="1" source="lg-classify" target="lg-retrieve"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Router Diamond -->
+        <mxCell id="lg-router" value="Intent?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="310" width="110" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#37474F;" edge="1" parent="1" source="lg-retrieve" target="lg-router"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- 5 Agent Fan-out -->
+        <mxCell id="lg-agent-group" value="&lt;b&gt;Domain Expertise&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=1;rounded=1;fontFamily=Helvetica;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="400" width="660" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-liq" value="&lt;b&gt;Liquidity&lt;/b&gt;&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lg-agent-group">
+          <mxGeometry x="10" y="30" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-cap" value="&lt;b&gt;Capital&lt;/b&gt;&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lg-agent-group">
+          <mxGeometry x="140" y="30" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-alm" value="&lt;b&gt;ALM&lt;/b&gt;&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lg-agent-group">
+          <mxGeometry x="270" y="30" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-fund" value="&lt;b&gt;Funding&lt;/b&gt;&lt;br&gt;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lg-agent-group">
+          <mxGeometry x="400" y="30" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-gen" value="&lt;b&gt;General&lt;/b&gt;&lt;br&gt;Handler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lg-agent-group">
+          <mxGeometry x="530" y="30" width="110" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Router → Agents arrows -->
+        <mxCell id="lg-r-liq" value="liquidity" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;fontSize=8;fontFamily=Helvetica;" edge="1" parent="1" source="lg-router" target="lg-liq"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="lg-r-cap" value="capital" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;fontSize=8;fontFamily=Helvetica;" edge="1" parent="1" source="lg-router" target="lg-cap"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="lg-r-alm" value="alm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;fontSize=8;fontFamily=Helvetica;" edge="1" parent="1" source="lg-router" target="lg-alm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="lg-r-fund" value="funding" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;fontSize=8;fontFamily=Helvetica;" edge="1" parent="1" source="lg-router" target="lg-fund"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="lg-r-gen" value="general" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#37474F;fontSize=8;fontFamily=Helvetica;" edge="1" parent="1" source="lg-router" target="lg-gen"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Node: escalation_check -->
+        <mxCell id="lg-esc" value="&lt;b&gt;escalation_check&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Match against breach thresholds&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="510" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Node: notify_escalation (side) -->
+        <mxCell id="lg-notify" value="&lt;b&gt;notify_escalation&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Email HOD + CEO&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;fontFamily=Helvetica;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="515" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-esc-notify" value="if triggered" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#D32F2F;fontSize=8;fontFamily=Helvetica;dashed=1;" edge="1" parent="1" source="lg-esc" target="lg-notify"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Node: excel_navigator -->
+        <mxCell id="lg-excel" value="&lt;b&gt;excel_navigator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Map to Tab → Row → Column&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="590" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a-esc-excel" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#37474F;" edge="1" parent="1" source="lg-esc" target="lg-excel"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Confidence Diamond -->
+        <mxCell id="lg-conf" value="Conf&lt;br&gt;&amp;ge; 85%?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="670" width="110" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a-excel-conf" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#37474F;" edge="1" parent="1" source="lg-excel" target="lg-conf"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- validate_proposal -->
+        <mxCell id="lg-validate" value="&lt;b&gt;validate_proposal&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Independent LLM cross-check&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="540" y="670" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a-conf-val" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#388E3C;fontSize=9;fontFamily=Helvetica;fontStyle=1;" edge="1" parent="1" source="lg-conf" target="lg-validate"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- staging_writer -->
+        <mxCell id="lg-staging" value="&lt;b&gt;staging_writer&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Write to /data/staging/pending/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="540" y="740" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a-val-stage" value="passed" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#388E3C;fontSize=9;fontFamily=Helvetica;" edge="1" parent="1" source="lg-validate" target="lg-staging"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- synthesise -->
+        <mxCell id="lg-synth" value="&lt;b&gt;synthesise_response&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Generate cited answer (Qwen 122B)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="810" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a-conf-synth" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#D32F2F;fontSize=9;fontFamily=Helvetica;fontStyle=1;" edge="1" parent="1" source="lg-conf" target="lg-synth"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- paperclip_ticket -->
+        <mxCell id="lg-ppc" value="&lt;b&gt;paperclip_ticket&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Create PPC-XXXX audit record&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="890" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a-synth-ppc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#37474F;" edge="1" parent="1" source="lg-synth" target="lg-ppc"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- END -->
+        <mxCell id="lg-end" value="END" style="ellipse;whiteSpace=wrap;html=1;fillColor=#37474F;strokeColor=#37474F;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="970" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lg-a-ppc-end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#37474F;" edge="1" parent="1" source="lg-ppc" target="lg-end"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- State box -->
+        <mxCell id="lg-state" value="&lt;b&gt;AgentState (TypedDict)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Checkpointed to PostgreSQL&lt;br&gt;Key: (user_id, thread_ts)&lt;br&gt;Enables multi-turn conversations&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#37474F;fontFamily=Helvetica;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="810" width="200" height="70" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== PAGE 6: RAG KNOWLEDGE ARCHITECTURE ==================== -->
+  <diagram id="rag-arch" name="6. RAG Knowledge Architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="rag-title" value="&lt;b&gt;RAG KNOWLEDGE ARCHITECTURE&lt;/b&gt;&lt;br&gt;How the System Learns and Retrieves Information" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="477" y="15" width="700" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Phase 1: Data Sources ===== -->
+        <mxCell id="rag-p1" value="&lt;b&gt;Data Sources&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="300" height="380" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-slack" value="💬 &lt;b&gt;Slack Messages&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;#cac-committee, #hr-committee&lt;br&gt;Committee discussions, decisions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p1">
+          <mxGeometry x="20" y="35" width="260" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-docs" value="📄 &lt;b&gt;Uploaded Documents&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;PDFs, DOCX, XLSX via Slack&lt;br&gt;Policies, reports, trackers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p1">
+          <mxGeometry x="20" y="100" width="260" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-vault" value="📓 &lt;b&gt;Obsidian Vault&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Skills, meeting notes, decisions&lt;br&gt;Watched by VaultWatcher (60s)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p1">
+          <mxGeometry x="20" y="165" width="260" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-proposals" value="✅ &lt;b&gt;Approved Proposals&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Decisions compiled into&lt;br&gt;knowledge articles by Wiki Compiler&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p1">
+          <mxGeometry x="20" y="230" width="260" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-mirror" value="📊 &lt;b&gt;Mirror Data&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;/data/mirror/ (read-only)&lt;br&gt;Corporate Excel trackers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p1">
+          <mxGeometry x="20" y="295" width="260" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Phase 2: Processing Pipeline ===== -->
+        <mxCell id="rag-p2" value="&lt;b&gt;Processing Pipeline&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="90" width="340" height="380" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-chunker" value="&lt;b&gt;Document Chunker&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;512 tokens per chunk&lt;br&gt;128 token overlap&lt;br&gt;PDF / DOCX / XLSX / MD handlers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p2">
+          <mxGeometry x="20" y="35" width="300" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-indexer" value="&lt;b&gt;Chat Indexer&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;SHA-256 deduplication&lt;br&gt;Metadata: user, channel, timestamp&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p2">
+          <mxGeometry x="20" y="110" width="300" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-watcher" value="&lt;b&gt;VaultWatcher&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;60s debounce, path-based routing&lt;br&gt;11 paths: shared + CAC + HR → collections&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p2">
+          <mxGeometry x="20" y="175" width="300" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-compiler" value="&lt;b&gt;Wiki Compiler&lt;/b&gt; (:3007)&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;LLM summarization → articles&lt;br&gt;Types: concept, decision, meeting-note,&lt;br&gt;entity, escalation, source-summary&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p2">
+          <mxGeometry x="20" y="240" width="300" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-embed" value="&lt;b&gt;Qwen 9B Embedding&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;host.docker.internal:8002&lt;br&gt;Batch size: 32 | Dense vectors&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p2">
+          <mxGeometry x="20" y="320" width="300" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Phase 3: Knowledge Store ===== -->
+        <mxCell id="rag-p3" value="&lt;b&gt;Knowledge Store (Qdrant)&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="840" y="90" width="340" height="380" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-cac-label" value="&lt;b&gt;CAC Department&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;fontColor=#5E35B1;" vertex="1" parent="rag-p3">
+          <mxGeometry x="20" y="30" width="200" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-cac-docs" value="cac_docs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="20" y="55" width="145" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-cac-chat" value="cac_chat" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="175" y="55" width="145" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-cac-know" value="cac_knowledge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="20" y="95" width="145" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-shared" value="shared_policies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="175" y="95" width="145" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="rag-hr-label" value="&lt;b&gt;HR Department&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;fontColor=#5E35B1;" vertex="1" parent="rag-p3">
+          <mxGeometry x="20" y="140" width="200" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-hr-docs" value="hr_docs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="20" y="165" width="145" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-hr-chat" value="hr_chat" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="175" y="165" width="145" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="rag-hr-know" value="hr_knowledge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="20" y="205" width="145" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Retrieval arrow -->
+        <mxCell id="rag-retrieval" value="&lt;b&gt;At Query Time&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Agents retrieve top-8 chunks&lt;br&gt;Min relevance: 0.70&lt;br&gt;Cosine similarity search&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="rag-p3">
+          <mxGeometry x="20" y="260" width="300" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Callout -->
+        <mxCell id="rag-callout" value="&lt;b&gt;Knowledge Compounds Over Time&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Raw data → structured articles → searchable vectors.&lt;br&gt;Agents automatically get smarter as institutional memory accumulates.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="500" width="500" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrows between phases -->
+        <mxCell id="rag-arr-12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#5E35B1;" edge="1" parent="1" source="rag-p1" target="rag-p2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rag-arr-23" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#E65100;" edge="1" parent="1" source="rag-p2" target="rag-p3"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== PAGE 7: BUILD ROADMAP / TIMELINE ==================== -->
+  <diagram id="timeline" name="7. Build Roadmap">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="tl-title" value="&lt;b&gt;BUILD ROADMAP&lt;/b&gt;&lt;br&gt;Stages 1-9 Complete — Stage 10 (UAT) Pending" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="477" y="15" width="700" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Group: Foundation (Stages 1-3) ===== -->
+        <mxCell id="tl-g1" value="&lt;b&gt;FOUNDATION&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="340" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s1" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 1: Infrastructure&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Docker Compose, Postgres 16, Qdrant,&lt;br&gt;MinIO, Nginx LB, .env config&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g1">
+          <mxGeometry x="15" y="30" width="310" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s2" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 2: Mirror + RAG&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;sync-mirror, rag-ingestion,&lt;br&gt;document chunking, vector search&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g1">
+          <mxGeometry x="15" y="100" width="310" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s3" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 3: Slack Bot&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Slack Bolt, event handling, message&lt;br&gt;forwarding, file ingestion (47 tests)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g1">
+          <mxGeometry x="15" y="170" width="310" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Group: Intelligence (Stages 4-5) ===== -->
+        <mxCell id="tl-g2" value="&lt;b&gt;INTELLIGENCE&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="90" width="340" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s4" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 4: CAC Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;LangGraph pipeline, 10 nodes,&lt;br&gt;intent classification, context retrieval&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g2">
+          <mxGeometry x="15" y="30" width="310" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s5" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 5: Agents + Staging&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;4 specialist agents, SKILL.md system,&lt;br&gt;staging writer, validation (142 tests)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g2">
+          <mxGeometry x="15" y="100" width="310" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Group: Governance (Stages 6-7) ===== -->
+        <mxCell id="tl-g3" value="&lt;b&gt;GOVERNANCE&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="760" y="90" width="340" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s6" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 6: Approval + Email&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Approval UI (Next.js), sync-back,&lt;br&gt;email notifier, JWT deep-links&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g3">
+          <mxGeometry x="15" y="30" width="310" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s7" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 7: Paperclip Hub&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;5 subsystems: tickets, heartbeat,&lt;br&gt;departments, event routing, workers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g3">
+          <mxGeometry x="15" y="100" width="310" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Group: Expansion (Stages 8-9) ===== -->
+        <mxCell id="tl-g4" value="&lt;b&gt;EXPANSION&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="90" width="340" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s8" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 8: HR + OpenClaw&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;HR department (4 agents), OpenClaw&lt;br&gt;worker, Obsidian vault integration&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g4">
+          <mxGeometry x="15" y="30" width="310" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-s9" value="&lt;font color=&quot;#388E3C&quot;&gt;✓&lt;/font&gt; &lt;b&gt;Stage 9: Wiki Knowledge&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Wiki compiler (6 generators), linter,&lt;br&gt;auto-maintenance, knowledge articles&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="tl-g4">
+          <mxGeometry x="15" y="100" width="310" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Stage 10: UAT ===== -->
+        <mxCell id="tl-s10" value="⏳ &lt;b&gt;Stage 10: UAT + Go-Live&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;User acceptance testing, DGX Spark deployment,&lt;br&gt;production configuration, stakeholder sign-off&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=3;dashed=1;fontFamily=Helvetica;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="390" y="400" width="500" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== Stats Summary ===== -->
+        <mxCell id="tl-stats" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#37474F;strokeWidth=2;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="140" y="500" width="1000" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-stat1" value="&lt;b style=&quot;font-size:24px;color:#5E35B1&quot;&gt;14&lt;/b&gt;&lt;br&gt;Docker Services" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="170" y="510" width="120" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-stat2" value="&lt;b style=&quot;font-size:24px;color:#5E35B1&quot;&gt;2&lt;/b&gt;&lt;br&gt;Departments&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(CAC + HR)&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="340" y="510" width="120" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-stat3" value="&lt;b style=&quot;font-size:24px;color:#5E35B1&quot;&gt;8&lt;/b&gt;&lt;br&gt;Specialist&lt;br&gt;AI Agents" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="510" y="510" width="120" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-stat4" value="&lt;b style=&quot;font-size:24px;color:#5E35B1&quot;&gt;5&lt;/b&gt;&lt;br&gt;Data Zones&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(Human Approval Gate)&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="680" y="510" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="tl-stat5" value="&lt;b style=&quot;font-size:24px;color:#388E3C&quot;&gt;546+&lt;/b&gt;&lt;br&gt;Automated&lt;br&gt;Tests" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="880" y="510" width="120" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Phase 2+ callout -->
+        <mxCell id="tl-future" value="&lt;b&gt;Phase 2+:&lt;/b&gt; Risk Committee → Legal &amp; Compliance → Investment Committee → Scale to all 7 departments" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;fontFamily=Helvetica;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="630" width="700" height="35" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== PAGE 8: MULTI-DEPARTMENT LOGIC FLOW ==================== -->
+  <diagram id="multi-dept-flow" name="8. Multi-Department Logic Flow">
+    <mxGraphModel dx="2000" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2339" pageHeight="1654" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ============ TITLE ============ -->
+        <mxCell id="md-title" value="&lt;b&gt;MULTI-DEPARTMENT LOGIC FLOW&lt;/b&gt;&lt;br&gt;End-to-End Message Lifecycle Across Departments" style="text;html=1;align=center;verticalAlign=middle;fontSize=20;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="700" y="10" width="800" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LANE 1: ENTRY — Slack Bot + Channel Router                   -->
+        <!-- ============================================================ -->
+        <mxCell id="lane1" value="&lt;b&gt;ENTRY&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=13;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="70" width="2100" height="160" as="geometry"/>
+        </mxCell>
+
+        <!-- User -->
+        <mxCell id="md-user" value="👤 Committee&lt;br&gt;Member" style="shape=mxgraph.basic.rect;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;rounded=1;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=11;fontStyle=1;" vertex="1" parent="lane1">
+          <mxGeometry x="30" y="45" width="110" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Slack message -->
+        <mxCell id="md-slack-msg" value="💬 Slack&lt;br&gt;Message" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="lane1">
+          <mxGeometry x="190" y="45" width="100" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-user-msg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#388E3C;" edge="1" parent="lane1" source="md-user" target="md-slack-msg"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Slack Bot -->
+        <mxCell id="md-slackbot" value="&lt;b&gt;Slack Bot&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3003 | ACK &lt; 100ms&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="lane1">
+          <mxGeometry x="340" y="45" width="130" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-msg-bot" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#388E3C;" edge="1" parent="lane1" source="md-slack-msg" target="md-slackbot"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Channel Router Diamond -->
+        <mxCell id="md-channel-router" value="Which&lt;br&gt;Dept?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=12;fontStyle=1;" vertex="1" parent="lane1">
+          <mxGeometry x="540" y="35" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-bot-router" value="channel_id → dept" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#E65100;fontSize=9;fontFamily=Helvetica;" edge="1" parent="lane1" source="md-slackbot" target="md-channel-router"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Route labels exiting the diamond -->
+        <mxCell id="md-route-cac" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#5E35B1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="lane1" source="md-channel-router">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="150" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="md-route-cac-label" value="&lt;font color=&quot;#5E35B1&quot;&gt;&lt;b&gt;#cac-committee&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=9;fontFamily=Helvetica;" vertex="1" parent="lane1">
+          <mxGeometry x="500" y="115" width="110" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- File ingestion side path -->
+        <mxCell id="md-file-ingest" value="📎 File Upload?&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;→ RAG Ingestion&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontFamily=Helvetica;fontSize=10;dashed=1;" vertex="1" parent="lane1">
+          <mxGeometry x="340" y="110" width="130" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- Route to HR -->
+        <mxCell id="md-route-hr-arrow" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#1565C0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="lane1" source="md-channel-router">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="75" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="md-route-hr-label" value="&lt;font color=&quot;#1565C0&quot;&gt;&lt;b&gt;#hr-committee&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=9;fontFamily=Helvetica;" vertex="1" parent="lane1">
+          <mxGeometry x="665" y="48" width="110" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Route to Future -->
+        <mxCell id="md-route-future-arrow" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#37474F;dashed=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="lane1" source="md-channel-router">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="120" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="md-route-future-label" value="&lt;font color=&quot;#37474F&quot;&gt;&lt;i&gt;#risk, #legal ...&lt;/i&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=9;fontFamily=Helvetica;" vertex="1" parent="lane1">
+          <mxGeometry x="690" y="100" width="100" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Dept config note -->
+        <mxCell id="md-dept-config" value="&lt;font style=&quot;font-size:9px&quot;&gt;Routing via&lt;br&gt;&lt;b&gt;departments.json&lt;/b&gt;&lt;br&gt;channel → dept → orchestrator URL&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E65100;fontFamily=Helvetica;fontSize=9;dashed=1;" vertex="1" parent="lane1">
+          <mxGeometry x="530" y="115" width="145" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LANE 2: CAC DEPARTMENT                                        -->
+        <!-- ============================================================ -->
+        <mxCell id="lane2" value="&lt;b&gt;CAC DEPARTMENT&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Capital Allocation &amp; ALCO Committee&lt;/font&gt;" style="swimlane;startSize=35;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="240" width="2100" height="210" as="geometry"/>
+        </mxCell>
+
+        <!-- CAC Orchestrator -->
+        <mxCell id="md-cac-orch" value="&lt;b&gt;CAC Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3001 | LangGraph&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="lane2">
+          <mxGeometry x="30" y="50" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Classify Intent -->
+        <mxCell id="md-cac-classify" value="Classify&lt;br&gt;Intent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane2">
+          <mxGeometry x="200" y="50" width="90" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-class" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-orch" target="md-cac-classify"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Retrieve Context -->
+        <mxCell id="md-cac-retrieve" value="Retrieve&lt;br&gt;Context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane2">
+          <mxGeometry x="320" y="50" width="90" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-ret" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-classify" target="md-cac-retrieve"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- CAC collections label -->
+        <mxCell id="md-cac-colls" value="&lt;font style=&quot;font-size:8px&quot;&gt;cac_docs | cac_chat&lt;br&gt;cac_knowledge&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=8;fontFamily=Helvetica;fontColor=#E65100;" vertex="1" parent="lane2">
+          <mxGeometry x="310" y="100" width="110" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- Intent Router -->
+        <mxCell id="md-cac-intent" value="Intent?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=10;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="440" y="45" width="80" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-intent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-retrieve" target="md-cac-intent"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- 4 CAC Agents -->
+        <mxCell id="md-cac-liq" value="Liquidity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="555" y="40" width="75" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-cac-cap" value="Capital" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="640" y="40" width="75" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-cac-alm" value="ALM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="555" y="80" width="75" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-cac-fund" value="Funding" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="640" y="80" width="75" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrows to agents -->
+        <mxCell id="md-a-cac-i1" style="rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-intent" target="md-cac-liq"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-cac-i2" style="rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-intent" target="md-cac-cap"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-cac-i3" style="rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-intent" target="md-cac-alm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-cac-i4" style="rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-intent" target="md-cac-fund"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Escalation Check -->
+        <mxCell id="md-cac-esc" value="Escalation?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="760" y="47" width="90" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-esc1" style="rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-cap" target="md-cac-esc"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Confidence gate -->
+        <mxCell id="md-cac-conf" value="Conf&lt;br&gt;&amp;ge;85%?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="890" y="47" width="80" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-esc-conf" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-esc" target="md-cac-conf"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Validate + Stage -->
+        <mxCell id="md-cac-validate" value="Validate&lt;br&gt;Proposal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontFamily=Helvetica;fontSize=9;" vertex="1" parent="lane2">
+          <mxGeometry x="1000" y="40" width="80" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-conf-val" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#388E3C;fontSize=8;fontFamily=Helvetica;fontStyle=1;" edge="1" parent="lane2" source="md-cac-conf" target="md-cac-validate"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Validation passed? -->
+        <mxCell id="md-cac-valpassed" value="Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=1;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="1100" y="42" width="60" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-val-pass" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-validate" target="md-cac-valpassed"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Staging Writer -->
+        <mxCell id="md-cac-stage" value="&lt;b&gt;Staging&lt;br&gt;Writer&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane2">
+          <mxGeometry x="1190" y="42" width="80" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-pass-stage" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#388E3C;fontSize=8;fontFamily=Helvetica;fontStyle=1;" edge="1" parent="lane2" source="md-cac-valpassed" target="md-cac-stage"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Synthesize -->
+        <mxCell id="md-cac-synth" value="Synthesize&lt;br&gt;Response" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane2">
+          <mxGeometry x="1310" y="45" width="100" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-stage-synth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#5E35B1;" edge="1" parent="lane2" source="md-cac-stage" target="md-cac-synth"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- No confidence skip -->
+        <mxCell id="md-a-cac-conf-skip" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#D32F2F;fontSize=8;fontFamily=Helvetica;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="lane2" source="md-cac-conf" target="md-cac-synth">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="930" y="125"/>
+              <mxPoint x="1360" y="125"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Reply -->
+        <mxCell id="md-cac-reply" value="📩 Thread&lt;br&gt;Reply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane2">
+          <mxGeometry x="1450" y="47" width="80" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-synth-reply" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#388E3C;" edge="1" parent="lane2" source="md-cac-synth" target="md-cac-reply"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Staging pending note -->
+        <mxCell id="md-cac-staging-note" value="&lt;font style=&quot;font-size:8px&quot;&gt;/data/staging/pending/&lt;br&gt;manifest.json (dept=cac)&lt;br&gt;ALCO_Tracker.xlsx&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=8;fontFamily=Helvetica;fontColor=#5E35B1;" vertex="1" parent="lane2">
+          <mxGeometry x="1170" y="95" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Escalation exit arrow (to shared lane) -->
+        <mxCell id="md-cac-esc-exit" value="&lt;font color=&quot;#D32F2F&quot;&gt;⚠️&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="lane2">
+          <mxGeometry x="785" y="105" width="30" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LANE 3: HR DEPARTMENT                                         -->
+        <!-- ============================================================ -->
+        <mxCell id="lane3" value="&lt;b&gt;HR DEPARTMENT&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Human Resources&lt;/font&gt;" style="swimlane;startSize=35;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="460" width="2100" height="200" as="geometry"/>
+        </mxCell>
+
+        <!-- HR Orchestrator -->
+        <mxCell id="md-hr-orch" value="&lt;b&gt;HR Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3002 | LangGraph&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="lane3">
+          <mxGeometry x="30" y="50" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- HR Classify -->
+        <mxCell id="md-hr-classify" value="Classify&lt;br&gt;Intent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane3">
+          <mxGeometry x="200" y="50" width="90" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-class" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-orch" target="md-hr-classify"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR Retrieve -->
+        <mxCell id="md-hr-retrieve" value="Retrieve&lt;br&gt;Context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane3">
+          <mxGeometry x="320" y="50" width="90" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-ret" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-classify" target="md-hr-retrieve"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR collections -->
+        <mxCell id="md-hr-colls" value="&lt;font style=&quot;font-size:8px&quot;&gt;hr_docs | hr_chat&lt;br&gt;hr_knowledge&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=8;fontFamily=Helvetica;fontColor=#E65100;" vertex="1" parent="lane3">
+          <mxGeometry x="310" y="100" width="110" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- HR Intent Router -->
+        <mxCell id="md-hr-intent" value="Intent?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=10;fontStyle=1;" vertex="1" parent="lane3">
+          <mxGeometry x="440" y="45" width="80" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-intent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-retrieve" target="md-hr-intent"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- 4 HR Agents -->
+        <mxCell id="md-hr-recruit" value="Recruitment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane3">
+          <mxGeometry x="555" y="40" width="80" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-hr-comp" value="Compensation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane3">
+          <mxGeometry x="645" y="40" width="85" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-hr-comply" value="Compliance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane3">
+          <mxGeometry x="555" y="80" width="80" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-hr-general" value="General HR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane3">
+          <mxGeometry x="645" y="80" width="85" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrows to HR agents -->
+        <mxCell id="md-a-hr-i1" style="rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-intent" target="md-hr-recruit"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-hr-i2" style="rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-intent" target="md-hr-comp"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-hr-i3" style="rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-intent" target="md-hr-comply"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-hr-i4" style="rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-intent" target="md-hr-general"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR Escalation Check -->
+        <mxCell id="md-hr-esc" value="Escalation?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane3">
+          <mxGeometry x="760" y="47" width="90" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-esc1" style="rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-comp" target="md-hr-esc"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR Confidence gate -->
+        <mxCell id="md-hr-conf" value="Conf&lt;br&gt;&amp;ge;85%?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane3">
+          <mxGeometry x="890" y="47" width="80" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-esc-conf" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-esc" target="md-hr-conf"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR Staging Writer -->
+        <mxCell id="md-hr-stage" value="&lt;b&gt;Staging&lt;br&gt;Writer&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane3">
+          <mxGeometry x="1190" y="42" width="80" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-conf-stage" value="Yes →" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#388E3C;fontSize=8;fontFamily=Helvetica;fontStyle=1;" edge="1" parent="lane3" source="md-hr-conf" target="md-hr-stage"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR Synthesize + Reply -->
+        <mxCell id="md-hr-synth" value="Synthesize&lt;br&gt;Response" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane3">
+          <mxGeometry x="1310" y="45" width="100" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-stage-synth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#1565C0;" edge="1" parent="lane3" source="md-hr-stage" target="md-hr-synth"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="md-hr-reply" value="📩 Thread&lt;br&gt;Reply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane3">
+          <mxGeometry x="1450" y="47" width="80" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-hr-synth-reply" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#388E3C;" edge="1" parent="lane3" source="md-hr-synth" target="md-hr-reply"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR staging note -->
+        <mxCell id="md-hr-staging-note" value="&lt;font style=&quot;font-size:8px&quot;&gt;/data/staging/pending/&lt;br&gt;manifest.json (dept=hr)&lt;br&gt;HR_Tracker.xlsx&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=8;fontFamily=Helvetica;fontColor=#1565C0;" vertex="1" parent="lane3">
+          <mxGeometry x="1170" y="95" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LANE 4: FUTURE DEPARTMENTS (Dashed)                          -->
+        <!-- ============================================================ -->
+        <mxCell id="lane4" value="&lt;b&gt;FUTURE DEPARTMENTS&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Risk | Legal &amp; Compliance | Investment Committee&lt;/font&gt;" style="swimlane;startSize=35;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;horizontal=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="670" width="2100" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Placeholder boxes -->
+        <mxCell id="md-future-risk" value="&lt;b&gt;Risk Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Phase 2&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=1;dashed=1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane4">
+          <mxGeometry x="30" y="45" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-future-legal" value="&lt;b&gt;Legal Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Phase 2&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=1;dashed=1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane4">
+          <mxGeometry x="200" y="45" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-future-invest" value="&lt;b&gt;Investment Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Phase 2&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=1;dashed=1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane4">
+          <mxGeometry x="370" y="45" width="150" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Same pattern note -->
+        <mxCell id="md-future-note" value="&lt;i&gt;Each department replicates the same pattern: own orchestrator, own agents, own Qdrant collections, own HOD approval.&lt;br&gt;Register in Paperclip → instant department onboarding.&lt;/i&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontFamily=Helvetica;fontColor=#37474F;" vertex="1" parent="lane4">
+          <mxGeometry x="570" y="45" width="600" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Dots showing extensibility -->
+        <mxCell id="md-dots" value="..." style="text;html=1;align=center;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#37474F;fontStyle=1;" vertex="1" parent="lane4">
+          <mxGeometry x="530" y="45" width="30" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LANE 5: SHARED SERVICES                                       -->
+        <!-- ============================================================ -->
+        <mxCell id="lane5" value="&lt;b&gt;SHARED SERVICES&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Cross-Department Coordination&lt;/font&gt;" style="swimlane;startSize=35;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="780" width="2100" height="150" as="geometry"/>
+        </mxCell>
+
+        <!-- Paperclip -->
+        <mxCell id="md-paperclip" value="&lt;b&gt;Paperclip Hub&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3100 | Audit + Events&lt;br&gt;Dept isolation enforced&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="lane5">
+          <mxGeometry x="30" y="45" width="160" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Paperclip subsystems -->
+        <mxCell id="md-ppc-tickets" value="Ticket&lt;br&gt;Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;" vertex="1" parent="lane5">
+          <mxGeometry x="220" y="40" width="80" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-ppc-heartbeat" value="Heartbeat&lt;br&gt;Registry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;" vertex="1" parent="lane5">
+          <mxGeometry x="310" y="40" width="80" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-ppc-deptmgr" value="Dept&lt;br&gt;Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;" vertex="1" parent="lane5">
+          <mxGeometry x="220" y="80" width="80" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-ppc-eventrouter" value="&lt;b&gt;Event&lt;br&gt;Router&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=9;fontStyle=1;" vertex="1" parent="lane5">
+          <mxGeometry x="310" y="80" width="80" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- RAG Ingestion -->
+        <mxCell id="md-rag" value="&lt;b&gt;RAG Ingestion&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3004 | Chunk + Embed&lt;br&gt;Dept-scoped collections&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane5">
+          <mxGeometry x="450" y="45" width="160" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Email Notifier -->
+        <mxCell id="md-email" value="&lt;b&gt;Email Notifier&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3005 | Per-dept HOD&lt;br&gt;4 email templates&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane5">
+          <mxGeometry x="660" y="45" width="150" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Wiki Compiler -->
+        <mxCell id="md-wiki" value="&lt;b&gt;Wiki Compiler&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3007 | Knowledge base&lt;br&gt;Per-dept vault folders&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane5">
+          <mxGeometry x="860" y="45" width="150" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- CEO Escalation Path -->
+        <mxCell id="md-ceo-esc" value="🚨 &lt;b&gt;CEO Escalation&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Cross-dept breach alerts&lt;br&gt;Routes via Paperclip Event Router&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane5">
+          <mxGeometry x="1070" y="40" width="180" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Cross-dept arrow label -->
+        <mxCell id="md-cross-dept-label" value="&lt;font style=&quot;font-size:9px&quot;&gt;&lt;b&gt;Cross-Dept Flow:&lt;/b&gt; Escalations from ANY dept → Paperclip → CEO + all HODs&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=9;fontFamily=Helvetica;fontColor=#D32F2F;" vertex="1" parent="lane5">
+          <mxGeometry x="1280" y="55" width="350" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LANE 6: APPROVAL GATE                                         -->
+        <!-- ============================================================ -->
+        <mxCell id="lane6" value="&lt;b&gt;APPROVAL GATE&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Per-Department HOD Decision (JWT RBAC Isolated)&lt;/font&gt;" style="swimlane;startSize=35;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=3;rounded=1;fontFamily=Helvetica;fontSize=12;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="940" width="2100" height="170" as="geometry"/>
+        </mxCell>
+
+        <!-- Gateway -->
+        <mxCell id="md-gateway" value="&lt;b&gt;Gateway&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3000 | JWT Auth&lt;br&gt;RBAC: dept-scoped&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane6">
+          <mxGeometry x="30" y="45" width="130" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Approval UI -->
+        <mxCell id="md-approval-ui" value="&lt;b&gt;Approval UI&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:4000 | Next.js&lt;br&gt;Diff view + actions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane6">
+          <mxGeometry x="200" y="45" width="130" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-gw-ui" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#D32F2F;" edge="1" parent="lane6" source="md-gateway" target="md-approval-ui"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- CAC HOD -->
+        <mxCell id="md-cac-hod" value="👤 &lt;b&gt;CAC HOD&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(CFO)&lt;br&gt;dept=cac, role=hod&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane6">
+          <mxGeometry x="390" y="40" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- HR HOD -->
+        <mxCell id="md-hr-hod" value="👤 &lt;b&gt;HR HOD&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(CHRO)&lt;br&gt;dept=hr, role=hod&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane6">
+          <mxGeometry x="530" y="40" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- HOD Decision Diamond -->
+        <mxCell id="md-hod-decision" value="HOD&lt;br&gt;Decision?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=11;fontStyle=1;" vertex="1" parent="lane6">
+          <mxGeometry x="710" y="40" width="110" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-cac-hod-dec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane6" source="md-cac-hod" target="md-hod-decision"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-hr-hod-dec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane6" source="md-hr-hod" target="md-hod-decision"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- 4 outcomes -->
+        <mxCell id="md-approve" value="&lt;font color=&quot;#388E3C&quot;&gt;✓ Approve&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;fontStyle=1;" vertex="1" parent="lane6">
+          <mxGeometry x="870" y="35" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-edit-approve" value="✏️ Edit+Approve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane6">
+          <mxGeometry x="985" y="35" width="110" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-reject" value="&lt;font color=&quot;#D32F2F&quot;&gt;✗ Reject&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;strokeWidth=2;fontFamily=Helvetica;fontSize=10;fontStyle=1;" vertex="1" parent="lane6">
+          <mxGeometry x="870" y="80" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-defer" value="⏳ Defer 24h" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=1;fontFamily=Helvetica;fontSize=10;dashed=1;" vertex="1" parent="lane6">
+          <mxGeometry x="985" y="80" width="110" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Decision arrows -->
+        <mxCell id="md-a-dec-app" style="rounded=1;html=1;strokeWidth=1;strokeColor=#388E3C;" edge="1" parent="lane6" source="md-hod-decision" target="md-approve"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-dec-edit" style="rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane6" source="md-hod-decision" target="md-edit-approve"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-dec-rej" style="rounded=1;html=1;strokeWidth=1;strokeColor=#D32F2F;" edge="1" parent="lane6" source="md-hod-decision" target="md-reject"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="md-a-dec-def" style="rounded=1;html=1;strokeWidth=1;strokeColor=#E65100;" edge="1" parent="lane6" source="md-hod-decision" target="md-defer"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- RBAC isolation note -->
+        <mxCell id="md-rbac-note" value="&lt;b&gt;RBAC Isolation:&lt;/b&gt; CAC HOD sees only CAC proposals. HR HOD sees only HR proposals.&lt;br&gt;CEO/CFO have cross-dept read via &lt;b&gt;globalAccess&lt;/b&gt; roles in departments.json." style="text;html=1;align=left;verticalAlign=middle;fontSize=9;fontFamily=Helvetica;fontColor=#D32F2F;" vertex="1" parent="lane6">
+          <mxGeometry x="1130" y="45" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LANE 7: OUTPUT — Sync-Back + Archive                         -->
+        <!-- ============================================================ -->
+        <mxCell id="lane7" value="&lt;b&gt;OUTPUT&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Sync-Back, Archive, Corporate Data&lt;/font&gt;" style="swimlane;startSize=35;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;rounded=1;fontFamily=Helvetica;fontSize=12;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1120" width="2100" height="150" as="geometry"/>
+        </mxCell>
+
+        <!-- Sync-back -->
+        <mxCell id="md-syncback" value="&lt;b&gt;Sync-Back&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;:3006 | Watchdog&lt;br&gt;Dept-specific Excel writer&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane7">
+          <mxGeometry x="30" y="45" width="160" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- CAC Excel -->
+        <mxCell id="md-cac-excel" value="📊 &lt;b&gt;ALCO_Tracker.xlsx&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;CAC dept&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane7">
+          <mxGeometry x="250" y="42" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-sync-cac" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#5E35B1;" edge="1" parent="lane7" source="md-syncback" target="md-cac-excel"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- HR Excel -->
+        <mxCell id="md-hr-excel" value="📊 &lt;b&gt;HR_Tracker.xlsx&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;HR dept&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane7">
+          <mxGeometry x="250" y="90" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-sync-hr" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1;strokeColor=#1565C0;" edge="1" parent="lane7" source="md-syncback" target="md-hr-excel"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Archive -->
+        <mxCell id="md-archive" value="📋 &lt;b&gt;/data/archive/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Permanent audit trail&lt;br&gt;All decisions logged&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane7">
+          <mxGeometry x="480" y="50" width="150" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Corporate Data -->
+        <mxCell id="md-corp" value="&lt;b&gt;Corporate Data&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Source of truth updated&lt;br&gt;(approved changes ONLY)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;strokeWidth=2;dashed=1;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="lane7">
+          <mxGeometry x="700" y="50" width="170" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="md-a-archive-corp" value="sync to corporate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#388E3C;fontSize=9;fontFamily=Helvetica;" edge="1" parent="lane7" source="md-archive" target="md-corp"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Rejected archive -->
+        <mxCell id="md-rejected-arch" value="&lt;font color=&quot;#D32F2F&quot;&gt;✗&lt;/font&gt; Rejected → Archive&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;(logged, NOT synced)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#D32F2F;fontFamily=Helvetica;fontSize=9;dashed=1;" vertex="1" parent="lane7">
+          <mxGeometry x="940" y="55" width="140" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- CROSS-LANE ARROWS (connecting lanes together)                 -->
+        <!-- ============================================================ -->
+
+        <!-- Entry → CAC (vertical from channel router to CAC lane) -->
+        <!-- Entry → HR (vertical from channel router to HR lane) -->
+        <!-- These are implied by the swim lane layout and the route labels -->
+
+        <!-- CAC Stage → Approval (vertical) -->
+        <mxCell id="md-cross-cac-appr" value="proposal (dept=cac)" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#5E35B1;dashed=1;fontSize=9;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1260" y="500" as="sourcePoint"/>
+            <mxPoint x="1260" y="940" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="1260" y="770"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- HR Stage → Approval (vertical) -->
+        <mxCell id="md-cross-hr-appr" value="proposal (dept=hr)" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#1565C0;dashed=1;fontSize=9;fontFamily=Helvetica;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1300" y="710" as="sourcePoint"/>
+            <mxPoint x="1300" y="940" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="1300" y="770"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Approval → Output (vertical) -->
+        <mxCell id="md-cross-appr-out" value="approved → sync" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#388E3C;fontSize=9;fontFamily=Helvetica;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="920" y="1110" as="sourcePoint"/>
+            <mxPoint x="920" y="1120" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Escalation arrows (CAC → Shared) -->
+        <mxCell id="md-cross-cac-esc" value="⚠️ escalation" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#D32F2F;dashed=1;fontSize=9;fontFamily=Helvetica;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="835" y="450" as="sourcePoint"/>
+            <mxPoint x="1160" y="820" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="835" y="770"/>
+              <mxPoint x="1160" y="770"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Escalation arrows (HR → Shared) -->
+        <mxCell id="md-cross-hr-esc" value="⚠️ escalation" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#D32F2F;dashed=1;fontSize=9;fontFamily=Helvetica;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="835" y="660" as="sourcePoint"/>
+            <mxPoint x="1160" y="820" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="835" y="770"/>
+              <mxPoint x="1160" y="770"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LEGEND                                                        -->
+        <!-- ============================================================ -->
+        <mxCell id="md-legend" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#388E3C&quot;&gt;■&lt;/font&gt; Entry/Output &amp;nbsp; &lt;font color=&quot;#5E35B1&quot;&gt;■&lt;/font&gt; CAC Dept &amp;nbsp; &lt;font color=&quot;#1565C0&quot;&gt;■&lt;/font&gt; HR Dept &amp;nbsp; &lt;font color=&quot;#37474F&quot;&gt;■&lt;/font&gt; Future (dashed) &amp;nbsp; &lt;font color=&quot;#7B1FA2&quot;&gt;■&lt;/font&gt; Shared Services &amp;nbsp; &lt;font color=&quot;#D32F2F&quot;&gt;■&lt;/font&gt; Approval Gate &amp;nbsp; &lt;font color=&quot;#C62828&quot;&gt;◆&lt;/font&gt; LLM Call &amp;nbsp; &lt;font color=&quot;#E65100&quot;&gt;◇&lt;/font&gt; Decision Diamond" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;strokeWidth=1;fontSize=10;fontFamily=Helvetica;align=center;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1290" width="1100" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Key insight callout -->
+        <mxCell id="md-insight" value="&lt;b&gt;Department Isolation:&lt;/b&gt; Each department has its own orchestrator, agents, Qdrant collections, Excel files, and HOD approver.&lt;br&gt;Paperclip enforces boundaries at 4 layers: DB (dept column), API (JWT RBAC), data zones (per-dept mounts), and event routing." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5E35B1;strokeWidth=2;fontSize=10;fontFamily=Helvetica;align=left;spacingLeft=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1345" width="800" height="45" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>

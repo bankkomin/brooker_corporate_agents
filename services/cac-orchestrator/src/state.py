@@ -31,6 +31,7 @@ class AgentState(TypedDict):
     agent_name: str
     proposed_value: str | None
     proposed_cell: str | None
+    old_value: str
 
     # escalation_check output
     escalation_triggered: bool

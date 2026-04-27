@@ -114,7 +114,7 @@ class OrchestratorClient:
         *,
         query: str,
         user_id: str,
-        channel_id: str,
+        channel: str,
         thread_ts: str | None = None,
     ) -> QueryResponse:
         """Send query to cac-orchestrator. Returns stub when disabled."""
@@ -123,7 +123,7 @@ class OrchestratorClient:
 
         payload = QueryRequest(
             query=query,
-            channel_id=channel_id,
+            channel=channel,
             user_id=user_id,
             thread_ts=thread_ts,
         )

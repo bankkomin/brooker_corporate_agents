@@ -1,4 +1,8 @@
 """Paperclip service — audit and orchestration hub."""
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+
 from contextlib import asynccontextmanager
 
 import structlog

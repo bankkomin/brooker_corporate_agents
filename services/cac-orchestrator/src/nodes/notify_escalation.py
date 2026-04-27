@@ -18,6 +18,7 @@ async def notify_escalation(state: dict, *, email_notifier_url: str) -> dict:
         "query": state.get("query", ""),
         "user_id": state.get("user_id", ""),
         "channel": state.get("channel", ""),
+        "dept": state.get("dept", "cac"),
     }
 
     try:
