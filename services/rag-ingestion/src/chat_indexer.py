@@ -1,5 +1,5 @@
 # services/rag-ingestion/src/chat_indexer.py
-"""Slack message indexer — embeds and stores messages in cac_chat collection."""
+"""Slack message indexer — embeds and stores messages in dept-specific chat collections."""
 from __future__ import annotations
 
 import hashlib
@@ -11,15 +11,18 @@ from .qdrant_store import QdrantStore
 
 logger = structlog.get_logger("rag-ingestion.chat_indexer")
 
-CHAT_COLLECTION = "cac_chat"
-
 
 class ChatIndexer:
-    """Indexes Slack messages into the cac_chat Qdrant collection."""
+    """Indexes Slack messages into dept-specific Qdrant chat collections."""
 
     def __init__(self, embedder: Embedder, store: QdrantStore) -> None:
         self._embedder = embedder
         self._store = store
+
+    @staticmethod
+    def _collection_for_dept(dept: str) -> str:
+        """Return the chat collection name for a department."""
+        return f"{dept.lower()}_chat"
 
     @staticmethod
     def make_message_id(channel_id: str, timestamp: str) -> str:
@@ -35,13 +38,14 @@ class ChatIndexer:
         channel_id: str,
         timestamp: str,
         thread_ts: str | None = None,
-        dept: str = "CAC",
+        dept: str = "cac",
     ) -> str:
         """Embed and store a message. Returns message_id."""
         if not text.strip():
             logger.debug("chat_indexer.empty_text", channel=channel_id)
             return ""
 
+        collection = self._collection_for_dept(dept)
         message_id = self.make_message_id(channel_id, timestamp)
 
         # Embed once (used for both dedup check and upsert)
@@ -49,7 +53,7 @@ class ChatIndexer:
 
         # Check for existing point (dedup via metadata filter, no extra embedding)
         existing = await self._store.search(
-            collection=CHAT_COLLECTION,
+            collection=collection,
             query_vector=vector,
             limit=1,
             score_threshold=0.99,
@@ -69,10 +73,10 @@ class ChatIndexer:
             "dept": dept,
         }
         await self._store.upsert_chunks(
-            collection=CHAT_COLLECTION,
+            collection=collection,
             texts=[text],
             vectors=[vector],
             metadatas=[metadata],
         )
-        logger.info("chat_indexer.indexed", message_id=message_id, channel=channel_id)
+        logger.info("chat_indexer.indexed", message_id=message_id, collection=collection)
         return message_id

@@ -16,6 +16,8 @@ class RAGSettings(BaseSettings):
     gemini_embed_model: str = "gemini-embedding-001"
 
     # Qdrant
+    qdrant_mode: str = "local"  # "local" (file-based persistent), "memory", or "server" (Docker)
+    qdrant_local_path: str = "./data/qdrant_local"
     qdrant_host: str = "qdrant"
     qdrant_rest_port: int = 6333
 

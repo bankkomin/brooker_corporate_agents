@@ -71,12 +71,12 @@ async def lifespan(app: FastAPI):
         except Exception as exc:
             logger.error(
                 "rag-ingestion.startup.embedding_dim_detection_failed",
-                vllm_embed_url=settings.vllm_embed_url,
+                embedder_type=settings.embedder_type,
                 error=str(exc),
             )
             raise RuntimeError(
-                "Cannot determine embedding dimension: vLLM embed endpoint is unreachable "
-                f"({settings.vllm_embed_url}). Set EMBEDDING_DIM env var to override."
+                f"Cannot determine embedding dimension: {settings.embedder_type} embedder "
+                f"is unreachable. Set EMBEDDING_DIM env var to override."
             ) from exc
 
     await store.ensure_collections(vector_size=dim)
@@ -108,6 +108,10 @@ async def ingest_document(
     dept: str = Form(default="CAC"),
     doc_type: str = Form(default="pdf"),
     collection: str = Form(default="cac_docs"),
+    category: str = Form(default=""),
+    tags: str = Form(default=""),
+    description: str = Form(default=""),
+    source: str = Form(default="manual_upload"),
     channel_id: str = Form(default=""),
     slack_file_id: str = Form(default=""),
 ) -> IngestDocumentResponse:
@@ -124,7 +128,16 @@ async def ingest_document(
 
         try:
             chunker: DocumentChunker = app.state.chunker
-            chunks = await chunker.chunk_file(tmp_path, doc_type=doc_type, dept=dept)
+            extra_meta = {
+                "category": category,
+                "tags": tags,
+                "description": description,
+                "source": source,
+                "original_filename": file.filename or "",
+            }
+            chunks = await chunker.chunk_file(
+                tmp_path, doc_type=doc_type, dept=dept, extra_meta=extra_meta,
+            )
 
             if not chunks:
                 return IngestDocumentResponse(

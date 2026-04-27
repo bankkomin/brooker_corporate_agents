@@ -30,7 +30,11 @@ class DocumentChunker:
         self._overlap = settings.chunk_overlap
 
     async def chunk_file(
-        self, file_path: Path, doc_type: str, dept: str = "CAC"
+        self,
+        file_path: Path,
+        doc_type: str,
+        dept: str = "CAC",
+        extra_meta: dict[str, str] | None = None,
     ) -> list[TextChunk]:
         """Chunk a file into TextChunks with metadata."""
         handler = self._get_handler(doc_type)
@@ -54,7 +58,7 @@ class DocumentChunker:
             if not text:
                 continue
             for piece in self._split_text(text):
-                meta = {
+                meta: dict[str, str | int | None] = {
                     "source_file": str(file_path),
                     "file_hash": file_hash,
                     "doc_type": doc_type,
@@ -63,6 +67,10 @@ class DocumentChunker:
                     "section": section.get("section"),
                     "sheet": section.get("sheet"),
                 }
+                if extra_meta:
+                    for k, v in extra_meta.items():
+                        if v:  # only add non-empty values
+                            meta[k] = v
                 chunks.append(TextChunk(text=piece, metadata=meta))
 
         logger.info("chunker.done", path=str(file_path), chunks=len(chunks))

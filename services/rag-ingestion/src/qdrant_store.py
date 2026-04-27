@@ -18,17 +18,34 @@ from .config import RAGSettings
 
 logger = structlog.get_logger("rag-ingestion.qdrant_store")
 
-COLLECTIONS = ["cac_docs", "cac_chat", "cac_knowledge", "shared_policies"]
+COLLECTIONS = [
+    # Per-department collections
+    *[f"{d}_docs" for d in ("cac", "risk", "legal", "invest", "ops", "hr", "it")],
+    *[f"{d}_chat" for d in ("cac", "risk", "legal", "invest", "ops", "hr", "it")],
+    *[f"{d}_knowledge" for d in ("cac", "risk", "legal", "invest", "ops", "hr", "it")],
+    # Shared
+    "shared_policies",
+]
 
 
 class QdrantStore:
     """Async wrapper for Qdrant vector operations."""
 
     def __init__(self, settings: RAGSettings) -> None:
-        self._client = AsyncQdrantClient(
-            host=settings.qdrant_host,
-            port=settings.qdrant_rest_port,
-        )
+        mode = settings.qdrant_mode.lower()
+        if mode == "local":
+            from pathlib import Path
+            Path(settings.qdrant_local_path).mkdir(parents=True, exist_ok=True)
+            self._client = AsyncQdrantClient(path=settings.qdrant_local_path)
+            logger.info("qdrant_store.local_persistent", path=settings.qdrant_local_path)
+        elif mode == "memory":
+            self._client = AsyncQdrantClient(location=":memory:")
+            logger.info("qdrant_store.in_memory_mode")
+        else:
+            self._client = AsyncQdrantClient(
+                host=settings.qdrant_host,
+                port=settings.qdrant_rest_port,
+            )
 
     async def ensure_collections(self, vector_size: int) -> None:
         """Create collections if they don't exist."""
