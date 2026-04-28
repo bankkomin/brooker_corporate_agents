@@ -319,7 +319,10 @@ Department-scoped vault directories enforce data boundaries at 4 layers.
 - [ ] Docker Compose: wiki-compiler /health returns 200 (requires Docker)
 - [ ] Performance test: compilation latency < 30s per article (requires vLLM)
 
-## Stage 10 — UAT + Go-Live
+## Phase 1 Closeout — Hardening, UAT + Go-Live (post-Stage 9)
+
+> *Renamed from "Stage 10" on 2026-04-28 to free Stage 10 for the Phase 2 framework. Content is the Phase 1 deployment checklist and is independent of the numbered code-stage sequence.*
+
 - [ ] UAT with 2–3 committee members (Slack side) — test queries, citations, edge cases
 - [ ] UAT with HOD (email side) — receive proposal email, click link, approve from phone browser
 - [ ] Populate alco_tracker.json with real Excel structure (tabs, columns, row labels)
@@ -337,3 +340,131 @@ Department-scoped vault directories enforce data boundaries at 4 layers.
 - [ ] Deploy to DGX Spark: docker compose up -d (all 14 services)
 - [ ] Monitor: Paperclip heartbeats healthy, all services responding
 - [ ] Go-live
+
+---
+
+# Phase 2 — Department Expansion (Stages 10-19)
+
+Phase 2 scales the system from 2 live departments (CAC, HR) to 11 by introducing a department-onboarding framework. Stage 10 builds the framework; Stages 11-19 each onboard one department in ~1.5 days using the framework's 12-step checklist.
+
+**Reference documents (all artifacts committed 2026-04-28):**
+- 📊 Org chart: `docs/diagrams/department-agent-map.drawio`
+- 📋 Framework spec: `docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md`
+- 📋 Framework plan: `docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md`
+- 📋 Per-dept spec template: `docs/superpowers/specs/_per-dept-spec-template.md`
+- 📋 Per-dept plan template: `docs/superpowers/plans/_per-dept-plan-template.md`
+
+**Patterns adopted into Phase 2:**
+- **Second brain** (Cole Medin) — `soul.md` / `user.md` / `memory.md` per agent + daily logs
+- **Self-improving loop** (Luuk Alleman) — HOD approve/edit/reject mapped to rating signal → reflection engine → SKILL.md update proposals (HOD-gated)
+
+## Stage 10 — Phase 2 Framework Infrastructure 📋 (scaffolded 2026-04-28, awaiting execution)
+
+8 phases, 65 tasks, ~23h focused work / ~1.5 weeks calendar. Builds the catalog config, code templates, two new shared services (reflection-engine + heartbeat), schema migrations, validation scripts, approval-ui extensions, and skeleton spec+plan files for Stages 11-19.
+
+- [ ] Phase 0 — Setup & regression baseline (golden-master CAC + HR fixtures)
+- [ ] Phase 1 — Schema & config foundation (departments.schema.json extension, document_inventory.json with ~53 docs, migration 010 with new tables/view, validation scripts)
+- [ ] Phase 2 — Skills cleanup + frontmatter (rename invest→ic, delete ops, move cfo-agent shared→finance, extend SKILL.md frontmatter)
+- [ ] Phase 3 — Shared library (load_memory node, retrieve_context_with_crossread, knowledge-gap writers, daily-log writer, permission enforcement)
+- [ ] Phase 4 — Reflection engine service (port 3008, Claude Agent SDK, nightly cron)
+- [ ] Phase 5 — Heartbeat service (port 3009, default disabled per dept)
+- [ ] Phase 6 — Template scaffolds (services/_template-orchestrator/, skills/_template/)
+- [ ] Phase 7 — Approval-UI extensions (Skill Updates tab + admin/knowledge-gaps view)
+- [ ] Phase 8 — Final wiring + 9 dept skeleton plans
+
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md`](superpowers/specs/2026-04-28-stage10-phase2-framework-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md`](superpowers/plans/2026-04-28-stage10-phase2-framework.md)
+
+## Stage 11 — Finance Department 📋 (planned, scaffolded 2026-04-28)
+
+First write-capable Phase 2 dept; stress-tests cross-dept read enforcement. CFO Agent + 3 specialists (reporting, treasury, MD&A). Cross-read INTO Finance from CAC, IC, Risk, CIO. Service port 3010.
+
+**Posture:** write · **Cross-read targets (live):** Finance is read INTO by others · **Existing scaffold:** ❌ none · **Dependencies:** Stage 10
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage11-finance-design.md`](superpowers/specs/2026-04-28-stage11-finance-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage11-finance.md`](superpowers/plans/2026-04-28-stage11-finance.md)
+
+## Stage 12 — Risk Committee 📋 (planned, scaffolded 2026-04-28)
+
+CRO Agent + 3 specialists (credit-risk, market-risk, operational-risk). Read-only with cross-read to CAC, CIO, Finance, Legal. Service port 3011.
+
+**Posture:** read_only · **Cross-reads:** cac, cio, finance, legal · **Existing scaffold:** ✅ `skills/risk/` · **Dependencies:** Stage 10 + Stage 11 (Finance live)
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage12-risk-design.md`](superpowers/specs/2026-04-28-stage12-risk-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage12-risk.md`](superpowers/plans/2026-04-28-stage12-risk.md)
+
+## Stage 13 — Legal Department 📋 (planned, scaffolded 2026-04-28)
+
+CLO Agent + 3 specialists (compliance, contract-review, regulatory). Read-only with **cross-read to all departments** — broadest read scope. Service port 3012.
+
+**Posture:** read_only · **Cross-reads:** `["*"]` (all depts) · **Existing scaffold:** ✅ `skills/legal/` · **Dependencies:** Stage 10 + 11
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage13-legal-design.md`](superpowers/specs/2026-04-28-stage13-legal-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage13-legal.md`](superpowers/plans/2026-04-28-stage13-legal.md)
+
+## Stage 14 — IT Department 📋 (planned, scaffolded 2026-04-28)
+
+CTO Agent + 3 specialists (devops, infrastructure, security). Read-only. Reuses existing CTO Agent identity from Stage 8 OpenClaw supervisor. Service port 3013.
+
+**Posture:** read_only · **Cross-reads:** own + shared only · **Existing scaffold:** ✅ `skills/it/` · **Dependencies:** Stage 10 + identity-continuity migration
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage14-it-design.md`](superpowers/specs/2026-04-28-stage14-it-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage14-it.md`](superpowers/plans/2026-04-28-stage14-it.md)
+
+## Stage 15 — Communications (IR/PR) 📋 (planned, scaffolded 2026-04-28)
+
+Comms Agent + 3 specialists (IR, PR, Branding). Read-only. Includes branding team (moved from HR per org chart update). Service port 3014.
+
+**Posture:** read_only · **Cross-reads:** own + shared only · **Existing scaffold:** ❌ none · **Dependencies:** Stage 10 (Stage 11 helpful for IR fact-checks)
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage15-comms-design.md`](superpowers/specs/2026-04-28-stage15-comms-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage15-comms.md`](superpowers/plans/2026-04-28-stage15-comms.md)
+
+## Stage 16 — IC Committee 📋 (planned, scaffolded 2026-04-28)
+
+IC Chair Agent + 3 specialists (due-diligence, portfolio, valuation). Read-only with cross-read to Finance, CIO, VCC, Legal. Service port 3015.
+
+**Posture:** read_only · **Cross-reads:** finance, cio, vcc, legal · **Existing scaffold:** ✅ `skills/ic/` (renamed from `invest/` in Stage 10) · **Dependencies:** Stages 11 + 13 (CIO/VCC graceful-degrade until Stages 17/18)
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage16-ic-design.md`](superpowers/specs/2026-04-28-stage16-ic-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage16-ic.md`](superpowers/plans/2026-04-28-stage16-ic.md)
+
+## Stage 17 — CIO Office 📋 (planned, scaffolded 2026-04-28)
+
+CIO Agent + 3 specialists (fund-performance, custody, PPM). Write-capable for NAV trackers via staging. Custody-agent has data-zone override (read-only on Zone 2). Service port 3016.
+
+**Posture:** write · **Cross-reads:** finance, vcc, ic · **Existing scaffold:** ❌ none · **Dependencies:** Stage 11 (must); Stage 16 (recommended)
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage17-cio-design.md`](superpowers/specs/2026-04-28-stage17-cio-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage17-cio.md`](superpowers/plans/2026-04-28-stage17-cio.md)
+
+## Stage 18 — VCC Department 📋 (planned, scaffolded 2026-04-28)
+
+VCC Head Agent + 3 specialists (client-relations, NAV/subscriptions, comms). Write-capable. PII guard on client-relations skill (`outbound_apis: []`). Service port 3017.
+
+**Posture:** write · **Cross-reads:** cio, ic · **Existing scaffold:** ❌ none · **Dependencies:** Stage 17 (must); Stage 16 (recommended)
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage18-vcc-design.md`](superpowers/specs/2026-04-28-stage18-vcc-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage18-vcc.md`](superpowers/plans/2026-04-28-stage18-vcc.md)
+
+## Stage 19 — Investment Banking 📋 (planned, scaffolded 2026-04-28)
+
+IB Agent + 3 specialists (deal-origination, structuring, syndication). Read-only; lowest-activity dept. Ships last in Phase 2. Service port 3018.
+
+**Posture:** read_only · **Cross-reads:** own + shared only · **Existing scaffold:** ❌ none · **Dependencies:** Stage 10 only
+**Spec:** [`docs/superpowers/specs/2026-04-28-stage19-ib-design.md`](superpowers/specs/2026-04-28-stage19-ib-design.md)
+**Plan:** [`docs/superpowers/plans/2026-04-28-stage19-ib.md`](superpowers/plans/2026-04-28-stage19-ib.md)
+
+---
+
+## Phase 2 Closeout (post-Stage 19)
+
+Once all 11 departments are live:
+
+- [ ] All-dept E2E test: simulated 24h of cross-dept Slack chatter; reflection engine completes nightly cycle; no errors
+- [ ] Lethal-trifecta audit: every skill's permissions verified against actual runtime behaviour
+- [ ] Update `CLAUDE.md` Phase 2 status: "complete"
+- [ ] Phase 2 retrospective; plan Phase 3 (Voyager-style novel skills, cross-agent learning, RL loop — deferred per framework spec §4.11)
+
+**Estimated Phase 2 calendar:** ~6-8 weeks (per framework spec §7.4)
+**Estimated total Phase 2 effort:** ~13.5 days code + ~3 days hardening = ~16.5 days focused work
+
+---
+
+## Decision gates (per framework spec §7.5)
+
+- **After Stage 10:** verify framework end-to-end against CAC + HR (regression). If reflection engine breaks anything, fix before adding new depts.
+- **After Stage 11:** verify cross-read enforcement actually works (CAC reading Finance's collection). Biggest architectural risk.
+- **After Stage 16:** pause to evaluate. By then 6 of 9 depts live; remaining 3 (CIO/VCC/IB) are higher complexity. Decide: ship and reassess vs continue.
