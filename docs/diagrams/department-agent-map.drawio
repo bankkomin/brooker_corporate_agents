@@ -1,0 +1,101 @@
+<mxfile host="app.diagrams.net" modified="2026-04-28T00:00:00.000Z" agent="Brooker Corporate Agent" version="24.0.0" type="device">
+  <diagram name="Department Map" id="dept-map">
+    <mxGraphModel dx="1422" dy="757" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="940" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Brooker Corporate Agent System — Department Map" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="530" y="0" width="640" height="36" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ceo" value="&lt;b&gt;CEO Agent&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#555&quot;&gt;Root supervisor&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• Strategic Retreat Plan&lt;br/&gt;• Leadership monthly report&lt;br/&gt;• MD&amp;amp;A&lt;br/&gt;• Board minutes &amp;amp; presentations&lt;br/&gt;• Corporate info (Brooker Group, BICL, Arun)&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="675" y="50" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="finance" value="&lt;b&gt;Finance Department&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: CFO Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• Annual report&lt;br/&gt;• Financial statements &amp;amp; notes&lt;br/&gt;• Networth report&lt;br/&gt;• BG weekly/monthly report&lt;br/&gt;• Coins weekly/monthly report&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="0" y="340" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ib" value="&lt;b&gt;IB — Investment Banking&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: IB Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• Structured loan report&lt;br/&gt;• IB deal docs&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="340" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hr" value="&lt;b&gt;HR Department&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: CHRO Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• HR policies&lt;br/&gt;• Remuneration policy&lt;br/&gt;• SOPs (all departments)&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="540" y="340" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="comms" value="&lt;b&gt;Communications (IR/PR)&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: Comms Agent&lt;br/&gt;(incl. Branding team)&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• Investor relations updates&lt;br/&gt;• Press releases &amp;amp; media kit&lt;br/&gt;• Branding policy&lt;br/&gt;• Brand guidelines&lt;br/&gt;• Marketing collateral&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="810" y="340" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ic" value="&lt;b&gt;IC Committee&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: IC Chair Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• IC minutes &amp;amp; presentations&lt;br/&gt;• Investment policy&lt;br/&gt;• Investment memos&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="340" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cac" value="&lt;b&gt;CAC Committee&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:9px;color:#1565c0&quot;&gt;Phase 1 — live&lt;/span&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agents: CFO (lead) · Liquidity · Capital · ALM · Funding · Escalation&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• ALCO Tracker&lt;br/&gt;• Capital plan&lt;br/&gt;• Funding facilities&lt;br/&gt;• Liquidity &amp;amp; covenant monitoring&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="340" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cio" value="&lt;b&gt;CIO Office&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: CIO Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• NAV reports (all funds)&lt;br/&gt;• PPM (all funds)&lt;br/&gt;• Custodian documents&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="135" y="620" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legal" value="&lt;b&gt;Legal Department&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: CLO Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• Legal opinions&lt;br/&gt;• Anti-Money-Laundering policy&lt;br/&gt;• Contract templates&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="405" y="620" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="risk" value="&lt;b&gt;Risk Committee&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: CRO Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• Risk policy&lt;br/&gt;• (co-owns AML with Legal)&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="675" y="620" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vcc" value="&lt;b&gt;VCC Department&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: VCC Head Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• VCC client list&lt;br/&gt;• VCC presentations&lt;br/&gt;• VCC contracts&lt;br/&gt;• VCC due diligence&lt;br/&gt;• Subscriptions&lt;br/&gt;• NAV&lt;br/&gt;• Newsletters&lt;br/&gt;• Investment memos&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="945" y="620" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="it" value="&lt;b&gt;IT Department&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;font-style:italic;color:#1565c0&quot;&gt;Agent: CTO Agent&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;• IT policies&lt;br/&gt;• IT SOPs&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=12;align=center;verticalAlign=top;spacingTop=10;spacingLeft=10;spacingRight=10;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="620" width="240" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="finance">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="ib">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="hr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3b" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="comms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="ic">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#6c8ebf;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="cac">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="cio">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="legal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="risk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="vcc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ceo" target="it">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px&quot;&gt;⬜ White, thick border = Root&lt;br/&gt;🟦 Light blue = Phase 1 (live)&lt;br/&gt;⬜ Light gray = Phase 2 (planned)&lt;br/&gt;&lt;i&gt;Blue italic line&lt;/i&gt; = supervising agent&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;align=left;verticalAlign=top;spacingTop=8;spacingLeft=10;spacingRight=10;fillColor=#fafafa;strokeColor=#bdbdbd;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="50" width="240" height="120" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
