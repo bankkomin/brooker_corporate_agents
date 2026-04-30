@@ -14,6 +14,12 @@ from fastapi.responses import JSONResponse
 
 from .config import settings
 
+try:
+    from services.shared.sharepoint_connector import SharePointConnector
+    from services.shared.ms_graph_client import MSGraphClient, GraphConfig
+except ImportError:
+    SharePointConnector = None
+
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
 
@@ -77,6 +83,35 @@ async def run_sync() -> None:
             files_checked = 0
         else:
             raise ValueError(f"Unknown mirror_source: {source!r}")
+
+        # SharePoint sync (Phase 5.4)
+        if SharePointConnector is not None:
+            import os as _os
+            tenant = _os.environ.get("MS_TENANT_ID", "")
+            client_id = _os.environ.get("MS_CLIENT_ID", "")
+            client_secret = _os.environ.get("MS_CLIENT_SECRET", "")
+
+            if tenant and client_id and client_secret:
+                try:
+                    graph = MSGraphClient(GraphConfig(tenant_id=tenant, client_id=client_id, client_secret=client_secret))
+                    connector = SharePointConnector(graph_client=graph)
+
+                    # Sync configured SharePoint folders per department
+                    sharepoint_mappings = [
+                        {"folder": "Finance/Reports", "dept_id": "finance"},
+                        {"folder": "CAC/ALCO", "dept_id": "cac"},
+                    ]
+
+                    for mapping in sharepoint_mappings:
+                        result = await connector.sync_folder(
+                            folder_path=mapping["folder"],
+                            dept_id=mapping["dept_id"],
+                        )
+                        files_updated += result.files_new + result.files_updated
+                        files_checked += result.files_checked
+                        logger.info("SharePoint sync %s: %d new, %d updated", mapping["folder"], result.files_new, result.files_updated)
+                except Exception:
+                    logger.exception("SharePoint sync failed")
 
         duration_ms = int((time.monotonic() - start_ms) * 1000)
         _last_sync_at = datetime.now(UTC)

@@ -9,6 +9,12 @@ import structlog
 
 from .config import RAGSettings
 
+try:
+    from services.shared.table_chunker import chunk_document as table_aware_chunk, chunk_excel_sheet
+except ImportError:
+    table_aware_chunk = None
+    chunk_excel_sheet = None
+
 logger = structlog.get_logger("rag-ingestion.chunker")
 
 
@@ -52,13 +58,39 @@ class DocumentChunker:
             return []
 
         file_hash = self._hash_file(file_path)
+        file_ext = file_path.suffix.lower()
         chunks: list[TextChunk] = []
         for section in raw_sections:
             text = section["text"].strip()
             if not text:
                 continue
+
+            # Use table-aware chunking if available and document contains tables
+            if table_aware_chunk is not None and ("|---|" in text or file_ext in (".xlsx", ".csv")):
+                table_chunks = table_aware_chunk(text, source=str(file_path), max_chunk_size=self._chunk_size)
+                for c in table_chunks:
+                    meta: dict[str, str | int | None] = {
+                        "source_file": str(file_path),
+                        "file_hash": file_hash,
+                        "doc_type": doc_type,
+                        "dept": dept,
+                        "page": section.get("page"),
+                        "section": section.get("section"),
+                        "sheet": section.get("sheet"),
+                        "chunk_type": c.chunk_type,
+                    }
+                    if extra_meta:
+                        for k, v in extra_meta.items():
+                            if v:
+                                meta[k] = v
+                    if c.metadata:
+                        for k, v in c.metadata.items():
+                            meta[k] = v
+                    chunks.append(TextChunk(text=c.text, metadata=meta))
+                continue
+
             for piece in self._split_text(text):
-                meta: dict[str, str | int | None] = {
+                meta = {
                     "source_file": str(file_path),
                     "file_hash": file_hash,
                     "doc_type": doc_type,
@@ -117,10 +149,31 @@ class DocumentChunker:
             ws = wb[sheet_name]
             rows = []
             for row in ws.iter_rows(values_only=True):
-                row_text = " | ".join(str(c) for c in row if c is not None)
+                row_vals = [c for c in row if c is not None]
+                row_text = " | ".join(str(c) for c in row_vals)
                 if row_text.strip():
                     rows.append(row_text)
-            if rows:
+
+            # Use table-aware Excel chunker if available
+            if chunk_excel_sheet is not None and rows:
+                structured_rows = []
+                for row in ws.iter_rows(values_only=True):
+                    structured_rows.append([str(c) if c is not None else "" for c in row])
+                excel_chunks = chunk_excel_sheet(
+                    structured_rows,
+                    sheet_name=sheet_name,
+                    source=str(path),
+                    max_chunk_size=self._chunk_size,
+                )
+                for c in excel_chunks:
+                    sections.append({
+                        "text": c.text,
+                        "page": None,
+                        "section": None,
+                        "sheet": sheet_name,
+                        "chunk_type": c.chunk_type,
+                    })
+            elif rows:
                 sections.append({
                     "text": "\n".join(rows),
                     "page": None,

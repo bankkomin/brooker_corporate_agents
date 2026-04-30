@@ -3,6 +3,12 @@ name: operational-risk
 agent: operational-risk-agent
 dept: risk
 version: 1.0
+permissions:
+  mode: read_only
+  data_zones: [1]
+  outbound_apis: []
+  read_collections: [risk_docs, risk_chat, risk_knowledge, shared_policies, cac_docs, cio_docs, finance_docs, legal_docs]
+output_types: [text, table]
 ---
 
 ## Mandate

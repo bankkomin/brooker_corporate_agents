@@ -12,6 +12,16 @@ from .agents.capital import CapitalAgent
 from .agents.cfo import CFOAgent
 from .agents.funding import FundingAgent
 from .agents.liquidity import LiquidityAgent
+try:
+    from services.shared.load_memory import load_memory_node
+except ImportError:
+    load_memory_node = None
+
+try:
+    from services.shared.daily_log import log_interaction_node
+except ImportError:
+    log_interaction_node = None
+
 from .nodes.classify_intent import classify_intent
 from .nodes.escalation_check import escalation_check
 from .nodes.excel_navigator import excel_navigator
@@ -109,6 +119,11 @@ def build_graph(
     graph = StateGraph(AgentState)
 
     # --- Add nodes ---
+
+    # Phase 2: load_memory as first node (if shared library available)
+    if load_memory_node is not None:
+        graph.add_node("load_memory", load_memory_node)
+
     graph.add_node("classify_intent", partial(classify_intent, llm_client=llm_client))
     graph.add_node(
         "retrieve_context",
@@ -153,6 +168,11 @@ def build_graph(
         ),
     )
     graph.add_node("synthesise", partial(synthesise_response, llm_client=llm_client))
+
+    # Phase 2: log_interaction as last node before END (if shared library available)
+    if log_interaction_node is not None:
+        graph.add_node("log_interaction", log_interaction_node)
+
     graph.add_node(
         "paperclip_ticket",
         partial(
@@ -163,7 +183,11 @@ def build_graph(
     )
 
     # --- Add edges ---
-    graph.set_entry_point("classify_intent")
+    if load_memory_node is not None:
+        graph.set_entry_point("load_memory")
+        graph.add_edge("load_memory", "classify_intent")
+    else:
+        graph.set_entry_point("classify_intent")
     graph.add_edge("classify_intent", "retrieve_context")
 
     # Conditional: route to correct agent.
@@ -215,6 +239,11 @@ def build_graph(
 
     graph.add_edge("paperclip_ticket", "staging_writer")
     graph.add_edge("staging_writer", "synthesise")
-    graph.add_edge("synthesise", END)
+
+    if log_interaction_node is not None:
+        graph.add_edge("synthesise", "log_interaction")
+        graph.add_edge("log_interaction", END)
+    else:
+        graph.add_edge("synthesise", END)
 
     return graph.compile(checkpointer=checkpointer)

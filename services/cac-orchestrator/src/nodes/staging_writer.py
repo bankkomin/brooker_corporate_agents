@@ -11,6 +11,11 @@ import structlog
 from ..models import ManifestProposal
 from ..tools.db_client import DBClient
 
+try:
+    from services.shared.permission_enforcement import ensure_can_write
+except ImportError:
+    ensure_can_write = None
+
 logger = structlog.get_logger("cac-orchestrator.staging")
 
 
@@ -43,6 +48,16 @@ async def staging_writer(
     if not state.get("proposed_value"):
         logger.info("staging_skipped_no_proposal")
         return {"staging_proposal_id": None}
+
+    # Permission check — ensure skill allows write_via_staging
+    if ensure_can_write is not None:
+        skill_perms = state.get("skill_permissions", {})
+        if skill_perms:
+            try:
+                ensure_can_write(skill_perms)
+            except Exception as perm_err:
+                logger.warning("staging_blocked_by_permission", error=str(perm_err))
+                return {"staging_proposal_id": None, "staging_error": str(perm_err)}
 
     proposal_id = _next_proposal_id()
 

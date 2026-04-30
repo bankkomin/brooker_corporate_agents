@@ -47,6 +47,12 @@ class OrchestratorSettings(BaseSettings):
     paperclip_url: str = "http://paperclip:3100"
     paperclip_api_key: str = "dev-paperclip-key"
 
+    # Vault
+    vault_root: str = "/vault/cac"
+
+    # Departments config
+    departments_config_path: str = "/app/config/departments.json"
+
     # Logging
     log_level: str = "INFO"
 

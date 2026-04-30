@@ -27,7 +27,7 @@
   "$defs": {
     "Department": {
       "type": "object",
-      "required": ["name", "shortName", "agents", "dataAccess", "escalation", "dashboardWidgets", "slackChannels"],
+      "required": ["name", "shortName", "agents", "dataAccess", "slackChannels"],
       "additionalProperties": false,
       "properties": {
         "name": {
@@ -57,7 +57,6 @@
         "agents": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
-          "minItems": 1,
           "description": "Agent IDs scoped to this department"
         },
         "dataAccess": {
@@ -73,6 +72,31 @@
         },
         "slackChannels": {
           "$ref": "#/$defs/SlackChannels"
+        },
+        "capabilityTier": {
+          "type": "string",
+          "enum": ["read_only", "write"],
+          "description": "Phase 2: capability tier governing agent write permissions"
+        },
+        "crossReadAccess": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Phase 2: department IDs this department can read (use '*' for all)"
+        },
+        "agentTopology": {
+          "$ref": "#/$defs/AgentTopology"
+        },
+        "documents": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Phase 2: document IDs associated with this department"
+        },
+        "heartbeat": {
+          "$ref": "#/$defs/Heartbeat"
+        },
+        "live": {
+          "type": "boolean",
+          "description": "Phase 2: whether this department is active in production"
         }
       }
     },
@@ -144,6 +168,48 @@
         "escalations": {
           "type": "string",
           "description": "Escalations Slack channel ID"
+        }
+      }
+    },
+    "AgentTopology": {
+      "type": "object",
+      "required": ["orchestrator", "specialists"],
+      "additionalProperties": false,
+      "properties": {
+        "orchestrator": {
+          "type": "string",
+          "minLength": 1,
+          "description": "ID of the orchestrator agent for this department"
+        },
+        "specialists": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "IDs of specialist agents under the orchestrator"
+        }
+      }
+    },
+    "Heartbeat": {
+      "type": "object",
+      "required": ["enabled", "schedule", "context_sources", "outbound_actions"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether heartbeat monitoring is enabled"
+        },
+        "schedule": {
+          "type": "string",
+          "description": "Cron expression or schedule string for heartbeat"
+        },
+        "context_sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Data sources polled during heartbeat"
+        },
+        "outbound_actions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Actions triggered by heartbeat"
         }
       }
     },

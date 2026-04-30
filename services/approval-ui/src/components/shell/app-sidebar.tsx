@@ -11,6 +11,8 @@ import {
   Bot,
   Database,
   Menu,
+  Sparkles,
+  SearchX,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -111,6 +113,61 @@ function SidebarNav({
   );
 }
 
+const SYSTEM_NAV = [
+  { label: "Skill Updates", icon: Sparkles, href: "/skill-updates" },
+  { label: "Knowledge Gaps", icon: SearchX, href: "/admin/knowledge-gaps" },
+];
+
+function SystemNav({ collapsed }: { collapsed: boolean }) {
+  const pathname = usePathname();
+
+  return (
+    <TooltipProvider>
+      <div className="mt-auto border-t border-sidebar-border">
+        {!collapsed && (
+          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+            System
+          </p>
+        )}
+        <nav className="flex flex-col gap-1 p-2">
+          {SYSTEM_NAV.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            const Icon = item.icon;
+
+            const link = (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  isActive &&
+                    "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
+                  collapsed && "justify-center px-2"
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            );
+
+            if (collapsed) {
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger render={link} />
+                  <TooltipContent side="right">{item.label}</TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            return link;
+          })}
+        </nav>
+      </div>
+    </TooltipProvider>
+  );
+}
+
 function SidebarBrand({
   dept,
   collapsed,
@@ -151,6 +208,7 @@ export function AppSidebar({ dept, collapsed = false }: AppSidebarProps) {
     >
       <SidebarBrand dept={dept} collapsed={collapsed} />
       <SidebarNav dept={dept} collapsed={collapsed} />
+      <SystemNav collapsed={collapsed} />
     </aside>
   );
 }
@@ -177,6 +235,7 @@ export function MobileSidebar({ dept }: { dept: string }) {
         {/* Close sheet on nav click */}
         <div onClick={() => setOpen(false)}>
           <SidebarNav dept={dept} collapsed={false} />
+          <SystemNav collapsed={false} />
         </div>
       </SheetContent>
     </Sheet>

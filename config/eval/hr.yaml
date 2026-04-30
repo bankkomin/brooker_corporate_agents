@@ -1,0 +1,75 @@
+golden_answers:
+  # --- Policy questions ---
+  - id: ga_hr_001
+    category: lookup
+    question: "What is the company's annual leave policy?"
+    expected_answer: "Employees are entitled to annual leave as specified in the employee handbook. The number of days depends on tenure and grade level."
+    acceptable_keywords: ["annual leave", "handbook"]
+    expected_citations: ["employee_handbook"]
+
+  - id: ga_hr_002
+    category: lookup
+    question: "What is the probation period for new hires?"
+    expected_answer: "The standard probation period for new employees is defined in the employee handbook and HR onboarding policy."
+    acceptable_keywords: ["probation", "new"]
+    expected_citations: ["employee_handbook"]
+
+  - id: ga_hr_003
+    category: analytical
+    question: "How does the sick leave policy differ for permanent vs contract staff?"
+    expected_answer: "Permanent and contract staff have different sick leave entitlements as outlined in the employee handbook. Permanent staff typically receive more days."
+    acceptable_keywords: ["sick leave", "permanent", "contract"]
+    expected_citations: ["employee_handbook"]
+
+  # --- Compensation questions ---
+  - id: ga_hr_004
+    category: lookup
+    question: "When is the annual salary review cycle?"
+    expected_answer: "The annual salary review cycle is conducted as part of the year-end performance management process."
+    acceptable_keywords: ["salary review", "annual"]
+    expected_citations: ["compensation_policy"]
+
+  - id: ga_hr_005
+    category: analytical
+    question: "What are the KPI weightings for the bonus calculation?"
+    expected_answer: "Bonus calculations are based on KPI weightings defined in the performance management framework, combining individual and company-level targets."
+    acceptable_keywords: ["KPI", "bonus", "weighting"]
+    expected_citations: ["compensation_policy"]
+
+  - id: ga_hr_006
+    category: edge_case
+    question: "Can an employee on a PIP receive a bonus?"
+    expected_answer: "Employees on a Performance Improvement Plan (PIP) are typically not eligible for discretionary bonuses during the PIP period, per the compensation policy."
+    acceptable_keywords: ["PIP", "bonus"]
+    unacceptable_keywords: ["always", "guaranteed"]
+    expected_citations: ["compensation_policy"]
+
+  # --- Talent and recruitment ---
+  - id: ga_hr_007
+    category: lookup
+    question: "What is the internal transfer policy?"
+    expected_answer: "Internal transfers are governed by the internal mobility policy. Employees must typically complete a minimum tenure before being eligible for transfer."
+    acceptable_keywords: ["transfer", "internal"]
+    expected_citations: ["hr_policy"]
+
+  - id: ga_hr_008
+    category: analytical
+    question: "What is the current headcount by department?"
+    expected_answer: "Headcount by department is available in the HR dashboard and workforce planning reports."
+    acceptable_keywords: ["headcount", "department"]
+    expected_citations: ["hr_dashboard"]
+
+  - id: ga_hr_009
+    category: lookup
+    question: "What benefits are included in the employee wellness program?"
+    expected_answer: "The employee wellness program includes benefits such as health insurance, mental health support, and fitness subsidies as outlined in the benefits handbook."
+    acceptable_keywords: ["wellness", "benefits"]
+    expected_citations: ["benefits_handbook"]
+
+  - id: ga_hr_010
+    category: edge_case
+    question: "What is the policy for rehiring a previously terminated employee?"
+    expected_answer: "Rehiring previously terminated employees requires HR director approval and review of the termination circumstances. Employees terminated for cause may be ineligible."
+    acceptable_keywords: ["rehire", "terminated"]
+    unacceptable_keywords: ["never", "always allowed"]
+    expected_citations: ["hr_policy"]

@@ -3,6 +3,12 @@ name: devops
 agent: devops-agent
 dept: it
 version: 1.0
+permissions:
+  mode: read_only
+  data_zones: [1]
+  outbound_apis: []
+  read_collections: [it_docs, it_chat, it_knowledge, shared_policies]
+output_types: [text]
 ---
 
 ## Mandate

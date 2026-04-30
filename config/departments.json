@@ -25,7 +25,21 @@
         "general": "${CAC_CHANNEL_ID}",
         "approvals": "${APPROVALS_CHANNEL_ID}",
         "escalations": "${ESCALATIONS_CHANNEL_ID}"
-      }
+      },
+      "capabilityTier": "write",
+      "crossReadAccess": ["finance", "risk", "cio", "ceo"],
+      "agentTopology": {
+        "orchestrator": "cfo-agent",
+        "specialists": ["liquidity-agent", "capital-agent", "alm-agent", "funding-agent", "covenant-agent"]
+      },
+      "documents": ["doc_cac_alco_tracker", "doc_cac_capital_plan", "doc_cac_funding_facilities", "doc_cac_liquidity_covenant"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": true
     },
     "risk": {
       "name": "Risk Committee",
@@ -51,7 +65,21 @@
         "general": "${RISK_CHANNEL_ID}",
         "approvals": "${RISK_APPROVALS_CHANNEL_ID}",
         "escalations": "${RISK_ESCALATIONS_CHANNEL_ID}"
-      }
+      },
+      "capabilityTier": "read_only",
+      "crossReadAccess": ["cac", "cio", "finance", "legal"],
+      "agentTopology": {
+        "orchestrator": "risk-orchestrator",
+        "specialists": ["credit-risk-agent", "market-risk-agent", "operational-risk-agent"]
+      },
+      "documents": ["doc_risk_risk_policy"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
     },
     "legal": {
       "name": "Legal & Compliance",
@@ -77,59 +105,21 @@
         "general": "${LEGAL_CHANNEL_ID}",
         "approvals": "${LEGAL_APPROVALS_CHANNEL_ID}",
         "escalations": "${LEGAL_ESCALATIONS_CHANNEL_ID}"
-      }
-    },
-    "invest": {
-      "name": "Investment Committee",
-      "shortName": "IC",
-      "description": "Portfolio management, valuation, and due diligence",
-      "color": "#f59e0b",
-      "icon": "pie-chart",
-      "agents": ["portfolio", "valuation", "due-diligence"],
-      "dataAccess": {
-        "qdrantCollections": ["invest_docs", "invest_chat", "invest_knowledge", "shared_policies"],
-        "mirrorPaths": ["/data/mirror/investments/"],
-        "excelFiles": ["Investment_Tracker.xlsx"],
-        "sensitivityLevel": "confidential",
-        "vaultPath": "/mnt/obsidian-vault/invest",
-        "wikiCollection": "invest_knowledge"
       },
-      "escalation": {
-        "canEscalateTo": ["ceo"],
-        "hodEmails": ["${INVEST_HOD_EMAIL}"]
+      "capabilityTier": "read_only",
+      "crossReadAccess": ["*"],
+      "agentTopology": {
+        "orchestrator": "legal-orchestrator",
+        "specialists": ["compliance-agent", "contract-agent", "regulatory-agent"]
       },
-      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
-      "slackChannels": {
-        "general": "${INVEST_CHANNEL_ID}",
-        "approvals": "${INVEST_APPROVALS_CHANNEL_ID}",
-        "escalations": "${INVEST_ESCALATIONS_CHANNEL_ID}"
-      }
-    },
-    "ops": {
-      "name": "Operations",
-      "shortName": "OPS",
-      "description": "Process optimisation, vendor management, and facilities",
-      "color": "#06b6d4",
-      "icon": "wrench",
-      "agents": ["process", "vendor", "facilities"],
-      "dataAccess": {
-        "qdrantCollections": ["ops_docs", "ops_chat", "ops_knowledge", "shared_policies"],
-        "mirrorPaths": ["/data/mirror/operations/"],
-        "excelFiles": ["Ops_Tracker.xlsx"],
-        "sensitivityLevel": "internal",
-        "vaultPath": "/mnt/obsidian-vault/ops",
-        "wikiCollection": "ops_knowledge"
+      "documents": ["doc_legal_aml_policy", "doc_legal_legal_opinions", "doc_legal_contract_templates"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
       },
-      "escalation": {
-        "canEscalateTo": ["coo", "ceo"],
-        "hodEmails": ["${OPS_HOD_EMAIL}"]
-      },
-      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
-      "slackChannels": {
-        "general": "${OPS_CHANNEL_ID}",
-        "approvals": "${OPS_APPROVALS_CHANNEL_ID}",
-        "escalations": "${OPS_ESCALATIONS_CHANNEL_ID}"
-      }
+      "live": false
     },
     "hr": {
       "name": "Human Resources",
@@ -155,7 +145,21 @@
         "general": "${HR_CHANNEL_ID}",
         "approvals": "${HR_APPROVALS_CHANNEL_ID}",
         "escalations": "${HR_ESCALATIONS_CHANNEL_ID}"
-      }
+      },
+      "capabilityTier": "read_only",
+      "crossReadAccess": [],
+      "agentTopology": {
+        "orchestrator": "hr-orchestrator",
+        "specialists": ["policy-agent", "compensation-agent", "talent-agent"]
+      },
+      "documents": ["doc_hr_hr_policy", "doc_hr_remuneration_policy", "doc_hr_sops"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": true
     },
     "it": {
       "name": "Information Technology",
@@ -181,7 +185,21 @@
         "general": "${IT_CHANNEL_ID}",
         "approvals": "${IT_APPROVALS_CHANNEL_ID}",
         "escalations": "${IT_ESCALATIONS_CHANNEL_ID}"
-      }
+      },
+      "capabilityTier": "read_only",
+      "crossReadAccess": [],
+      "agentTopology": {
+        "orchestrator": "it-orchestrator",
+        "specialists": ["devops-agent", "infrastructure-agent", "security-agent"]
+      },
+      "documents": ["doc_it_it_policies", "doc_it_it_sops"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
     },
     "ceo": {
       "name": "CEO Office",
@@ -207,7 +225,189 @@
         "general": "${CEO_CHANNEL_ID}",
         "approvals": "${CEO_APPROVALS_CHANNEL_ID}",
         "escalations": "${CEO_ESCALATIONS_CHANNEL_ID}"
-      }
+      },
+      "capabilityTier": "read_only",
+      "crossReadAccess": ["*"],
+      "agentTopology": {
+        "orchestrator": "ceo-agent",
+        "specialists": ["strategy-agent", "reporting-agent", "board-agent"]
+      },
+      "documents": ["doc_ceo_strategic_retreat", "doc_ceo_leadership_monthly", "doc_ceo_mda", "doc_ceo_board_minutes", "doc_ceo_bg_weekly", "doc_ceo_bicl_weekly", "doc_ceo_arun_weekly"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
+    },
+    "finance": {
+      "name": "Finance",
+      "shortName": "FIN",
+      "agents": [],
+      "dataAccess": {
+        "qdrantCollections": ["finance_docs", "finance_chat", "finance_knowledge", "shared_policies"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/finance",
+        "wikiCollection": "finance_knowledge"
+      },
+      "slackChannels": {
+        "general": "#finance-committee"
+      },
+      "capabilityTier": "write",
+      "crossReadAccess": [],
+      "agentTopology": {
+        "orchestrator": "cfo-agent",
+        "specialists": ["reporting-agent", "treasury-agent", "mda-agent"]
+      },
+      "documents": ["doc_finance_annual_report", "doc_finance_financial_statements", "doc_finance_networth_report", "doc_finance_bg_weekly", "doc_finance_coins_weekly"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
+    },
+    "ib": {
+      "name": "Investment Banking",
+      "shortName": "IB",
+      "agents": [],
+      "dataAccess": {
+        "qdrantCollections": ["ib_docs", "ib_chat", "ib_knowledge", "shared_policies"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/ib",
+        "wikiCollection": "ib_knowledge"
+      },
+      "slackChannels": {
+        "general": "#ib-committee"
+      },
+      "capabilityTier": "read_only",
+      "crossReadAccess": [],
+      "agentTopology": {
+        "orchestrator": "ib-orchestrator",
+        "specialists": ["deal-agent", "syndication-agent", "research-agent"]
+      },
+      "documents": ["doc_ib_structured_loan_report", "doc_ib_deal_docs", "doc_ib_pitch_books", "doc_ib_term_sheets", "doc_ib_investment_memos", "doc_ib_syndication_docs", "doc_ib_league_tables"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
+    },
+    "ic": {
+      "name": "Investment Committee",
+      "shortName": "IC",
+      "agents": [],
+      "dataAccess": {
+        "qdrantCollections": ["ic_docs", "ic_chat", "ic_knowledge", "shared_policies"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/ic",
+        "wikiCollection": "ic_knowledge"
+      },
+      "slackChannels": {
+        "general": "#ic-committee"
+      },
+      "capabilityTier": "read_only",
+      "crossReadAccess": ["finance", "cio", "vcc", "legal"],
+      "agentTopology": {
+        "orchestrator": "ic-orchestrator",
+        "specialists": ["due-diligence-agent", "portfolio-agent", "valuation-agent"]
+      },
+      "documents": ["doc_ic_investment_policy", "doc_ic_ic_minutes", "doc_ic_investment_memos"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
+    },
+    "cio": {
+      "name": "Chief Investment Office",
+      "shortName": "CIO",
+      "agents": [],
+      "dataAccess": {
+        "qdrantCollections": ["cio_docs", "cio_chat", "cio_knowledge", "shared_policies"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/cio",
+        "wikiCollection": "cio_knowledge"
+      },
+      "slackChannels": {
+        "general": "#cio-committee"
+      },
+      "capabilityTier": "write",
+      "crossReadAccess": ["finance", "vcc", "ic"],
+      "agentTopology": {
+        "orchestrator": "cio-orchestrator",
+        "specialists": ["nav-agent", "custodian-agent", "fund-agent"]
+      },
+      "documents": ["doc_cio_nav_report", "doc_cio_custodian_report", "doc_cio_ppm"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
+    },
+    "vcc": {
+      "name": "Venture Capital Committee",
+      "shortName": "VCC",
+      "agents": [],
+      "dataAccess": {
+        "qdrantCollections": ["vcc_docs", "vcc_chat", "vcc_knowledge", "shared_policies"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/vcc",
+        "wikiCollection": "vcc_knowledge"
+      },
+      "slackChannels": {
+        "general": "#vcc-committee"
+      },
+      "capabilityTier": "write",
+      "crossReadAccess": ["cio", "ic"],
+      "agentTopology": {
+        "orchestrator": "vcc-orchestrator",
+        "specialists": ["client-agent", "fund-admin-agent", "reporting-agent"]
+      },
+      "documents": ["doc_vcc_nav_report", "doc_vcc_subscriptions_report", "doc_vcc_client_list", "doc_vcc_presentations", "doc_vcc_contracts", "doc_vcc_due_diligence", "doc_vcc_newsletters", "doc_vcc_memos"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
+    },
+    "comms": {
+      "name": "Communications",
+      "shortName": "COMMS",
+      "agents": [],
+      "dataAccess": {
+        "qdrantCollections": ["comms_docs", "comms_chat", "comms_knowledge", "shared_policies"],
+        "sensitivityLevel": "confidential",
+        "vaultPath": "/mnt/obsidian-vault/comms",
+        "wikiCollection": "comms_knowledge"
+      },
+      "slackChannels": {
+        "general": "#comms-committee"
+      },
+      "capabilityTier": "read_only",
+      "crossReadAccess": [],
+      "agentTopology": {
+        "orchestrator": "comms-orchestrator",
+        "specialists": ["ir-agent", "pr-agent", "marketing-agent"]
+      },
+      "documents": ["doc_comms_branding_policy", "doc_comms_brand_guidelines", "doc_comms_press_releases", "doc_comms_ir_newsletters", "doc_comms_earnings_decks", "doc_comms_web_social_content", "doc_comms_marketing_materials"],
+      "heartbeat": {
+        "enabled": false,
+        "schedule": "",
+        "context_sources": [],
+        "outbound_actions": []
+      },
+      "live": false
     }
   },
   "globalAccess": {

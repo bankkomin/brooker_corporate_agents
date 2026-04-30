@@ -14,6 +14,13 @@ from typing import Any
 import structlog
 from fastapi import FastAPI, HTTPException
 
+try:
+    from services.shared.metrics_middleware import PrometheusMiddleware
+    from prometheus_client import make_asgi_app as make_metrics_app
+except ImportError:
+    PrometheusMiddleware = None
+    make_metrics_app = None
+
 from .config import settings
 from .graph import build_graph
 from .models import QueryRequest, QueryResponse, Source
@@ -112,6 +119,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+if PrometheusMiddleware is not None:
+    app.add_middleware(PrometheusMiddleware)
+
+if make_metrics_app is not None:
+    metrics_app = make_metrics_app()
+    app.mount("/metrics", metrics_app)
+
 
 @app.post("/query", response_model=QueryResponse)
 async def query(req: QueryRequest) -> QueryResponse:
@@ -151,6 +165,11 @@ async def query(req: QueryRequest) -> QueryResponse:
         "confidence_score": 0.0,
         "processing_start": start,
         "paperclip_ticket_id": None,
+        # Phase 2 shared library fields
+        "agent_memory": "",
+        "vault_root": settings.vault_root,
+        "agent_id": "cac-orchestrator",
+        "dept_id": "cac",
     }
 
     # Phase 1: create interaction before graph

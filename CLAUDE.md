@@ -6,6 +6,7 @@ Reads Slack channels + uploaded documents, answers with citations, proposes Exce
 
 **PRD:** `PRD.md` (v2.2) — the single source of truth for all requirements.
 **Progress:** `docs/Implementation.md` — checklist tracking. Read this first every session to find current task.
+**Phase 2 framework:** Stage 10 complete (2026-04-28). 9 dept stages scaffolded (Stages 11-19); awaiting per-dept rollout.
 
 ## CRITICAL — Data Safety Rule
 ```
@@ -43,6 +44,8 @@ Zone 4: /data/archive/  — permanent audit + sync back to corporate
 | approval-ui | 4000 | Human review dashboard (browser) |
 | email-notifier | internal | HOD email notifications |
 | paperclip | 3100 | Agent orchestration shell (Node.js) |
+| reflection-engine | 3008 | Nightly reflection: daily logs → memory promotion + skill proposals |
+| heartbeat | 3009 | Opt-in proactive agent layer (default disabled) |
 | postgres | 5432 | Database |
 | qdrant | 6333 | Vector store (REST), 6334 (gRPC) |
 | minio | 9000 | Document store |
@@ -120,6 +123,7 @@ Week 8: UAT + Go-Live
 - `config/departments.json` — HOD emails (`escalation.hodEmails`) and Slack channel IDs (`slackChannels`) per department; must have real values before Week 6
 - `config/escalation_rules.json` — configurable breach triggers
 - `config/obsidian_watch.json` — vault folders watched by LlamaIndex
+- `config/document_inventory.json` — 53 corporate documents mapped to depts, tiers, Qdrant collections
 
 ## SKILL.md Format (PRD Section 11)
 Every agent skill file must have: Mandate, Tone & Style, Domain Knowledge, Retrieval Instructions, Staging Proposal Rules, Excel Navigation, Escalation Triggers, Output Format, Hard Rules.

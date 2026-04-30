@@ -1,0 +1,576 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_POSTGRESQL",
+      "label": "PostgreSQL",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "id": null,
+  "uid": "eval-results",
+  "title": "Evaluation Results",
+  "description": "Evaluation framework results: accuracy trends, category breakdowns, citation accuracy, latency, pass/fail",
+  "tags": ["brooker", "evaluation", "quality"],
+  "style": "dark",
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "schemaVersion": 39,
+  "version": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "dept_id",
+        "type": "query",
+        "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+        "query": "SELECT DISTINCT dept_id FROM eval_runs ORDER BY dept_id;",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": "%",
+        "current": { "text": "All", "value": "$__all" },
+        "multi": false,
+        "sort": 1,
+        "label": "Department"
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Accuracy Overview",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Latest Accuracy",
+      "id": 2,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT accuracy FROM eval_runs WHERE dept_id LIKE '$dept_id' ORDER BY run_at DESC LIMIT 1;",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 0.7, "color": "yellow" },
+              { "value": 0.85, "color": "green" }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Latest Citation Accuracy",
+      "id": 3,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT citation_accuracy FROM eval_runs WHERE dept_id LIKE '$dept_id' ORDER BY run_at DESC LIMIT 1;",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 0.7, "color": "yellow" },
+              { "value": 0.9, "color": "green" }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Latest Avg Latency",
+      "id": 4,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT avg_latency_ms FROM eval_runs WHERE dept_id LIKE '$dept_id' ORDER BY run_at DESC LIMIT 1;",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 5000, "color": "yellow" },
+              { "value": 15000, "color": "red" }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Total Eval Runs",
+      "id": 5,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT COUNT(*) as total_runs FROM eval_runs WHERE dept_id LIKE '$dept_id';",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "thresholds": { "mode": "off", "steps": [] }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Accuracy Trend Over Time",
+      "id": 10,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 5 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT run_at AS time, accuracy FROM eval_runs WHERE dept_id LIKE '$dept_id' AND $__timeFilter(run_at) ORDER BY run_at;",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 8,
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": { "mode": "none" },
+            "axisPlacement": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 0.7, "color": "yellow" },
+              { "value": 0.85, "color": "green" }
+            ]
+          },
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Accuracy by Category",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "id": 20,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "barchart",
+      "title": "Accuracy by Category",
+      "description": "Accuracy breakdown: lookup vs analytical vs edge_case",
+      "id": 21,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT c.category, AVG(c.is_correct::int)::float AS accuracy FROM eval_run_cases c JOIN eval_runs r ON c.run_id = r.id WHERE r.dept_id LIKE '$dept_id' AND $__timeFilter(r.run_at) GROUP BY c.category ORDER BY c.category;",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 0.7, "color": "yellow" },
+              { "value": 0.85, "color": "green" }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Accuracy by Category Over Time",
+      "id": 22,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT r.run_at AS time, c.category, AVG(c.is_correct::int)::float AS accuracy FROM eval_run_cases c JOIN eval_runs r ON c.run_id = r.id WHERE r.dept_id LIKE '$dept_id' AND $__timeFilter(r.run_at) GROUP BY r.run_at, c.category ORDER BY r.run_at;",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 8,
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": { "mode": "none" },
+            "axisPlacement": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": { "mode": "off", "steps": [] }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "lastNotNull"] }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Citation Accuracy & Latency",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "id": 30,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Citation Accuracy Trend",
+      "id": 31,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT run_at AS time, citation_accuracy FROM eval_runs WHERE dept_id LIKE '$dept_id' AND $__timeFilter(run_at) ORDER BY run_at;",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 8,
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": { "mode": "none" },
+            "axisPlacement": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 0.7, "color": "yellow" },
+              { "value": 0.9, "color": "green" }
+            ]
+          },
+          "color": { "mode": "fixed", "fixedColor": "orange" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Average Latency Trend",
+      "id": 32,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 23 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT run_at AS time, avg_latency_ms FROM eval_runs WHERE dept_id LIKE '$dept_id' AND $__timeFilter(run_at) ORDER BY run_at;",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 8,
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": { "mode": "none" },
+            "axisPlacement": "auto"
+          },
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 5000, "color": "yellow" },
+              { "value": 15000, "color": "red" }
+            ]
+          },
+          "color": { "mode": "fixed", "fixedColor": "purple" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Pass / Fail",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
+      "id": 40,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "barchart",
+      "title": "Pass / Fail Counts per Run",
+      "description": "Number of passing and failing test cases per evaluation run",
+      "id": 41,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT r.run_at AS time, SUM(CASE WHEN c.is_correct THEN 1 ELSE 0 END) AS pass, SUM(CASE WHEN c.is_correct THEN 0 ELSE 1 END) AS fail FROM eval_run_cases c JOIN eval_runs r ON c.run_id = r.id WHERE r.dept_id LIKE '$dept_id' AND $__timeFilter(r.run_at) GROUP BY r.run_at ORDER BY r.run_at;",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": { "mode": "off", "steps": [] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "pass" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } },
+              { "id": "displayName", "value": "Pass" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "fail" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } },
+              { "id": "displayName", "value": "Fail" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "normal",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "tooltip": { "mode": "multi", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "type": "table",
+      "title": "Recent Eval Runs",
+      "id": 42,
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 40 },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT run_at, dept_id, accuracy, citation_accuracy, avg_latency_ms FROM eval_runs WHERE dept_id LIKE '$dept_id' AND $__timeFilter(run_at) ORDER BY run_at DESC LIMIT 20;",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "off", "steps": [] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "accuracy" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "value": null, "color": "red" }, { "value": 0.7, "color": "yellow" }, { "value": 0.85, "color": "green" }] } },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "citation_accuracy" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "value": null, "color": "red" }, { "value": 0.7, "color": "yellow" }, { "value": 0.9, "color": "green" }] } },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_latency_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 5000, "color": "yellow" }, { "value": 15000, "color": "red" }] } },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [{ "displayName": "run_at", "desc": true }],
+        "footer": { "show": false }
+      }
+    }
+  ]
+}

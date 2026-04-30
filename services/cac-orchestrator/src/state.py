@@ -59,3 +59,9 @@ class AgentState(TypedDict):
     # Stage 5 additions
     interaction_id: int | None
     proposed_tab: str | None
+
+    # Phase 2 shared library fields
+    agent_memory: str
+    vault_root: str
+    agent_id: str
+    dept_id: str

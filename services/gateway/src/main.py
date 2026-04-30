@@ -12,6 +12,17 @@ from datetime import UTC, datetime
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+from services.gateway.src.rate_limit import limiter
+
+try:
+    from services.shared.metrics_middleware import PrometheusMiddleware
+    from prometheus_client import make_asgi_app as make_metrics_app
+except ImportError:
+    PrometheusMiddleware = None
+    make_metrics_app = None
 
 from services.gateway.src.analytics import router as analytics_router
 from services.gateway.src.chat import router as chat_router
@@ -26,6 +37,13 @@ from services.gateway.src.errors import auth_error_handler
 from services.gateway.src.escalations import router as escalations_router
 from services.gateway.src.proposals import router as proposals_router
 from services.gateway.src.uploads import router as uploads_router
+from services.gateway.src.skill_proposals import router as skill_proposals_router
+from services.gateway.src.admin import router as admin_router
+from services.gateway.src.memory import router as memory_router
+from services.gateway.src.compliance import router as compliance_router
+from services.gateway.src.reports import router as reports_router
+from services.gateway.src.cross_dept import router as cross_dept_router
+from services.gateway.src.venture_monitor import router as vm_router
 
 logger = structlog.get_logger(__name__)
 
@@ -58,15 +76,29 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4000", "http://localhost:5111"],
+    allow_origins=[
+        "http://localhost:4000", "http://localhost:5111",
+        "https://corporate-agent.brookergroup.ngrok.app",
+        "https://brookergroup.ngrok.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.add_exception_handler(AuthError, auth_error_handler)  # type: ignore[arg-type]
+
+if PrometheusMiddleware is not None:
+    app.add_middleware(PrometheusMiddleware)
+
+if make_metrics_app is not None:
+    metrics_app = make_metrics_app()
+    app.mount("/metrics", metrics_app)
 
 
 @app.middleware("http")
@@ -119,6 +151,13 @@ app.include_router(proposals_router)
 app.include_router(escalations_router)
 app.include_router(analytics_router)
 app.include_router(uploads_router)
+app.include_router(skill_proposals_router)
+app.include_router(admin_router)
+app.include_router(memory_router)
+app.include_router(compliance_router)
+app.include_router(reports_router)
+app.include_router(cross_dept_router)
+app.include_router(vm_router)
 
 
 @app.get("/")

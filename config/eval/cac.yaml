@@ -1,0 +1,149 @@
+golden_answers:
+  # --- Liquidity questions ---
+  - id: ga_cac_001
+    category: lookup
+    question: "What is the current LCR ratio?"
+    expected_answer: "The current LCR is reported in the ALCO Tracker."
+    acceptable_keywords: ["LCR", "liquidity coverage"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_002
+    category: lookup
+    question: "What is the NSFR?"
+    expected_answer: "The NSFR (Net Stable Funding Ratio) is tracked in the ALCO Tracker."
+    acceptable_keywords: ["NSFR", "net stable funding"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_003
+    category: analytical
+    question: "Is our LCR above the BOT regulatory minimum?"
+    expected_answer: "The BOT requires a minimum LCR of 100%. The current LCR should be checked against this threshold in the ALCO Tracker."
+    acceptable_keywords: ["100%", "BOT", "minimum"]
+    expected_citations: ["alco_tracker", "bot_regulations"]
+
+  - id: ga_cac_004
+    category: lookup
+    question: "What are the top 5 largest depositors and their concentration?"
+    expected_answer: "The top depositor concentrations are tracked in the deposit concentration report within the ALCO Tracker."
+    acceptable_keywords: ["concentration", "depositor"]
+    expected_citations: ["alco_tracker"]
+
+  # --- Capital questions ---
+  - id: ga_cac_005
+    category: lookup
+    question: "What is our current CAR (Capital Adequacy Ratio)?"
+    expected_answer: "The Capital Adequacy Ratio is reported in the capital adequacy section of the ALCO Tracker."
+    acceptable_keywords: ["CAR", "capital adequacy"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_006
+    category: analytical
+    question: "How much Tier 1 capital do we hold versus Tier 2?"
+    expected_answer: "Tier 1 and Tier 2 capital breakdowns are available in the capital adequacy report."
+    acceptable_keywords: ["Tier 1", "Tier 2"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_007
+    category: lookup
+    question: "What is the CET1 ratio?"
+    expected_answer: "The CET1 (Common Equity Tier 1) ratio is tracked in the capital section of the ALCO Tracker."
+    acceptable_keywords: ["CET1", "common equity"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_008
+    category: edge_case
+    question: "What would happen to CAR if we wrote off 500M in NPLs?"
+    expected_answer: "A 500M NPL write-off would reduce retained earnings and therefore CET1 capital, lowering the CAR. The exact impact depends on current RWA levels."
+    acceptable_keywords: ["CAR", "write-off", "CET1"]
+    unacceptable_keywords: ["guaranteed", "certainly will"]
+    expected_citations: ["alco_tracker"]
+
+  # --- ALM questions ---
+  - id: ga_cac_009
+    category: lookup
+    question: "What is the current duration gap?"
+    expected_answer: "The duration gap between assets and liabilities is tracked in the ALM section of the ALCO Tracker."
+    acceptable_keywords: ["duration", "gap"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_010
+    category: analytical
+    question: "What is the NII sensitivity to a 100bps rate increase?"
+    expected_answer: "The NII (Net Interest Income) sensitivity to interest rate changes is modeled in the ALM stress scenarios within the ALCO Tracker."
+    acceptable_keywords: ["NII", "sensitivity", "interest rate"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_011
+    category: analytical
+    question: "What is the repricing gap in the 1-3 month bucket?"
+    expected_answer: "The repricing gap by maturity bucket is available in the ALM repricing schedule in the ALCO Tracker."
+    acceptable_keywords: ["repricing", "gap"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_012
+    category: edge_case
+    question: "If rates drop 200bps, what is the EVE impact?"
+    expected_answer: "A 200bps rate decrease scenario and its impact on EVE (Economic Value of Equity) is part of the interest rate stress testing in the ALCO Tracker."
+    acceptable_keywords: ["EVE", "economic value"]
+    unacceptable_keywords: ["exact", "precisely"]
+    expected_citations: ["alco_tracker"]
+
+  # --- Funding questions ---
+  - id: ga_cac_013
+    category: lookup
+    question: "What is the current loan-to-deposit ratio?"
+    expected_answer: "The loan-to-deposit ratio is reported in the funding metrics section of the ALCO Tracker."
+    acceptable_keywords: ["loan-to-deposit", "LDR"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_014
+    category: analytical
+    question: "What is the maturity profile of our wholesale funding?"
+    expected_answer: "The wholesale funding maturity profile is tracked in the funding section, showing tenors and rollover dates."
+    acceptable_keywords: ["wholesale", "funding", "maturity"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_015
+    category: lookup
+    question: "How much interbank borrowing is outstanding?"
+    expected_answer: "Interbank borrowing balances are available in the funding section of the ALCO Tracker."
+    acceptable_keywords: ["interbank", "borrowing"]
+    expected_citations: ["alco_tracker"]
+
+  - id: ga_cac_016
+    category: edge_case
+    question: "What happens if we lose our top 3 depositors simultaneously?"
+    expected_answer: "A simultaneous loss of the top 3 depositors would trigger the liquidity contingency plan. The impact on LCR and funding should be modeled as a stress scenario."
+    acceptable_keywords: ["contingency", "stress"]
+    unacceptable_keywords: ["impossible", "will never"]
+    expected_citations: ["alco_tracker", "contingency_plan"]
+
+  # --- Covenant questions ---
+  - id: ga_cac_017
+    category: lookup
+    question: "Are we in compliance with all loan covenants?"
+    expected_answer: "Covenant compliance status is tracked in the covenant monitoring section. Any breaches or early warnings are flagged."
+    acceptable_keywords: ["covenant", "compliance"]
+    expected_citations: ["covenant_tracker"]
+
+  - id: ga_cac_018
+    category: analytical
+    question: "Which covenants are closest to breach?"
+    expected_answer: "Covenants approaching their thresholds are flagged as early warnings in the covenant monitoring section."
+    acceptable_keywords: ["covenant", "threshold"]
+    expected_citations: ["covenant_tracker"]
+
+  - id: ga_cac_019
+    category: lookup
+    question: "What is the debt-to-equity covenant threshold for our syndicated loan?"
+    expected_answer: "The debt-to-equity covenant threshold for the syndicated loan facility is specified in the covenant tracker."
+    acceptable_keywords: ["debt-to-equity", "syndicated"]
+    expected_citations: ["covenant_tracker"]
+
+  - id: ga_cac_020
+    category: edge_case
+    question: "If our credit rating is downgraded, which covenants trigger acceleration?"
+    expected_answer: "A credit rating downgrade may trigger acceleration clauses in certain facilities. The specific covenants with rating-linked triggers are documented in the covenant tracker."
+    acceptable_keywords: ["downgrade", "acceleration"]
+    unacceptable_keywords: ["no impact", "nothing happens"]
+    expected_citations: ["covenant_tracker"]

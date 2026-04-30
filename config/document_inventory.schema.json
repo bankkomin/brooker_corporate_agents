@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["id", "title", "ownerDept", "tier", "vaultPath", "qdrantCollection"],
+  "properties": {
+    "id":               { "type": "string", "pattern": "^doc_[a-z0-9_]+$" },
+    "title":            { "type": "string" },
+    "ownerDept":        { "type": "string" },
+    "tier":             { "enum": ["policy", "report", "tracker", "narrative"] },
+    "vaultPath":        { "type": "string" },
+    "qdrantCollection": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "ingestSource":     { "type": "string" },
+    "frequency":        { "type": "string" },
+    "crossReadAccess":  { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -47,7 +47,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
       POSTGRES_USER: ${POSTGRES_USER:-agents}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Required}
       POSTGRES_INITDB_ARGS: "--data-checksums"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U agents -d corporate_agents"]
@@ -84,7 +84,7 @@ services:
     networks: [agent-net]
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-changeme}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Required}
     command: server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -121,7 +121,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
       BROOKER_JWT_SECRET: ${BROOKER_JWT_SECRET:-}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:?Required}@postgres:5432/${POSTGRES_DB:-corporate_agents}
       BROOKER_DATABASE_URL: ${BROOKER_DATABASE_URL:-}
       CAC_ORCHESTRATOR_URL: http://cac-orchestrator:3001
       SYNC_BACK_URL: http://sync-back:3006
@@ -148,6 +148,8 @@ services:
       - staging_data:/data/staging:rw
       - ./config:/app/config:ro
       - ./skills:/app/skills:ro
+      - ./services/shared:/app/services/shared:ro
+      - ./services/__init__.py:/app/services/__init__.py:ro
     extra_hosts: ["host.docker.internal:host-gateway"]
     networks: [agent-net]
     environment:
@@ -159,7 +161,7 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
       POSTGRES_USER: ${POSTGRES_USER:-agents}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Required}
       STAGING_PATH: /data/staging
       MIRROR_PATH: /data/mirror
       CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.85}
@@ -169,7 +171,7 @@ services:
       EXCEL_SCHEMA_PATH: /app/config/excel_schema/alco_tracker.json
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       PAPERCLIP_URL: http://paperclip:3100
-      PAPERCLIP_API_KEY: ${PAPERCLIP_API_KEY:-changeme}
+      PAPERCLIP_API_KEY: ${PAPERCLIP_API_KEY:?Required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -179,6 +181,48 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  hr-orchestrator:
+    build: ./services/hr-orchestrator
+    ports: ["3002:3002"]
+    restart: unless-stopped
+    volumes:
+      - mirror_data:/data/mirror:ro
+      - ./config:/app/config:ro
+      - ./skills:/app/skills:ro
+      - ./services/shared:/app/services/shared:ro
+      - ./services/__init__.py:/app/services/__init__.py:ro
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    networks: [agent-net]
+    environment:
+      VLLM_LARGE_URL: http://nginx:8080/v1
+      VLLM_LARGE_MODEL: ${VLLM_LARGE_MODEL:-qwen-122b}
+      QDRANT_HOST: qdrant
+      QDRANT_REST_PORT: 6333
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Required}
+      MIRROR_PATH: /data/mirror
+      RAG_TOP_K: ${RAG_TOP_K:-8}
+      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.70}
+      ESCALATION_RULES_PATH: /app/config/escalation_rules.json
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      PAPERCLIP_URL: http://paperclip:3100
+      PAPERCLIP_API_KEY: ${PAPERCLIP_API_KEY:?Required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      nginx:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -225,7 +269,7 @@ services:
       POSTGRES_PORT: "5432"
       POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
       POSTGRES_USER: ${POSTGRES_USER:-agents}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Required}
       MINIO_ENDPOINT: minio:9000
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       OBSIDIAN_VAULT_PATH: /mnt/obsidian-vault
@@ -244,7 +288,7 @@ services:
 
   sync-mirror:
     build: ./services/sync-mirror
-    ports: ["3008:3008"]
+    ports: ["3020:3008"]
     restart: unless-stopped
     volumes:
       - mirror_data:/data/mirror:rw
@@ -260,7 +304,7 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB:-corporate_agents}
       POSTGRES_USER: ${POSTGRES_USER:-agents}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Required}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     depends_on:
       postgres:
@@ -276,7 +320,7 @@ services:
       context: ./services/sync-back
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:?Required}@postgres:5432/${POSTGRES_DB:-corporate_agents}
       - STAGING_PATH=/data/staging
       - ARCHIVE_PATH=/data/archive
       - MIRROR_PATH=/data/mirror
@@ -310,7 +354,7 @@ services:
       - PORT=4000
       - NODE_ENV=production
       - PAPERCLIP_URL=http://paperclip:3100
-      - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY:-changeme}
+      - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY:?Required}
     secrets:
       - jwt_public_key
     networks:
@@ -338,7 +382,7 @@ services:
     environment:
       - LOG_LEVEL=info
       - JWT_PRIVATE_KEY_PATH=/run/secrets/jwt_private_key
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:?Required}@postgres:5432/${POSTGRES_DB:-corporate_agents}
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER:-}
@@ -368,7 +412,7 @@ services:
     volumes:
       - ./data/staging:/data/staging
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-corporate_agents}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD:?Required}@postgres:5432/${POSTGRES_DB:-corporate_agents}
       - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY:-dev-paperclip-key}
       - SYNC_BACK_URL=http://sync-back:3006
       - EMAIL_NOTIFIER_URL=http://email-notifier:3005
@@ -405,4 +449,116 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - agent-net
+    restart: unless-stopped
+
+  reflection-engine:
+    build: ./services/reflection-engine
+    ports:
+      - "3008:3008"
+    environment:
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REFLECTION_POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      LLM_BASE_URL: http://nginx:8080/v1
+      LLM_MODEL: qwen-122b
+      PAPERCLIP_URL: http://paperclip:3100
+      VAULT_ROOT: /vault
+    volumes:
+      - ./obsidian-vault:/vault:rw
+      - ./config:/app/config:ro
+      - ./services/shared:/app/services/shared:ro
+      - ./services/__init__.py:/app/services/__init__.py:ro
+    depends_on:
+      - postgres
+      - paperclip
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  heartbeat:
+    build: ./services/heartbeat
+    ports:
+      - "3009:3009"
+    environment:
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      HEARTBEAT_POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PAPERCLIP_URL: http://paperclip:3100
+      HEARTBEAT_CONFIG_PATH: /app/config/departments.json
+    volumes:
+      - ./config:/app/config:ro
+    depends_on:
+      - postgres
+      - paperclip
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3009/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  eval-framework:
+    build: ./services/eval-framework
+    ports:
+      - "3030:3030"
+    environment:
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD:?Required}@postgres:5432/${POSTGRES_DB}
+      EVAL_POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD:?Required}@postgres:5432/${POSTGRES_DB}
+    volumes:
+      - ./config:/app/config:ro
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  read-only-orchestrator:
+    build: ./services/read-only-orchestrator
+    ports:
+      - "3040:3040"
+    environment:
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD:?Required}@postgres:5432/${POSTGRES_DB}
+      QDRANT_URL: http://qdrant:6333
+      LLM_BASE_URL: http://nginx:8080/v1
+      LLM_MODEL: qwen-122b
+      VAULT_ROOT: /vault
+    volumes:
+      - ./config:/app/config:ro
+      - ./skills:/skills:ro
+      - ./obsidian-vault:/vault:ro
+      - ./services/shared:/app/services/shared:ro
+      - ./services/__init__.py:/app/services/__init__.py:ro
+    depends_on:
+      - postgres
+      - qdrant
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3040/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports:
+      - "3050:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/etc/grafana/dashboards:ro
+    depends_on:
+      - prometheus
     restart: unless-stopped

@@ -3,6 +3,12 @@ name: legal-orchestrator
 agent: legal-orchestrator
 dept: legal
 version: 1.0
+permissions:
+  mode: read_only
+  data_zones: [1]
+  outbound_apis: []
+  read_collections: [legal_docs, legal_chat, legal_knowledge, shared_policies]
+output_types: [text]
 ---
 
 ## Mandate

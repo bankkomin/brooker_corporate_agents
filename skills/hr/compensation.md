@@ -3,6 +3,12 @@ name: compensation-benchmarking
 agent: compensation-agent
 dept: hr
 version: 1.0
+permissions:
+  mode: read_only
+  data_zones: [1]
+  outbound_apis: []
+  read_collections: [hr_docs, hr_chat, hr_knowledge, shared_policies]
+output_types: [text]
 ---
 
 ## Mandate

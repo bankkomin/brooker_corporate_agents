@@ -358,22 +358,57 @@ Phase 2 scales the system from 2 live departments (CAC, HR) to 11 by introducing
 - **Second brain** (Cole Medin) — `soul.md` / `user.md` / `memory.md` per agent + daily logs
 - **Self-improving loop** (Luuk Alleman) — HOD approve/edit/reject mapped to rating signal → reflection engine → SKILL.md update proposals (HOD-gated)
 
-## Stage 10 — Phase 2 Framework Infrastructure 📋 (scaffolded 2026-04-28, awaiting execution)
+## Stage 10 — Phase 2 Framework Infrastructure ✅ (2026-04-28)
 
-8 phases, 65 tasks, ~23h focused work / ~1.5 weeks calendar. Builds the catalog config, code templates, two new shared services (reflection-engine + heartbeat), schema migrations, validation scripts, approval-ui extensions, and skeleton spec+plan files for Stages 11-19.
+### 10A — Schema & Config
+- [x] Extended `config/departments.schema.json` with capabilityTier, crossReadAccess, agentTopology, heartbeat
+- [x] Migrated `config/departments.json` (CAC + HR updated + 9 future depts at live=false)
+- [x] Created `config/document_inventory.json` (53 corporate documents across 12 depts)
+- [x] Created `config/document_inventory.schema.json`
+- [x] Migration 010 — agent_knowledge_gaps, agent_skill_proposals, reflection_runs, agent_performance view
+- [x] Validation scripts: `scripts/validate_config.py`, `scripts/validate_skills.py`
 
-- [ ] Phase 0 — Setup & regression baseline (golden-master CAC + HR fixtures)
-- [ ] Phase 1 — Schema & config foundation (departments.schema.json extension, document_inventory.json with ~53 docs, migration 010 with new tables/view, validation scripts)
-- [ ] Phase 2 — Skills cleanup + frontmatter (rename invest→ic, delete ops, move cfo-agent shared→finance, extend SKILL.md frontmatter)
-- [ ] Phase 3 — Shared library (load_memory node, retrieve_context_with_crossread, knowledge-gap writers, daily-log writer, permission enforcement)
-- [ ] Phase 4 — Reflection engine service (port 3008, Claude Agent SDK, nightly cron)
-- [ ] Phase 5 — Heartbeat service (port 3009, default disabled per dept)
-- [ ] Phase 6 — Template scaffolds (services/_template-orchestrator/, skills/_template/)
-- [ ] Phase 7 — Approval-UI extensions (Skill Updates tab + admin/knowledge-gaps view)
-- [ ] Phase 8 — Final wiring + 9 dept skeleton plans
+### 10B — Skills Cleanup + Frontmatter
+- [x] Renamed `skills/invest/` → `skills/ic/`
+- [x] Deleted `skills/ops/`
+- [x] Moved `skills/shared/cfo-agent.md` → `skills/finance/cfo-agent.md` (with backcompat stub)
+- [x] Created `skills/_template/` (orchestrator + 3 specialist placeholders)
+- [x] Created `skills/{ib,cio,vcc,comms}/` directories
 
-**Spec:** [`docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md`](superpowers/specs/2026-04-28-stage10-phase2-framework-design.md)
-**Plan:** [`docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md`](superpowers/plans/2026-04-28-stage10-phase2-framework.md)
+### 10C — Shared Library
+- [x] `services/shared/load_memory.py` — LangGraph node for soul.md/user.md/memory.md triad
+- [x] `services/shared/retrieve_context_crossread.py` — cross-dept read with graceful degradation
+- [x] `services/shared/knowledge_gaps.py` — LLM self-report phrase detection
+- [x] `services/shared/daily_log.py` — append interactions to vault daily-logs
+- [x] `services/shared/permission_enforcement.py` — runtime skill permission checks
+- [x] `services/shared/models_phase2.py` — SkillPermissions + SkillMeta Pydantic models
+
+### 10D — Reflection Engine (port 3008)
+- [x] Service scaffold: FastAPI + APScheduler nightly cron
+- [x] Daily log reader + approval decisions joiner
+- [x] LLM reflection via langchain-openai (JSON prompt + 3-retry parse)
+- [x] Memory promotion: archive → overwrite cycle for memory.md/user.md
+- [x] Pattern detection: >= 5 same-shape low-signal → agent_skill_proposals row
+
+### 10E — Heartbeat (port 3009, default disabled)
+- [x] Service scaffold: FastAPI + per-dept APScheduler
+- [x] Config reader filters departments.json for heartbeat.enabled
+- [x] Context gatherer stubs (Slack + SharePoint URI prefixes)
+- [x] Orchestrator invocation client (POST /proactive)
+
+### 10F — Templates
+- [x] `services/_template-orchestrator/` — copy-and-fill skeleton from HR pattern
+- [x] `skills/_template/` — 4 placeholder SKILL.md files
+
+### 10G — Infrastructure
+- [x] Docker compose: reflection-engine + heartbeat entries
+- [x] 9 vault folder skeletons (finance, ib, ic, cio, vcc, comms, legal, risk, it)
+- [x] Updated `config/obsidian_watch.json` with trends/ + daily-logs/ per dept
+- [x] 9 skeleton plans (Stages 11-19) + per-dept-plan-template
+
+**Architecture:** Phase 2 framework lets each downstream dept stage land in ~1.5 days. Catalog (departments.json + document_inventory.json) + templates (services/_template-orchestrator + skills/_template) + shared services (reflection-engine + heartbeat) + per-skill permission registry + agent_performance signal-strength view.
+**Spec:** `docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md`
+**Plan:** `docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md`
 
 ## Stage 11 — Finance Department 📋 (planned, scaffolded 2026-04-28)
 

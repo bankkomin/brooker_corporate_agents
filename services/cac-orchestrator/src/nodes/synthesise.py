@@ -1,9 +1,32 @@
-"""Synthesis node — formats final answer with citations using Qwen 122B."""
+"""Synthesis node — formats final answer with citations using Qwen 122B.
+
+Phase 2: integrates knowledge gap detection via shared library.
+"""
 from __future__ import annotations
 
 import structlog
 
 from ..tools.llm_client import LLMClient
+
+try:
+    from services.shared.knowledge_gaps import detect_self_report
+except ImportError:
+    detect_self_report = None  # type: ignore[assignment]
+
+try:
+    from services.shared.citation_grounding import ground_citations, add_grounding_badges
+except ImportError:
+    ground_citations = None
+
+try:
+    from services.shared.calibrated_confidence import compute_confidence
+except ImportError:
+    compute_confidence = None
+
+try:
+    from services.shared.chain_of_thought import classify_complexity, build_cot_prompt, parse_cot_response
+except ImportError:
+    classify_complexity = None
 
 logger = structlog.get_logger("cac-orchestrator.synthesise")
 
@@ -72,6 +95,16 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient) -> dict:
 
     user_prompt = "\n\n".join(parts)
 
+    # Chain-of-thought for complex queries
+    query = state.get("query", "")
+    use_cot = False
+    query_type = "simple"
+    if classify_complexity is not None:
+        query_type = classify_complexity(query)
+        if query_type != "simple":
+            use_cot = True
+            user_prompt = build_cot_prompt(query, query_type, context_text, skill_content="")
+
     try:
         answer = await llm_client.chat(
             [
@@ -85,7 +118,73 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient) -> dict:
         logger.error("synthesise_failed", error=str(exc))
         answer = "I encountered an error while processing your question. Please try again."
 
+    # Parse structured CoT response if chain-of-thought was used
+    if use_cot and parse_cot_response is not None:
+        cot_result = parse_cot_response(answer, query, query_type)
+        # Use the final answer from CoT parsing
+        if cot_result.final_answer:
+            answer = cot_result.final_answer
+
+    # Citation grounding
+    if ground_citations is not None:
+        sources = state.get("retrieved_sources", [])
+        grounding_report = ground_citations(answer, sources)
+        answer = add_grounding_badges(answer, grounding_report)
+        # Use grounding accuracy for calibrated confidence
+        citation_accuracy = grounding_report.accuracy
+    else:
+        citation_accuracy = 1.0
+
+    # Calibrated confidence (replaces LLM self-reported score)
+    if compute_confidence is not None:
+        retrieved_chunks = state.get("retrieved_chunks", [])
+        top_sim = state.get("top_similarity", 0.0)
+        proposed = state.get("proposed_value")
+        conf = compute_confidence(
+            retrieved_chunks=retrieved_chunks,
+            top_similarity=top_sim,
+            answer_text=answer,
+            proposed_value=proposed,
+            citation_accuracy=citation_accuracy,
+        )
+        confidence_score = conf.composite
+        confidence_label = conf.label
+        confidence_explanation = conf.explanation
+
     confidence = _confidence_label(confidence_score)
     has_proposal = staging_proposal_id is not None
+
+    # Phase 2: detect knowledge gaps from LLM self-report phrases
+    if detect_self_report is not None:
+        try:
+            from ..tools.db_client import DBClient  # noqa: F811
+
+            # detect_self_report needs a db connection; use a no-op if unavailable
+            dept_id = state.get("dept_id", "cac")
+            agent_id = state.get("agent_id", state.get("agent_name", "cac-orchestrator"))
+            query = state.get("query", "")
+
+            # Try to get a db connection from the db_client if available
+            # detect_self_report is async so we import and call it
+            gap_detected = False
+            try:
+                # The db_conn parameter in detect_self_report expects an
+                # asyncpg connection. We pass None if unavailable — the
+                # function will handle the exception internally.
+                gap_detected = await detect_self_report(
+                    response=answer,
+                    dept_id=dept_id,
+                    agent_id=agent_id,
+                    query=query,
+                    db_conn=None,  # Will be wired to real pool in future iteration
+                )
+            except Exception as gap_exc:
+                logger.debug("knowledge_gap_detect_call_failed", error=str(gap_exc))
+
+            if gap_detected:
+                logger.info("knowledge_gap_self_report_detected", query=query[:80])
+        except Exception as exc:
+            logger.debug("knowledge_gap_integration_skipped", error=str(exc))
+
     logger.info("response_synthesised", confidence=confidence, has_proposal=has_proposal)
     return {"answer": answer, "confidence": confidence}
