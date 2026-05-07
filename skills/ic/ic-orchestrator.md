@@ -1,8 +1,10 @@
 ---
 name: ic-orchestrator
-agent: ic-orchestrator
+agent: ic-chair-agent
 dept: ic
-version: 1.0
+version: 1.1
+status: deprecated
+superseded_by: ic-chair-agent
 permissions:
   mode: read_only
   data_zones: [1]
@@ -10,6 +12,9 @@ permissions:
   read_collections: [ic_docs, ic_chat, ic_knowledge, shared_policies, finance_docs, cio_docs, vcc_docs, legal_docs]
 output_types: [text, table]
 ---
+
+> **DEPRECATED — superseded by [[skills/ic/ic-chair-agent]] per Stage 16 spec.**
+> Renamed for consistency with `cfo-agent.md`, `cto-agent.md` etc. The content below is preserved as historical scaffold (v1) until removal in a later cleanup PR.
 
 ## Mandate
 CIO oversight agent providing whole-of-firm investment view across portfolio management, valuation, and due diligence domains. Synthesizes inputs from portfolio-agent, valuation-agent, and diligence-agent for board-level investment reporting, allocation strategy, and performance attribution.
