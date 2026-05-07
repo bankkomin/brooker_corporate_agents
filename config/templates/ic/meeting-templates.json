@@ -1,0 +1,221 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0",
+  "department": "ic",
+  "description": "IC monthly meeting output generation contract — maps vault sources to docx + pptx + markdown placeholders. Used by ic-chair-agent to draft new meeting artifacts.",
+  "reference_files": {
+    "docx": "config/templates/ic/IC-meeting-minutes-reference.docx",
+    "pptx": "config/templates/ic/IC-meeting-deck-reference.pptx",
+    "xlsx": "config/templates/ic/IC-dashboard-reference.xlsx"
+  },
+  "output_locations": {
+    "docx_draft": "output/ic/IC-{meeting_date}-draft.docx",
+    "pptx_draft": "output/ic/IC-deck-{meeting_date}-draft.pptx",
+    "markdown_twin": "obsidian-vault/ic/meeting-notes/IC-{meeting_date}-draft.md",
+    "dashboard_md": "obsidian-vault/ic/trends/dashboard-{period}-draft.md"
+  },
+  "generation_pipeline": [
+    "1. Load latest dashboard.xlsx (input)",
+    "2. Generate dashboard-{period}.md trend file → vault",
+    "3. Load all running ic/decisions/*.md and resolve current status per decision",
+    "4. Load all referenced ic/entities/*.md for portfolio composition",
+    "5. Render markdown meeting note → vault (so RAG indexes it)",
+    "6. Render docx via reference template → output/ic/",
+    "7. Render pptx via reference template → output/ic/",
+    "8. Surface to human approval queue (approval-ui port 4000)",
+    "9. Upon approval, sync to corporate share via sync-back service"
+  ],
+  "data_sources": {
+    "dashboard_input": {
+      "source_path": "data/mirror/ic/dashboard-{period}.xlsx",
+      "sheet_name_pattern": "{Mon} {YY}",
+      "extraction_skill": "anthropic-skills:xlsx",
+      "output_md": "obsidian-vault/ic/trends/dashboard-{period}.md",
+      "key_cells": {
+        "total_investments": {"row": 32, "col": "B"},
+        "net_worth_q4": {"row": 33, "col": "B"},
+        "ratio_equity": {"row": 34, "col": "B", "cap": 0.60},
+        "ratio_fix": {"row": 35, "col": "B", "cap": 0.30},
+        "ratio_structured_loan": {"row": 36, "col": "B", "cap": 0.50},
+        "ratio_digital_asset_treasury": {"row": 37, "col": "B", "cap": 0.50},
+        "total_assets_q4": {"row": 38, "col": "B"},
+        "investment_total_assets_ratio": {"row": 38, "col": "H", "cap": 0.40, "binding_date": "2026-06-30"},
+        "thb_usd_fx": {"row": 40, "col": "B"}
+      }
+    }
+  },
+  "docx_field_map": {
+    "header.meeting_number": "$frontmatter.meeting_number",
+    "header.time_date": "$frontmatter.meeting_time + $frontmatter.meeting_date",
+    "agenda": "templates/meeting-note.md#Agenda",
+    "liquidity.fy_outflow_bt": "$dashboard_input.fy_outflow_bt OR $cross_read.finance.fy_budget",
+    "liquidity.cash_and_equivalents_mn": "$dashboard_input.cash_and_equivalents OR $cross_read.cac.cash_position",
+    "liquidity.current_stocks_mn": "compute: sum of listed positions liquidatable < 1 quarter from dashboard",
+    "liquidity.current_unlocked_funds_mn": "compute: sum of open-end fund redemptions available < 1 quarter",
+    "liquidity.de_ratio": "$cross_read.finance.de_ratio",
+    "liquidity.risk_band": "compute: (cash + stocks + unlocked) / fy_outflow → band per ic/concepts/liquidity-management-policy",
+    "outlook.set_monthly_pct": "$external.set_feed.monthly OR $tbd",
+    "outlook.set_close": "$external.set_feed.close OR $tbd",
+    "outlook.set_ytd_pct": "$external.set_feed.ytd OR $tbd",
+    "outlook.thb_usd_fx": "$dashboard_input.thb_usd_fx",
+    "outlook.global_commentary": "LLM_synthesize($cross_read.macro_briefs)",
+    "master_sheet.ratios": "$dashboard_input ratio_* fields",
+    "master_sheet.red_flag_list": "ic/decisions/red-flag-portfolio-reduction.md#status_timeline + cross-check ic/entities/{name}.md drawdown",
+    "master_sheet.concentration_breaches": "compute: any ic/entities/* where mtm > 0.25 * total_investments",
+    "master_sheet.strategy_table": [
+      {"strategy": "Digital Assets", "source": "ic/entities/binance-bnb-otc.md + ic/decisions/digital-asset-treasury-divestment.md"},
+      {"strategy": "Non-Listed", "source": "aggregate of non-listed entities"},
+      {"strategy": "Brook", "source": "ic/entities/brooker.md"},
+      {"strategy": "Sukhothai", "source": "ic/entities/sukhothai-fund.md"},
+      {"strategy": "THB/USD", "source": "$dashboard_input.thb_usd_fx + prior period"}
+    ],
+    "objectives_table": "ic/decisions/*.md (every running decision file)",
+    "brooker_port.monthly_ytd": "ic/entities/brooker.md performance history",
+    "brooker_port.stocks_outlook": "ic/entities/{mill,pace,wave,b,cv}.md (Red Flag first)",
+    "sukhothai": "ic/entities/sukhothai-fund.md + ic/decisions/sukhothai-redemption.md",
+    "non_listed": "ic/entities/{varuna,wavebcg,adfin,robinhood}.md (and any new)",
+    "structured_loan_table": "ic/entities/structured-loan-portfolio.md inventory table",
+    "digital_assets_stub": "Digital Assets and VC -Please refer to presentation. Please refer to appendix.",
+    "schedule": "$next_meeting_date"
+  },
+  "pptx_slide_map": {
+    "slide_1_title": {
+      "data": ["{period} Digital Asset Update", "8 section bullets"],
+      "source": "static + frontmatter"
+    },
+    "slides_2_to_11_macro": {
+      "data": "macro narrative + chart placeholders",
+      "source": "carry-forward from prior deck unless human chair flags refresh; agent surfaces 'macro refresh needed?' as pre-meeting decision",
+      "auto_generate": false
+    },
+    "slide_12_okr_build": {
+      "data": "OKR-1 income table 8 line items totaling Bt 500mn",
+      "source": "ic/concepts/okr-500mb-recurring-income.md income build table",
+      "auto_generate": true
+    },
+    "slide_13_vcc_dashboard": {
+      "data": "Engine 1 VCC OS dashboard",
+      "source": "ic/decisions/singapore-vcc-structure.md + ic/entities/brook-limited-partners-fof.md",
+      "auto_generate": true
+    },
+    "slide_14_engine_1_actions": {
+      "data": "Sub-fund seeding + LP events",
+      "source": "ic/decisions/singapore-vcc-structure.md events list",
+      "auto_generate": true
+    },
+    "slide_15_dat_doctrine": {
+      "data": "Go-game metaphor + influence/survivability quantification",
+      "source": "ic/concepts/engine-framework.md dat_doctrine section",
+      "auto_generate": true
+    },
+    "slide_16_round_1": {
+      "data": "Sell & Seed vs Sell only scenarios table",
+      "source": "ic/decisions/dat-sell-call-strategy.md round_1 table OR ic/decisions/digital-asset-treasury-divestment.md round_1_economics",
+      "auto_generate": true
+    },
+    "slides_17_18_phase_plan": {
+      "data": "Phase 1/2/3 sell+call sequence",
+      "source": "ic/decisions/dat-sell-call-strategy.md phase plan",
+      "auto_generate": true
+    },
+    "slide_19_blind_sell_problem": {
+      "data": "Current ratio + sell impact + smart-way overlay",
+      "source": "ic/decisions/dat-sell-call-strategy.md blind sell problem section",
+      "auto_generate": true
+    },
+    "slide_20_strike_leverage": {
+      "data": "Deribit, monthly yields, strike formula, gamma context, drawdown table",
+      "source": "ic/decisions/dat-sell-call-strategy.md strategy parameters",
+      "auto_generate": true
+    },
+    "slide_21_scenario_outcomes": {
+      "data": "1x/2x/3x scenario outcomes",
+      "source": "ic/decisions/dat-sell-call-strategy.md sell-down matrix",
+      "auto_generate": true
+    },
+    "slide_22_execution_risk": {
+      "data": "TWAP/VWAP/OTC + risk matrix + committee actions",
+      "source": "ic/decisions/dat-sell-call-strategy.md risk matrix",
+      "auto_generate": true
+    },
+    "slide_23_sell_down_matrix": {
+      "data": "BTC/BNB units required at price levels × leverage",
+      "source": "ic/decisions/dat-sell-call-strategy.md sell-down matrix",
+      "auto_generate": true
+    },
+    "slide_24_board_summary": {
+      "data": "CAC-Agent advisory output panel",
+      "source": "agent runtime output (this very SKILL produces it)",
+      "auto_generate": true
+    },
+    "slide_25_gamma_appendix": {
+      "data": "Gamma profile reading guide",
+      "source": "static + ic/entities/deribit.md gamma context",
+      "auto_generate": true
+    },
+    "slide_26_dat_mtm": {
+      "data": "DAT MTM update + OKR-1b validator/staking run-rate",
+      "source": "ic/entities/binance-bnb-otc.md + ic/concepts/okr-500mb-recurring-income.md OKR-1b",
+      "auto_generate": true
+    },
+    "slide_27_loan_inventory": {
+      "data": "12-loan inventory table",
+      "source": "ic/entities/structured-loan-portfolio.md canonical inventory table",
+      "auto_generate": true
+    },
+    "slide_28_new_loans": {
+      "data": "New structured loan plan + 40/60 strategic partner map",
+      "source": "ic/entities/structured-loan-portfolio.md new loans plan + Strategic Partner Map",
+      "auto_generate": true
+    },
+    "slide_29_bicl_terms": {
+      "data": "BICL Pilot facility terms",
+      "source": "ic/decisions/bicl-movie-private-credit.md facility terms",
+      "auto_generate": true
+    },
+    "slide_30_liquidity": {
+      "data": "Cash outflow + buffer components",
+      "source": "same as docx liquidity section",
+      "auto_generate": true
+    },
+    "slide_31_capital_sovereignty": {
+      "data": "Risk list + funding channels",
+      "source": "ic/decisions/capital-sovereignty-doctrine.md",
+      "auto_generate": true
+    },
+    "slide_32_blank_or_chart": {
+      "auto_generate": false,
+      "note": "Blank slide in reference deck; carry forward or remove"
+    },
+    "slide_33_prediction_market": {
+      "data": "3-strategy table (Latency Arb, Delta-Neutral MM, Buy High & Settle) + blended row",
+      "source": "ic/decisions/prediction-market-pilot.md strategy table",
+      "auto_generate": true
+    },
+    "slide_34_action_approval": {
+      "data": "Numbered list of every IC vote item this meeting",
+      "source": "draft meeting note Action & Approval section + decisions_pending",
+      "auto_generate": true
+    },
+    "slide_35_end": {
+      "data": "End",
+      "source": "static",
+      "auto_generate": true
+    }
+  },
+  "approval_workflow": {
+    "draft_artifacts_go_to": "/data/staging/pending/ic/",
+    "approval_ui_route": "/ic/dashboard",
+    "human_reviewer": "ic-chair (HOD)",
+    "on_approval": "sync-back service writes to corporate share + archives copy in /data/archive/ic/",
+    "on_rejection": "agent receives rejection reason via approval-ui callback; revises draft"
+  },
+  "hard_rules": [
+    "NEVER write directly to corporate share — staging + approval only",
+    "NEVER invent figures — every number traces to vault file or timestamped external feed",
+    "NEVER auto-generate macro slides 2-11 — surface 'macro refresh needed?' as pre-meeting decision",
+    "ALWAYS produce the markdown twin alongside docx + pptx so RAG can index immediately",
+    "If a value is unknown, emit '[TBD — verify]' rather than guessing; surface in escalation_flags",
+    "The 9-item docx agenda is canonical for formal minutes; the 17-item deck agenda is for the deck only"
+  ]
+}
