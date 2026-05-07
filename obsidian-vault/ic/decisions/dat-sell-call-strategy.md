@@ -19,6 +19,46 @@ tags: ["ic", "decision", "options", "dat", "twap", "short-call", "deribit", "app
 
 Combine a **TWAP sell-down** of BTC + BNB with **short call options** on Deribit to achieve [[investment-holding-limit|40% Investment / Total Assets]] compliance while preserving optionality. Target raise: **Bt ~475 mn** over 60-90 days.
 
+## Default execution mode (use unless explicitly overridden)
+
+When sizing this rebalance, **default to the BTC + BNB combined sell** in the deck's **29.1% / 70.9% split** (slide 16). Rationale:
+
+1. **Already authorized.** Action #5 in the [[IC-2026-03-19]] Action & Approval list ("Sale of Digital Asset Treasury BNB and BTC up to 35% or THB 450mn") sanctions this exact combination.
+2. **DAT doctrine compliance.** [[engine-framework]] requires Bt 1,000mn influence + Bt 500mn survivability floors. A BTC-only sell would consume ~93% of the BTC stack and breach the influence floor; a deck-split preserves both BTC (~30% reduction) and BNB (~36% reduction).
+3. **BNB partial classification matters.** BNB OTC is 50.4% Investment-Company-classified — selling BNB requires ~2× the MTM to deliver the same numerator reduction. The deck's 70.9% BNB share already accounts for this; a naive pro-rata-by-MTM approach under-sells BNB.
+
+### Per-coin sell sizing recipe
+
+Given:
+- `R` = required `Investment Company Baht` reduction (per [[skills/ic/portfolio]] stale-data recipe)
+- `BTC_price_USD`, `BNB_price_USD` = today's prices
+- `FX` = THB/USD (use most recent BOT rate)
+
+Then:
+
+```
+BTC_tranche_bt   = 0.291 × R
+BNB_tranche_bt   = 0.709 × R   ÷ 0.504    (BNB partial-classification adjustment)
+BTC_to_sell      = BTC_tranche_bt   ÷ (BTC_price_USD × FX)
+BNB_to_sell      = BNB_tranche_bt   ÷ (BNB_price_USD × FX)
+
+If 3x sell+call overlay is also authorized (Action #3 active):
+  multiply both BTC_to_sell and BNB_to_sell by 0.869 (saves ~13%)
+```
+
+**Worked example (test scenario, May 2026):**
+- R ≈ Bt 531mn (Feb baseline + Apr token-PDF delta)
+- BTC $81,000, BNB $650, FX 32.3088
+- Without overlay: 59 BTC + 17,927 BNB (BNB tranche unadjusted) OR 59 BTC + 35,569 BNB (BNB tranche adjusted for 50.4% classification — likely too aggressive vs Action #5 cap)
+- With 3x overlay: 51 BTC + 15,579 BNB (unadjusted) — recommended; close to deck's 461mn raise, fits Action #5 cap
+
+### When to deviate from the deck-split default
+
+Only deviate (e.g. BTC-only sell, or BNB-only sell) if:
+1. The user explicitly requests one-sided
+2. **Surface the doctrine breach** if the BTC stack would drop below the Bt 1,000mn influence floor
+3. **Cross-check Action #5 cap** (Bt 450mn or 35% of stack) — overshoots require re-vote
+
 ## The "Blind Sell Problem" *(deck slide 19)*
 
 - Current Investment Ratio: **52.8%**

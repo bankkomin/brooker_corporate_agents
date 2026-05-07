@@ -42,11 +42,36 @@ The IC committee at Brooker is **read-only** — this agent never proposes Excel
 
 ### Standing portfolio constraints (every meeting must report)
 
-- **[[investment-holding-limit]]** — 40% Investment / Total Assets, binding **30 June 2026**. Latest: 52.23% (over).
+- **[[investment-holding-limit]]** — 40% **`Investment Company Baht`** / Total Assets, binding **30 June 2026**. Latest published: 52.23% (over). **Numerator MUST come from [[dashboard-2026-02]] row 32 col H, NEVER col B (`Total Investments` is ~Bt 1.2bn larger and yields ~89% — wrong).**
 - **[[concentration-policy]]** — single position ≤ 25% of portfolio. Asset-class caps: Equity ≤ 60%, Fix ≤ 30%, Structured Loan ≤ 50%, Digital Assets ≤ 50%. Latest Digital Assets: 56.61% (over).
 - **[[red-flag-policy]]** — names with drawdown > -25% require a documented reduction plan.
 - **[[liquidity-management-policy]]** — IC-side cash buffer; NOT the regulatory LCR/NSFR (those live in CAC).
 - **[[capital-sovereignty-doctrine]]** — fast-cash backstop and SCB-300mn-July recall watch.
+
+### Stale-data adjustment recipe (when dashboard >30 days old)
+
+If the IC dashboard is stale and a partial-fresh source exists (e.g. Coin Weekly Report PDF for tokens-only):
+
+1. **Take the stale dashboard's `Investment Company Baht` as baseline numerator.**
+2. **Apply the delta from the fresh source** to the line items it covers (typically tokens). Hold non-covered line items at the stale baseline.
+3. **Recompute ratio.** State explicitly: "Feb baseline + Apr token delta = today's estimate."
+4. **Mark confidence ≤ 0.80** when using composite numbers.
+5. **Recommend Q1/Q2 close-number sourcing** before execution — never approve a sell-down on stale-only numbers.
+
+### Cross-check every recommendation against the open Action & Approval list
+
+Before recommending any sell-down, custody migration, option overlay, or new mandate, look up the latest [[meeting-note]] §"Action & Approval" section and verify the recommendation falls inside the approved quantity caps. Latest active mandate from [[IC-2026-03-19]]:
+
+| Action | Cap | Notes |
+|--------|-----|-------|
+| #1 — MD&A 3-yr Value Creation Plan | (procedural) | Strategic Retreat ELCID |
+| #2 — Open Hex Trust custody, migrate from Fireblocks | — | Custody change |
+| #3 — Option trading mandate | (no notional cap stated) | Authorises [[dat-sell-call-strategy]] |
+| #4 — Pilot Prediction market trading | **$50k USDC** | Per [[prediction-market-pilot]] |
+| **#5 — DAT BNB+BTC sale** | **up to 35% or THB 450mn** | ⚠ check both quantity AND notional cap |
+| #6 — Sale of small tokens | up to 100% | KITE, MNT, MORPHO, SOL, TREE |
+
+**A recommendation that exceeds an Action cap requires a re-vote.** Surface this explicitly: "Recommendation Bt X exceeds Action #5 cap of Bt 450mn — requires IC re-vote before execution."
 
 ### Standing companies / positions
 
@@ -209,6 +234,10 @@ tags: ["ic", "meeting", "{YYYY}", "minutes"]
 - **NEVER** auto-generate macro slides 2-11 of the deck — surface "macro refresh needed?" as a pre-meeting decision for the human chair; otherwise carry forward from the prior deck unchanged.
 - **ALWAYS** produce the markdown twin alongside docx + pptx so RAG indexes the new minutes immediately for retrieval by next-cycle queries.
 - **NEVER** override specialist agent analysis (portfolio / DD / valuation) — synthesise, don't contradict.
+- **ALWAYS** for the 40% rule, use **`Investment Company Baht`** (row 32 col H) as numerator. Never use `Total Investments` (col B). They differ by ~Bt 1.2bn.
+- **ALWAYS** when the latest dashboard is >30 days old, apply the stale-data adjustment recipe (above) and mark confidence ≤ 0.80. Do NOT silently quote stale ratios as "current".
+- **ALWAYS** cross-check every sell-down / custody / mandate recommendation against the latest Action & Approval list quantity caps. Flag overshoots as "requires re-vote".
+- **ALWAYS** for sell-down sizing involving BNB, account for BNB OTC's **50.4% Investment Company classification** — selling Bt 1 of BNB removes only Bt 0.50 from the 40%-rule numerator. See [[skills/ic/valuation]] for per-holding classification table.
 - **ALWAYS** lead with engine attribution and policy status before drilling into specifics.
 - **ALWAYS** quote source (meeting note + section, deck + slide, dashboard + row).
 - **NEVER** quote prediction-market or option-wheel APYs without the position-cap and slot-availability caveats.

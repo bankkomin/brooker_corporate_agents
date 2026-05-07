@@ -99,3 +99,24 @@ Generation pipeline (the agent at runtime):
 - Tier 7 (behavioral simulation): question bank not yet built. Highest-value remaining validation.
 - Tier 8 (RAG retrieval quality): requires local Qdrant + embedding endpoint.
 - Tiers 9-10 (live runtime + generation pipeline): require Stage 16 deployment.
+
+## [2026-05-07] tier-7 live test + 4 skill bug fixes from findings
+
+Ran a live behavioural test: "How much BTC + BNB to sell at $81k / $650 today to hit 40% rule?" The skills produced a structured answer with engine attribution, scenarios, citations, and a JSON output — but the test exposed 4 real bugs that would have caused wrong recommendations in production:
+
+**Bugs surfaced and fixed:**
+
+1. **Denominator confusion** — Dashboard row 32 has TWO columns that look interchangeable: col B `Total Investments` (Bt 2,925mn) and col H `Investment Company Baht` (Bt 1,706mn). The 40% rule uses col H (yields 52.23%, matches deck). Using col B yields ~89% (wildly wrong). Fixed in [[skills/ic/portfolio]] (Domain Knowledge + Hard Rule), [[skills/ic/valuation]] (Hard Rule), and [[skills/ic/ic-chair-agent]] (standing constraints + Hard Rule).
+
+2. **BNB partial Investment-Co classification** — BNB OTC is only 50.4% classified as Investment Company (Bt 414mn / Bt 822mn). Selling Bt 1 of BNB removes only Bt 0.50 from the 40%-rule numerator. A naive 1:1 sale-impact calculation under-sizes the BNB sell by ~2×. Added classification table to [[skills/ic/valuation]] and [[skills/ic/portfolio]] (Domain Knowledge sections); added the BNB-specific Hard Rule to [[skills/ic/ic-chair-agent]].
+
+3. **Stale-dashboard handling** — The Feb 2026 dashboard was 3 months stale at test time, with crypto having rallied 12.5% since. The skills had no recipe for "use stale baseline + fresh delta from partial source". Added the 5-step stale-data adjustment recipe to [[skills/ic/portfolio]] (Domain Knowledge), referenced from [[skills/ic/ic-chair-agent]].
+
+4. **Per-action approval-cap cross-check** — The skills did not require checking proposed actions against the open Action & Approval list quantity caps. Recommendation Bt 531mn would have silently exceeded Action #5's "up to Bt 450mn" cap. Added cross-check table + Hard Rule to [[skills/ic/ic-chair-agent]].
+
+5. **Default execution mode for DAT sell-down** — [[dat-sell-call-strategy]] now defaults to the deck's 29.1/70.9 BTC/BNB split with 3x overlay (the IC-voted plan), with explicit deviation criteria. Added per-coin sell sizing recipe and a worked example matching the May 2026 test scenario.
+
+**Re-validated post-fix:**
+- Sync script: drift=0 across IC dept (5 files copied, byte-equal between skills/ic/ and obsidian-vault/skills/ic/)
+- All Hard Rules now PRD §11 compliant
+- Worked example in [[dat-sell-call-strategy]] matches the May 2026 test answer (51 BTC + 15,579 BNB with overlay)

@@ -25,6 +25,47 @@ Portfolio specialist for the Investment Committee. Reads the IC dashboard ([[das
 
 ## Domain Knowledge
 
+### CRITICAL: 40% rule denominator — `Investment Company Baht`, NOT `Total Investments`
+
+The IC dashboard has TWO columns at row 32 that look interchangeable but are not:
+
+| Cell | Label | Feb 2026 value | Use? |
+|------|-------|----------------|------|
+| **Row 32 col B** | `Total Investments` | Bt 2,925,430,103.67 | ❌ NEVER use as 40% rule numerator |
+| **Row 32 col H** | `Investment Company Baht` | **Bt 1,706,260,117.84** | ✅ canonical 40% rule numerator |
+| Row 38 col B | `Total Assets Q4 (Estimated)` | Bt 3,266,520,902.04 | ✅ canonical 40% rule denominator |
+| **Row 38 col H** | computed ratio | **0.5223 = 52.23%** | ✅ this is the published, deck-cited ratio |
+
+The two numerators differ by ~Bt 1.2 bn because `Total Investments` (col B) includes structured loans, Brooker self-investment, and other non-Investment-Company holdings. **Using col B would yield ~89% (wildly wrong)**; the deck and IC vote on **col H = 52.23%**.
+
+When asked about the 40% rule, always pull `Investment Company Baht` (col H). When asked about total invested capital irrespective of regulation, you may use `Total Investments` (col B) — but **state which one** explicitly.
+
+### Per-asset Investment Company classification (partial)
+
+Some holdings are only **partially** classified as Investment Company. Selling Bt 1 of MTM does NOT always reduce the col H numerator by Bt 1. Known partials in [[dashboard-2026-02]]:
+
+| Holding | Total MTM (Bt) | Investment Co Baht | % classified | Source |
+|---------|---------------:|-------------------:|-------------:|--------|
+| `Binance BNB OTC` (row 24) | 821,849,107 | 414,350,000 | **50.4%** | [[dashboard-2026-02]] |
+| `Digital Assets (Market Value)` (row 23) | 561,023,937 | 528,230,000 | 94.2% | [[dashboard-2026-02]] |
+| Listed Brooker portfolio | 27,270,719 | 27,270,719 | 100% | [[dashboard-2026-02]] |
+| Most non-listed holdings | (varies) | (full) | 100% | [[dashboard-2026-02]] |
+
+**Operational implication:** when modeling a BNB sale's impact on the 40% ratio, each Bt of BNB sold removes only ~Bt 0.50 from the numerator (not Bt 1). To raise Bt 100mn of numerator reduction via BNB alone, you may need to sell ~Bt 200mn of BNB MTM. **Surface this as a TBD-verify caveat in any sell-down recommendation involving BNB.**
+
+For BTC and tokens within `Digital Assets (Market Value)`, the 94.2% classification is high enough to use 1:1 as a working assumption with a 5-6% safety buffer.
+
+### Stale-dashboard adjustment recipe
+
+When the latest dashboard is >30 days old AND a partial fresh source exists (e.g. token-only Coin Weekly Report PDF):
+
+1. Take the stale dashboard's `Investment Company Baht` as the baseline numerator.
+2. Identify which line items have moved (e.g. tokens) and apply the delta from the fresh source.
+3. Compute updated ratio. State explicitly: "Feb baseline + Apr token delta = today estimate".
+4. Do NOT mix multiple stale-fresh combinations silently — every adjustment must be cited.
+5. Mark confidence ≤ 0.80 when using composite numbers.
+6. Always recommend sourcing the latest quarter close before execution.
+
 ### Asset-class ratio caps (per [[concentration-policy]])
 
 | Class | Cap | Latest (Feb 2026) | Source |
@@ -119,6 +160,8 @@ See [[portfolio-allocation-history]] for the canonical trend table.
 - **ALWAYS** report breaches with cap value AND deadline (where relevant).
 - **NEVER** classify a Red Flag as resolved without drawdown evidence < -25%.
 - **NEVER** recommend specific buy/sell trades — describe drift and plan status.
-- **ALWAYS** check the Investment / Total Assets denominator (`Total Assets Q4 (Estimated)` from dashboard row 38) when the question involves the 40% cap.
+- **ALWAYS** for the 40% rule, use **`Investment Company Baht` (row 32 col H)** as numerator AND `Total Assets Q4` (row 38 col B) as denominator. NEVER substitute `Total Investments` (row 32 col B) — that's a ~Bt 1.2bn-larger figure that includes structured loans + Brooker self-investment.
+- **ALWAYS** when modeling sale impact on the 40% ratio, look up each holding's **Investment Company classification %**. Do NOT assume 1 Bt of MTM sold = 1 Bt of numerator reduction. BNB OTC is 50.4% classified; selling BNB requires ~2× the MTM to achieve a given numerator reduction. Surface this as a TBD-verify caveat.
+- **ALWAYS** if the latest dashboard is >30 days old, apply the stale-data adjustment recipe (above) and confidence ≤ 0.80; do not silently quote stale ratios.
 - If a name appears under a different alias across sources (e.g. "Mr. Ekkapong" / [[mr-phongphan]] / "Barcelona" / "Barcellona"), surface the alias chain — do not silently merge.
 - For Sukhothai: distinguish the **fund** ([[sukhothai-fund]], USD) from the listed Thai equity in older notes; they are different entities.

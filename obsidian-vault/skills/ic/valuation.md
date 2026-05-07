@@ -25,6 +25,29 @@ Valuation specialist for the Investment Committee. Reads MTM values from the IC 
 
 ## Domain Knowledge
 
+### Investment Company classification (the partial-classification trap)
+
+The 40% rule numerator (`Investment Company Baht`, [[dashboard-2026-02]] row 32 col H = Bt 1,706,260,117.84) is a **subset** of total holdings MTM. Some holdings are partially classified:
+
+| Holding | Total MTM (Bt) | Investment Co Baht | % classified | Sale impact on numerator (per Bt sold) |
+|---------|---------------:|-------------------:|-------------:|---------------------------------------|
+| `Binance BNB OTC` (row 24) | 821,849,107 | 414,350,000 | **50.4%** | ~Bt 0.50 reduction per Bt MTM sold |
+| `Digital Assets (Market Value)` (row 23) — BTC, ETH, SOL, alts | 561,023,937 | 528,230,000 | 94.2% | ~Bt 0.94 per Bt MTM sold |
+| Listed Brooker portfolio | 27,270,719 | 27,270,719 | 100% | Bt 1.00 per Bt MTM sold |
+| Most non-listed (Varuna, ADFIN, Sukhothai) | (varies) | (full) | 100% | Bt 1.00 per Bt MTM sold |
+| `Total Investments` row B (which includes structured loans + Brooker self-investment) | 2,925,430,103 | — | — | NOT the 40% rule basis |
+
+**Operational implication for sell-down modeling:**
+
+When a sell-down is being sized to hit the 40% ratio:
+1. Compute `required_numerator_reduction = current_IC − target_IC`
+2. For each holding being sold, divide by its classification %:
+   `required_MTM_to_sell = required_numerator_reduction / classification_pct`
+3. **For BNB:** to remove Bt 100mn from the numerator, sell ~Bt 198mn of BNB MTM (because only 50.4% reduces the bucket)
+4. **For BTC/alts in row 23:** to remove Bt 100mn from the numerator, sell ~Bt 106mn of MTM (5.8% safety margin)
+
+**This is a 2× difference for BNB.** Always state the assumption explicitly and surface as a TBD-verify caveat — the partial classification could shift in a fresh accounting close.
+
 ### Fair value hierarchy applied to IC book
 
 | Class | Level | Source |
@@ -152,4 +175,6 @@ Per [[dat-sell-call-strategy]] (deck slides 19-25):
 - For DAT sell + call: **NEVER** quote premium yield without the strike, leverage, and max-drawdown context together.
 - **NEVER** use a single stale price as basis for an analytical conclusion — pair with a fresh source or flag staleness.
 - For loan reserves: **ALWAYS** report Outstanding AND After-Reserved separately; do not present after-reserved alone.
+- **NEVER** assume 1 Bt of MTM sold = 1 Bt of `Investment Company Baht` reduction. Look up classification % per holding (BNB OTC 50.4%, Digital Assets 94.2%, etc.) and divide accordingly. Sale-impact calculations that skip this step can be **2× wrong for BNB**.
+- **NEVER** quote the 40% ratio using `Total Investments` (row 32 col B) — that's ~Bt 1.2bn larger and yields ~89% (wildly wrong vs the published 52.23%). Always use `Investment Company Baht` (row 32 col H).
 - If asked about portfolio allocation or DD, **defer** to [[portfolio-agent]] or [[due-diligence-agent]].
