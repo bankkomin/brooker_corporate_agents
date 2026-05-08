@@ -29,6 +29,7 @@ These are the SKILL.md files that govern each IC agent's behaviour. They are mir
   - Digital asset treasury: [[digital-asset-treasury-divestment]] · [[dat-sell-call-strategy]] · [[option-wheel-prediction-markets]] · [[prediction-market-pilot]]
   - Engines & doctrine: [[singapore-vcc-structure]] · [[bicl-movie-private-credit]] · [[capital-sovereignty-doctrine]]
   - Other: [[corporate-startup-partnerships]] · [[robinhood-token-ipo]] · [[nft-festival-cafe-capex]] · [[adfin-bot-waiver]]
+  - **Proposals (draft, pre-vote):** [[q2-2026-rebalance-proposal]] *(2026-05-07 — BTC+BNB sell-down to 40%)* · companion HTML: `decisions/q2-2026-rebalance-proposal.html` *(mobile-friendly view)*
 - **Meeting Notes** — `ic/meeting-notes/` — IC committee minutes
   - [[IC-2025-01-23]] · [[IC-2025-04-02]] · [[IC-2026-03-19]] *(deck-augmented from `IC No1 Mar 2026.pptx`)*
 - **Entities** — `ic/entities/`

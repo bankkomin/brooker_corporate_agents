@@ -120,3 +120,17 @@ Ran a live behavioural test: "How much BTC + BNB to sell at $81k / $650 today to
 - Sync script: drift=0 across IC dept (5 files copied, byte-equal between skills/ic/ and obsidian-vault/skills/ic/)
 - All Hard Rules now PRD §11 compliant
 - Worked example in [[dat-sell-call-strategy]] matches the May 2026 test answer (51 BTC + 15,579 BNB with overlay)
+
+## [2026-05-07] proposal | Q2 2026 DAT rebalance proposal drafted
+
+Working analysis [[q2-2026-rebalance-proposal]] drafted in `decisions/` (status: `draft_for_review`). Captures the sizing analysis run during the Tier 7 behavioural test, including:
+
+- Two scenarios (with vs without 3x short-call overlay)
+- Three sub-paths under "without overlay" (BTC+BNB only, full deck plan, partial under-cap)
+- Side-by-side comparison table
+- Recommendation: Scenario A (3x overlay, deck-split) primary; Scenario B-2 (full deck plan) fallback
+- Required IC actions for vote
+- Caveats per patched skills (stale dashboard, BNB classification, Action #5 cap, SCB recall, custody migration)
+- Output JSON for downstream agent consumption
+
+This is the first **proposal-type** decision file in the vault. Status flow: `draft_for_review` → `under_ic_review` → `approved` (becomes a running decision) | `rejected` (archived) | `superseded` (replaced by revised proposal).

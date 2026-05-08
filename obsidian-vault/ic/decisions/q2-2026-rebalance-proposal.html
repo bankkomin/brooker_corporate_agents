@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="IC Q2 2026 DAT Rebalance Proposal — BTC + BNB sell-down analysis to hit 40% Investment Company / Total Assets cap by 30 June 2026.">
+<title>IC Q2 2026 Rebalance Proposal — Brooker</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #1e2933;
+  background: #f6f7f9;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 16px;
+  background: #ffffff;
+}
+@media (min-width: 720px) { .wrap { padding: 32px; margin: 24px auto; box-shadow: 0 2px 8px rgba(20,30,50,.06); border-radius: 8px; } }
+header { border-bottom: 3px solid #0d4a5c; padding-bottom: 16px; margin-bottom: 24px; }
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1c7293;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+h1 { color: #0d4a5c; font-size: 22px; line-height: 1.25; margin: 0 0 8px 0; }
+@media (min-width: 600px) { h1 { font-size: 28px; } }
+h2 { color: #0d4a5c; font-size: 18px; margin-top: 32px; padding-bottom: 6px; border-bottom: 1px solid #e0e4ea; }
+@media (min-width: 600px) { h2 { font-size: 22px; } }
+h3 { color: #1c7293; font-size: 16px; margin-top: 24px; }
+@media (min-width: 600px) { h3 { font-size: 18px; } }
+p { margin: 8px 0 12px; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.badge-status { background: #fff3cd; color: #846100; border: 1px solid #ffe082; }
+.badge-deadline { background: #fde2dd; color: #862016; border: 1px solid #f4ada1; }
+.badge-meta { background: #e6eef3; color: #1c4759; border: 1px solid #c4d7e0; }
+.tldr {
+  background: #f0f7f9;
+  border-left: 4px solid #1c7293;
+  padding: 14px 16px;
+  border-radius: 0 6px 6px 0;
+  margin: 16px 0 24px;
+}
+.tldr p { margin: 6px 0; }
+.tldr strong { color: #0d4a5c; }
+.bignum {
+  background: #0d4a5c;
+  color: #fff;
+  padding: 18px 20px;
+  border-radius: 8px;
+  margin: 16px 0;
+  text-align: center;
+}
+.bignum .label { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; }
+.bignum .num { font-size: 32px; font-weight: 700; line-height: 1.1; margin: 4px 0; }
+@media (min-width: 600px) { .bignum .num { font-size: 44px; } }
+.bignum .sub { font-size: 13px; opacity: 0.85; }
+.scenario {
+  border: 1px solid #e0e4ea;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 14px 0;
+  background: #ffffff;
+}
+.scenario-recommended {
+  border-color: #2c5f2d;
+  background: #f4f9f3;
+  border-left: 5px solid #2c5f2d;
+}
+.scenario-warn {
+  border-color: #b85042;
+  background: #fdf5f2;
+  border-left: 5px solid #b85042;
+}
+.scenario h3 { margin-top: 0; }
+.tag-rec { display: inline-block; background: #2c5f2d; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px; letter-spacing: 0.06em; margin-left: 6px; vertical-align: middle; font-weight: 600; }
+.tag-warn { display: inline-block; background: #b85042; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px; letter-spacing: 0.06em; margin-left: 6px; vertical-align: middle; font-weight: 600; }
+.tag-ok { display: inline-block; background: #1c7293; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px; letter-spacing: 0.06em; margin-left: 6px; vertical-align: middle; font-weight: 600; }
+.tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0; border-radius: 6px; border: 1px solid #e0e4ea; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+th { background: #0d4a5c; color: #fff; text-align: left; padding: 10px; font-weight: 600; }
+td { padding: 10px; border-top: 1px solid #e0e4ea; }
+tr:nth-child(even) td { background: #f9fafb; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.warn {
+  background: #fdf5f2;
+  border-left: 4px solid #b85042;
+  padding: 10px 14px;
+  border-radius: 0 6px 6px 0;
+  margin: 10px 0;
+  font-size: 14px;
+}
+.warn::before { content: "⚠ "; color: #b85042; font-weight: bold; }
+.ok {
+  background: #f4f9f3;
+  border-left: 4px solid #2c5f2d;
+  padding: 10px 14px;
+  border-radius: 0 6px 6px 0;
+  margin: 10px 0;
+  font-size: 14px;
+}
+.ok::before { content: "✓ "; color: #2c5f2d; font-weight: bold; }
+ul.checks { list-style: none; padding-left: 0; }
+ul.checks li { padding: 8px 0 8px 28px; position: relative; border-bottom: 1px solid #f0f3f6; }
+ul.checks li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #c4d7e0;
+  border-radius: 3px;
+  background: #fff;
+}
+details {
+  margin: 12px 0;
+  border: 1px solid #e0e4ea;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+details summary {
+  cursor: pointer;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: #0d4a5c;
+  user-select: none;
+}
+details[open] summary { border-bottom: 1px solid #e0e4ea; }
+details > *:not(summary) { padding: 0 14px; }
+pre {
+  background: #1e2933;
+  color: #d6e3ec;
+  padding: 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em; background: #f0f3f6; padding: 1px 5px; border-radius: 3px; }
+pre code { background: none; padding: 0; }
+.footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e0e4ea; font-size: 12px; color: #6c7884; }
+.footer a { color: #1c7293; }
+.smol { font-size: 13px; color: #5a6671; }
+@media print {
+  body { background: #fff; }
+  .wrap { box-shadow: none; max-width: 100%; padding: 0; }
+  .scenario-recommended, .scenario-warn { break-inside: avoid; }
+  details { background: none; } details[open] > * { display: block; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Investment Committee · Draft proposal</div>
+  <h1>Q2 2026 DAT Rebalance — BTC + BNB Sell-down to 40%</h1>
+  <div class="badges">
+    <span class="badge badge-status">Status: DRAFT FOR REVIEW</span>
+    <span class="badge badge-deadline">Deadline: 30 Jun 2026</span>
+    <span class="badge badge-meta">Authored by ic-chair-agent · 2026-05-07</span>
+  </div>
+</header>
+
+<section class="tldr">
+  <p><strong>Bottom line.</strong> The 40% Investment Company / Total Assets cap is binding on 30 June 2026 (54 days). Today's estimated ratio is <strong>~56.3%</strong>, requiring a <strong>~Bt 531 mn</strong> reduction in the Investment Company numerator.</p>
+  <p><strong>Recommended:</strong> Scenario A — sell <strong>51.3 BTC + 15,579 BNB</strong> with the 3x short-call overlay on Deribit. Raises Bt 461 mn cash plus ~Bt 70 mn premium income over 3 months. Already authorized via Mar 2026 IC vote.</p>
+  <p><strong>Fallback (no overlay):</strong> Scenario B-2 — deck's full plan (BTC + BNB + ETH/SOL/alts under Action #6). Avoids the re-vote that BTC-only-without-overlay would require.</p>
+</section>
+
+<section class="bignum">
+  <div class="label">Required Investment Company Baht reduction</div>
+  <div class="num">~Bt 531 mn</div>
+  <div class="sub">Today's est. ratio ~56.3% &nbsp;→&nbsp; target 40% by 30 Jun 2026 (54 days)</div>
+</section>
+
+<h2>Inputs</h2>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Input</th><th class="num">Value</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr><td>Investment Company Baht (Feb baseline)</td><td class="num">Bt 1,706,260,118</td><td>dashboard-2026-02 row 32 col H</td></tr>
+    <tr><td>Total Assets Q4 (Estimated)</td><td class="num">Bt 3,266,520,902</td><td>dashboard-2026-02 row 38 col B</td></tr>
+    <tr><td>Stale-data adjustment (Apr token-MTM delta)</td><td class="num">+ ~Bt 132 mn</td><td>Coin Weekly Report 2026-04-26</td></tr>
+    <tr><td><strong>Estimated current numerator</strong></td><td class="num"><strong>~Bt 1,838 mn</strong></td><td>portfolio.md stale-data recipe</td></tr>
+    <tr><td><strong>Estimated current ratio</strong></td><td class="num"><strong>~56.3%</strong></td><td>1,838 / 3,266</td></tr>
+    <tr><td>Target ratio</td><td class="num">40%</td><td>Investment Holding Limit</td></tr>
+    <tr><td><strong>Required reduction</strong></td><td class="num"><strong>~Bt 531 mn</strong></td><td>1,838 − (0.40 × 3,266)</td></tr>
+    <tr><td>BTC holdings</td><td class="num">164.6554 BTC</td><td>Coin Weekly Report row 2 (2026-03-31)</td></tr>
+    <tr><td>BNB holdings</td><td class="num">43,086.4760 BNB</td><td>Coin Weekly Report row 1</td></tr>
+    <tr><td>BTC price (today)</td><td class="num">$81,000</td><td>user input 2026-05-07</td></tr>
+    <tr><td>BNB price (today)</td><td class="num">$650</td><td>user input 2026-05-07</td></tr>
+    <tr><td>FX</td><td class="num">32.3088 THB/USD</td><td>Coin Weekly Report BOT Rate</td></tr>
+    <tr><td>Bt per BTC</td><td class="num">2,617,013</td><td>computed</td></tr>
+    <tr><td>Bt per BNB</td><td class="num">21,001</td><td>computed</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Active mandates (boundaries this proposal must respect)</h2>
+<p class="smol">Per IC-2026-03-19 Action &amp; Approval list:</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>#</th><th>Action</th><th>Cap</th></tr></thead>
+  <tbody>
+    <tr><td>#3</td><td>Option trading mandate (Deribit short-call overlay)</td><td>no notional cap stated</td></tr>
+    <tr><td><strong>#5</strong></td><td><strong>Sale of DAT BNB and BTC</strong></td><td><strong>up to 35% per asset OR THB 450 mn total</strong></td></tr>
+    <tr><td>#6</td><td>Sale of small tokens (KITE, MNT, MORPHO, SOL, TREE, etc.)</td><td>up to 100% (no cap)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Scenario A — WITH 3x short-call overlay <span class="tag-rec">RECOMMENDED</span></h2>
+
+<div class="scenario scenario-recommended">
+<p class="smol">IC-voted plan. Per dat-sell-call-strategy default execution mode (29.1 / 70.9 deck split, 3x leverage on Deribit).</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Side</th><th class="num">Quantity</th><th class="num">Bt raised</th></tr></thead>
+  <tbody>
+    <tr><td>BTC</td><td class="num"><strong>51.3 BTC</strong></td><td class="num">~Bt 134.3 mn</td></tr>
+    <tr><td>BNB</td><td class="num"><strong>15,579 BNB</strong></td><td class="num">~Bt 327.2 mn</td></tr>
+    <tr><td><strong>Total cash raised</strong></td><td></td><td class="num"><strong>~Bt 461 mn</strong></td></tr>
+    <tr><td>Plus 3x option premium <span class="smol">(3-month cumulative ~11.4% of unsold BTC+BNB at strike)</span></td><td></td><td class="num">~Bt 70 mn</td></tr>
+    <tr><td><strong>Total numerator reduction</strong></td><td></td><td class="num"><strong>~Bt 531 mn</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>Post-sell:</strong> 113.4 BTC residual · 27,506 BNB residual · estimated ratio <strong>~40.0%</strong>.</p>
+<p class="smol"><strong>Action #5 status:</strong> Bt 461 mn vs Bt 450 mn cap → marginal overshoot, consistent with deck's own published plan.</p>
+</div>
+
+<h2>Scenario B — WITHOUT short-call overlay (straight cash sale)</h2>
+<p>Without premium income, the entire numerator reduction must come from raw sales. Three viable paths:</p>
+
+<div class="scenario scenario-warn">
+<h3>B-1 · BTC + BNB only, deck split <span class="tag-warn">RE-VOTE REQUIRED</span></h3>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Side</th><th class="num">Quantity</th><th class="num">Bt raised</th><th class="num">% of stack</th></tr></thead>
+  <tbody>
+    <tr><td>BTC</td><td class="num"><strong>59.0 BTC</strong></td><td class="num">~Bt 154.5 mn</td><td class="num">35.8% ⚠</td></tr>
+    <tr><td>BNB</td><td class="num"><strong>17,927 BNB</strong></td><td class="num">~Bt 376.5 mn</td><td class="num"><strong>41.6% ✗</strong></td></tr>
+    <tr><td><strong>Total cash raised</strong></td><td></td><td class="num"><strong>~Bt 531 mn</strong></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="smol"><strong>Action #5 status:</strong> EXCEEDS by Bt 81 mn (notional) AND by 6.6pp on BNB (per-asset). Requires IC re-vote.</p>
+</div>
+
+<div class="scenario scenario-recommended">
+<h3>B-2 · Deck's FULL plan (BTC + BNB + ETH/SOL/alts) <span class="tag-rec">FALLBACK</span></h3>
+<p class="smol">The deck plan (slide 16) included Bt 124 mn of ETH/SOL/alts sale under Action #6 (no cap on small tokens).</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Side</th><th class="num">Quantity</th><th class="num">Bt raised</th><th>Action authority</th></tr></thead>
+  <tbody>
+    <tr><td>BTC</td><td class="num"><strong>51 BTC</strong></td><td class="num">~Bt 134 mn</td><td>Action #5 ✓ (31% of stack)</td></tr>
+    <tr><td>BNB</td><td class="num"><strong>15,580 BNB</strong></td><td class="num">~Bt 327 mn</td><td>Action #5 ⚠ (36% — same as deck)</td></tr>
+    <tr><td>ETH + SOL + alts</td><td class="num">~50% of token stack</td><td class="num">~Bt 70-100 mn</td><td>Action #6 ✓ (no cap)</td></tr>
+    <tr><td><strong>Total</strong></td><td></td><td class="num"><strong>~Bt 531-561 mn</strong></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="smol"><strong>Post-sell ratio:</strong> ~40.0% (or slightly under for buffer). Stays inside existing IC mandates without re-vote.</p>
+</div>
+
+<div class="scenario">
+<h3>B-3 · Stay strictly under Action #5 cap (partial fix only)</h3>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Side</th><th class="num">Quantity</th><th class="num">Bt raised</th></tr></thead>
+  <tbody>
+    <tr><td>BTC</td><td class="num"><strong>50 BTC</strong></td><td class="num">~Bt 130.9 mn</td></tr>
+    <tr><td>BNB</td><td class="num"><strong>15,192 BNB</strong></td><td class="num">~Bt 319.1 mn</td></tr>
+    <tr><td><strong>Total</strong></td><td></td><td class="num"><strong>~Bt 450 mn</strong> (exactly Action #5 cap)</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="smol"><strong>Post-sell ratio:</strong> ~42.2% — still over 40%. Closes Bt 450 mn of breach but not the deadline. Phase 2 covering ~Bt 81 mn required before 30 Jun 2026.</p>
+</div>
+
+<h2>Side-by-side comparison</h2>
+<div class="tablewrap">
+<table>
+  <thead>
+    <tr><th></th><th class="num">A · with 3x overlay</th><th class="num">B-2 · full deck plan</th><th class="num">B-1 · BTC+BNB only</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>BTC sold</td><td class="num">51.3</td><td class="num">51</td><td class="num">59</td></tr>
+    <tr><td>BNB sold</td><td class="num">15,579</td><td class="num">15,580</td><td class="num">17,927</td></tr>
+    <tr><td>Tokens (alts) sold</td><td class="num">—</td><td class="num">~50% of stack</td><td class="num">—</td></tr>
+    <tr><td>Total cash raised</td><td class="num">Bt 461 mn</td><td class="num">Bt 531-561 mn</td><td class="num">Bt 531 mn</td></tr>
+    <tr><td>Premium income</td><td class="num">+ Bt 70 mn</td><td class="num">—</td><td class="num">—</td></tr>
+    <tr><td>Total numerator reduction</td><td class="num">Bt 531 mn</td><td class="num">Bt 531-561 mn</td><td class="num">Bt 531 mn</td></tr>
+    <tr><td>Action #5 status</td><td>Marginal</td><td>Marginal</td><td><strong>Re-vote required</strong></td></tr>
+    <tr><td>BTC residual</td><td class="num">113.4</td><td class="num">113.7</td><td class="num">105.7</td></tr>
+    <tr><td>BNB residual</td><td class="num">27,506</td><td class="num">27,506</td><td class="num">25,160</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Recommendation</h2>
+<div class="ok"><strong>Primary:</strong> Scenario A (3x overlay, deck-split). Already IC-authorized via Actions #3 and #5. Generates Bt 70 mn premium that softens cap-headroom math. Aligns with the IC-voted plan from 2026-03-19.</div>
+<div class="ok"><strong>Fallback:</strong> Scenario B-2 (full deck plan including ETH/SOL/alts under Action #6). Stays inside existing mandates without re-vote. Was already implicit in deck slide 16.</div>
+<div class="warn"><strong>Avoid:</strong> Scenario B-1 (BTC+BNB-only without overlay) — forces a re-vote in a tight 54-day window and offers no operational advantage over B-2.</div>
+
+<h2>Required IC actions (before execution)</h2>
+<ul class="checks">
+  <li>Activate Action #3 (Option Trading Mandate) — confirm 3x Deribit short-call overlay active for May/Jun/Jul strikes ($85k / $92k / $98k)</li>
+  <li>Authorise execution under Action #5 at ~Bt 461 mn raise (within cap by Bt 11 mn margin)</li>
+  <li>Sequence sells before July 2026 to avoid concurrent SCB Bt 300 mn loan recall window</li>
+  <li>Pre-approve Q1 2026 close-number ingestion to convert this estimate into a confirmed plan before TWAP execution</li>
+</ul>
+
+<h2>Caveats</h2>
+<div class="warn"><strong>Stale dashboard.</strong> Numerator estimate Bt 1,838 mn = Feb 2026 baseline + Apr 2026 token MTM delta. Q1 2026 close numbers required before execution. Confidence ≤ 0.80.</div>
+<div class="warn"><strong>BNB partial Investment-Company classification (50.4%).</strong> If selling BNB only proportionally reduces the Investment-Company numerator, the BNB tranche may need to ~2×. Verify with accounting close before commitment. This single classification question can swing the proposal from "achievable within mandate" to "infeasible without alts sale".</div>
+<div class="warn"><strong>35% per-asset cap on Action #5.</strong> Scenarios A and B-2 both hit ~36% on BNB — marginal. The deck's own plan accepted this margin; this proposal preserves the same posture.</div>
+<div class="warn"><strong>Deadline tight.</strong> 54 days to 30 Jun 2026. TWAP execution typically takes 60-90 days. Window is workable but compressed; any delay (re-vote, custody migration friction, IC schedule slip) compresses execution risk.</div>
+<div class="warn"><strong>Custody migration in progress.</strong> Action #2 (open Hex Trust, migrate from Fireblocks) is still pending. Do not begin TWAP execution until at least one custody venue is confirmed live for option clearing.</div>
+
+<h2>Next steps</h2>
+<ul class="checks">
+  <li>Source Q1 2026 close numbers for Investment Company Baht and Total Assets</li>
+  <li>Verify BNB OTC Investment-Company classification % at latest accounting close</li>
+  <li>Confirm Action #3 (option mandate) operational readiness on Deribit</li>
+  <li>Confirm at least one custody venue (Fireblocks or Hex Trust) live for option clearing</li>
+  <li>Schedule IC vote: confirm Scenario A or escalate to Scenario B-2 / B-1 / B-3</li>
+  <li>Pre-stage TWAP execution plan with venue (Binance OTC) for ~60-day window</li>
+</ul>
+
+<details>
+<summary>📋 Output JSON (for downstream agent consumption)</summary>
+<pre><code>{
+  "proposal_id": "ic-q2-2026-dat-rebalance",
+  "proposal_date": "2026-05-07",
+  "target_completion": "2026-06-30",
+  "policy_status": {
+    "ratio_today_est": 0.563,
+    "cap": 0.40,
+    "deadline": "2026-06-30",
+    "days_remaining": 54,
+    "breach_severity_pp": 16.3
+  },
+  "required_reduction_bt_mn": 531,
+  "scenarios": {
+    "A_with_3x_overlay_recommended": {
+      "btc": 51.3,
+      "bnb": 15579,
+      "alts_bt_mn": 0,
+      "raise_bt_mn": 461,
+      "premium_bt_mn": 70,
+      "total_numerator_reduction_bt_mn": 531,
+      "btc_residual": 113.4,
+      "bnb_residual": 27506,
+      "post_sell_ratio_est": 0.40,
+      "action_5_status": "marginal",
+      "re_vote_required": false
+    },
+    "B2_full_deck_plan_fallback": {
+      "btc": 51,
+      "bnb": 15580,
+      "alts_bt_mn": "70-100",
+      "raise_bt_mn_range": [531, 561],
+      "premium_bt_mn": 0,
+      "btc_residual": 113.7,
+      "bnb_residual": 27506,
+      "post_sell_ratio_est": 0.40,
+      "action_5_status": "marginal",
+      "action_6_status": "within",
+      "re_vote_required": false
+    },
+    "B1_btc_bnb_only_no_overlay": {
+      "btc": 59,
+      "bnb": 17927,
+      "raise_bt_mn": 531,
+      "btc_residual": 105.7,
+      "bnb_residual": 25160,
+      "post_sell_ratio_est": 0.40,
+      "action_5_status": "exceeds_by_81mn_and_42pct_bnb_share",
+      "re_vote_required": true
+    },
+    "B3_partial_within_cap": {
+      "btc": 50,
+      "bnb": 15192,
+      "raise_bt_mn": 450,
+      "post_sell_ratio_est": 0.422,
+      "still_over_40_pct": true,
+      "phase_2_required": "Bt 81 mn before 2026-06-30",
+      "re_vote_required": false
+    }
+  },
+  "caveats": [
+    "stale_dashboard_q1_2026_close_required",
+    "bnb_classification_50_4pct_could_double_bnb_requirement",
+    "bnb_share_36pct_marginally_over_35pct_per_asset_cap",
+    "scb_300mn_recall_window_july_2026",
+    "custody_migration_hex_trust_pending",
+    "deadline_54_days_tight_for_twap_execution"
+  ],
+  "confidence": 0.74,
+  "recommended_scenario": "A_with_3x_overlay_recommended",
+  "fallback_scenario": "B2_full_deck_plan_fallback"
+}</code></pre>
+</details>
+
+<details>
+<summary>📚 Source references</summary>
+<ul>
+  <li>IC-2026-03-19 — Mar 2026 IC meeting; Action &amp; Approval list</li>
+  <li>dat-sell-call-strategy — sell+call strategy with default execution mode + sizing recipe</li>
+  <li>digital-asset-treasury-divestment — running parent decision</li>
+  <li>investment-holding-40pct-limit — running 40% rebalance decision</li>
+  <li>dashboard-2026-02 — Feb 2026 baseline</li>
+  <li>engine-framework — DAT doctrine (influence Bt 1,000mn / survivability Bt 500mn floors)</li>
+  <li>capital-sovereignty-doctrine — SCB Bt 300mn July 2026 recall watch</li>
+  <li>skills/ic/portfolio — stale-data recipe, BNB classification rule</li>
+  <li>skills/ic/valuation — Investment Company classification table</li>
+  <li>skills/ic/ic-chair-agent — approval-cap cross-check rule</li>
+  <li>Coin Weekly Report 2026-04-26 — BTC/BNB stacks + FX + token MTM</li>
+</ul>
+</details>
+
+<div class="footer">
+<p>This is a <strong>DRAFT</strong> proposal generated by <code>ic-chair-agent</code>. Not authorized to execute.<br>
+Markdown source: <code>obsidian-vault/ic/decisions/q2-2026-rebalance-proposal.md</code></p>
+<p>Brooker Corporate Agent · IC Department · Stage 16</p>
+</div>
+
+</div>
+</body>
+</html>
