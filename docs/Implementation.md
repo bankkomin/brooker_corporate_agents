@@ -1,8 +1,11 @@
 # Implementation Progress
 
-**Source:** PRD.md v2.2 + Architecture Design Spec
-**Current:** Stage 8 — Worker Dispatch + Obsidian + HR Department (complete)
+**Source:** PRD.md v2.2 + [Architecture Design Spec](superpowers/specs/2026-03-25-architecture-design.md)
+**Current:** Stage 10 — Phase 2 Framework Infrastructure (complete); Stages 11–19 scaffolded; Phase 1 closeout pending
 **Started:** 2026-03-25
+**Last refreshed:** 2026-05-13
+
+> **Doc cleanup (2026-05-13):** Per-stage execution plans for completed Stages 1–10 have been removed from `docs/superpowers/plans/` and `docs/superpowers/specs/`. The canonical record is this checklist + git history. The architecture spec and the Phase 2 framework spec remain. Per-dept plans/specs for Stages 11–19 remain in place.
 
 ---
 
@@ -54,7 +57,6 @@
 embedded via vLLM Qwen 9B (OpenAI-compatible), stored in Qdrant (4 collections: cac_docs, cac_chat,
 cac_knowledge, shared_policies). VaultWatcher uses watchdog + debounce + Postgres hash dedup.
 **Files:** 6 source files, 7 test files | **Tests:** 136 (121 unit + 15 integration)
-**Plan:** `docs/superpowers/plans/2026-03-30-stage2-rag-ingestion.md`
 
 ## Stage 3 — Slack Bot ✅ (2026-03-30)
 - [x] Create Slack App (permissions: channels:history, files:read, chat:write, app_mentions:read)
@@ -72,7 +74,6 @@ cac_knowledge, shared_policies). VaultWatcher uses watchdog + debounce + Postgre
 ACK-then-process pattern — all events acknowledged < 100ms, processed via asyncio.create_task().
 Orchestrator stubbed via ORCHESTRATOR_ENABLED=false feature flag (flip in Stage 4).
 **Files:** 11 source files, 9 test files | **Tests:** 47 new (45 unit + 2 integration)
-**Plan:** `docs/superpowers/plans/2026-03-30-stage3-slack-bot.md`
 
 ## Stage 4 — CAC Orchestrator ✅ (2026-03-31)
 - [x] Write AgentState TypedDict (src/state.py — 24 fields incl. validation_passed, validation_warnings)
@@ -104,7 +105,6 @@ detection) plus 7-day history cross-check against staging_proposals DB.
 **Deferred to Stage 5:** AsyncPostgresSaver checkpointer (multi-turn), agents using skills loader,
 interaction_id audit trail link, validation fail-closed on parse errors.
 **Files:** 30 source files + 6 placeholder skills, 16 test files | **Tests:** 142 (133 unit + 9 integration)
-**Plan:** `docs/superpowers/plans/2026-03-30-stage4-cac-orchestrator.md`
 
 ## Stage 5 — All Agents + Staging Writer ✅ (2026-03-31)
 - [x] Wire AsyncPostgresSaver checkpointer for multi-turn conversations
@@ -129,8 +129,6 @@ trail: create_interaction() before graph, update_interaction() after, with inter
 to staging_proposals. Escalation wiring: notify_escalation node fires POST to email-notifier stub
 (fire-and-forget). Validation hardened to fail-closed on unparseable LLM responses.
 **Files:** 17 new files, 20 modified files | **Tests:** 52 new (377 total)
-**Spec:** `docs/superpowers/specs/2026-03-31-stage5-agents-staging-design.md`
-**Plan:** `docs/superpowers/plans/2026-03-31-stage5-agents-staging.md`
 
 ## Stage 6 — Approval UI + Sync Back + Email Notifier ✅ (2026-04-02)
 - [x] Build services/approval-ui/ (Next.js 15 + shadcn/ui + Tailwind CSS 4, port 4000)
@@ -153,8 +151,6 @@ to staging_proposals. Escalation wiring: notify_escalation node fires POST to em
 RS256 JWT deep-links from email-notifier. Department-scoped RBAC enforced at gateway + UI layers.
 Config-driven department modularity via departments.json (single source of truth).
 **Files:** 40+ new files | **Tests:** 16 new (Vitest + pytest)
-**Spec:** `docs/superpowers/specs/2026-04-01-approval-ui-rbac-design.md`
-**Plan:** `docs/superpowers/plans/2026-04-01-stage6-approval-ui-rbac.md`
 
 ## Stage 7 — Paperclip + Integration ✅ (2026-04-02)
 - [x] Write all 11 SKILL.md files (5 shared + 5 CAC + 1 paperclip)
@@ -178,7 +174,6 @@ goes through Paperclip's event router with retry logic (3× exponential backoff)
 enforce data isolation — each dept has isolated data zones, Qdrant collections, escalation rules.
 OpenClaw registered as stub worker (Stage 8 wires real dispatch).
 **Files:** 20+ new files | **Tests:** 30+ new (391 total suite)
-**Spec:** `docs/superpowers/specs/2026-04-02-stage7-paperclip-integration-design.md`
 
 ## Stage 8 — Worker Dispatch + Obsidian + HR Department ✅ (2026-04-07)
 
@@ -238,7 +233,6 @@ routes files to department-specific Qdrant collections via config-driven path ma
 **Departments:** 2 (CAC + HR, was CAC only)
 **Agents:** 8 specialists (4 CAC + 4 HR)
 **Files:** 77 files changed, 4,644 lines added | **Tests:** 17 new test files
-**Plan:** `docs/superpowers/plans/2026-04-03-stage8-worker-dispatch-hr.md`
 
 ## Stage 9 — Wiki RAG Knowledge Base
 
@@ -248,8 +242,6 @@ institutional memory over time. Shifts from query-time RAG retrieval to ingestio
 knowledge compilation. Agents get smarter automatically as committee history accumulates.
 Department-scoped vault directories enforce data boundaries at 4 layers.
 
-**Design Spec:** `docs/superpowers/specs/2026-04-07-stage9-wiki-rag-design.md`
-**Plan:** `docs/superpowers/plans/2026-04-07-stage9-wiki-rag.md`
 **Pattern:** [Karpathy llm-wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
 
 ### 9A — Vault Structure, Schema & Department Boundaries
@@ -350,7 +342,6 @@ Phase 2 scales the system from 2 live departments (CAC, HR) to 11 by introducing
 **Reference documents (all artifacts committed 2026-04-28):**
 - 📊 Org chart: `docs/diagrams/department-agent-map.drawio`
 - 📋 Framework spec: `docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md`
-- 📋 Framework plan: `docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md`
 - 📋 Per-dept spec template: `docs/superpowers/specs/_per-dept-spec-template.md`
 - 📋 Per-dept plan template: `docs/superpowers/plans/_per-dept-plan-template.md`
 
@@ -408,7 +399,6 @@ Phase 2 scales the system from 2 live departments (CAC, HR) to 11 by introducing
 
 **Architecture:** Phase 2 framework lets each downstream dept stage land in ~1.5 days. Catalog (departments.json + document_inventory.json) + templates (services/_template-orchestrator + skills/_template) + shared services (reflection-engine + heartbeat) + per-skill permission registry + agent_performance signal-strength view.
 **Spec:** `docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md`
-**Plan:** `docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md`
 
 ## Stage 11 — Finance Department 📋 (planned, scaffolded 2026-04-28)
 

@@ -837,7 +837,7 @@ docs:
 - Approval-UI: new tab **Skill updates** + admin view `/admin/knowledge-gaps`
 - 9 skeleton dept specs + 9 skeleton dept plans (Stage 10 deliverable, per skeleton-now decision)
 
-**Implementation plan:** `docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md` (created next via `superpowers:writing-plans`).
+**Implementation status:** ✅ shipped 2026-04-28 — see `docs/Implementation.md` § Stage 10.
 
 **Acceptance:**
 
@@ -907,7 +907,7 @@ Every stage outputs **both** a spec and a plan as committed markdown files.
 
 | Stage | Spec file | Plan file |
 |---|---|---|
-| 10 | `docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md` | `docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md` |
+| 10 | `docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md` | (plan archived 2026-05-13 — Stage 10 shipped; see `docs/Implementation.md`) |
 | 11 | `docs/superpowers/specs/YYYY-MM-DD-stage11-finance-design.md` | `docs/superpowers/plans/YYYY-MM-DD-stage11-finance.md` |
 | 12 | `docs/superpowers/specs/YYYY-MM-DD-stage12-risk-design.md` | `docs/superpowers/plans/YYYY-MM-DD-stage12-risk.md` |
 | 13 | `docs/superpowers/specs/YYYY-MM-DD-stage13-legal-design.md` | `docs/superpowers/plans/YYYY-MM-DD-stage13-legal.md` |
@@ -1005,24 +1005,20 @@ Recorded during the brainstorming session that produced this spec. All confirmed
 
 - **Org chart:** `docs/diagrams/department-agent-map.drawio`
 - **PRD:** `PRD.md` v2.2 (sections 7 — CAC; 11 — SKILL.md format; 13 — build order)
-- **Implementation log:** `docs/Implementation.md` (Stages 1-9 complete)
+- **Architecture spec:** `docs/superpowers/specs/2026-03-25-architecture-design.md` (living document — covers Stages 1-19)
+- **Implementation log:** `docs/Implementation.md` (canonical stage-by-stage record; Stages 1-10 ✅, 11-19 📋)
 - **Project memory:** `CLAUDE.md`
-- **Stage 4 spec (CAC graph):** `docs/superpowers/specs/2026-03-30-stage4-cac-orchestrator.md`
-- **Stage 5 spec (agents + staging):** `docs/superpowers/specs/2026-03-31-stage5-agents-staging-design.md`
-- **Stage 6 spec (approval-ui):** `docs/superpowers/specs/2026-04-01-approval-ui-rbac-design.md`
-- **Stage 7 spec (paperclip):** `docs/superpowers/specs/2026-04-02-stage7-paperclip-integration-design.md`
-- **Stage 8 plan (HR + OpenClaw):** `docs/superpowers/plans/2026-04-03-stage8-worker-dispatch-hr.md`
-- **Stage 9 spec (wiki RAG):** `docs/superpowers/specs/2026-04-07-stage9-wiki-rag-design.md`
 - **Karpathy llm-wiki gist:** https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 - **Video 1 (Luuk Alleman — self-improving agent):** https://www.youtube.com/watch?v=DA_2G4ZQ6UI
 - **Video 2 (Cole Medin — second brain):** https://www.youtube.com/watch?v=1FiER-40zng
+
+> *Note (2026-05-13): Per-stage execution plans/specs for Stages 1–9 were removed during doc cleanup. The architecture spec and Implementation.md retain the design decisions; git history retains the originals.*
 
 ---
 
 ## Next steps
 
 1. ✅ Spec written
-2. Spec review loop via `superpowers:spec-document-reviewer` subagent — fix issues, re-dispatch up to 3 iterations
-3. User reviews this spec end-to-end
-4. On approval: invoke `superpowers:writing-plans` to draft the Stage 10 implementation plan at `docs/superpowers/plans/2026-04-28-stage10-phase2-framework.md`
-5. Stage 10 implementation begins (per the plan)
+2. ✅ Spec review loop completed
+3. ✅ Stage 10 implementation shipped 2026-04-28 — see `docs/Implementation.md` § Stage 10
+4. Onboard Phase 2 departments using this framework (Stages 11–19) — one plan + spec pair per dept under `docs/superpowers/{plans,specs}/`
