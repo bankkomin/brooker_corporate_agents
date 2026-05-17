@@ -96,3 +96,6 @@ logs/
 # JWT keys (never commit private keys)
 secrets/*.pem
 !secrets/.gitkeep
+
+# brooker-db-to-wiki extraction scratch (derived from external corporate data)
+.source-extracts/
