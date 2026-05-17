@@ -22,6 +22,7 @@ Requires: pdfplumber, python-docx, openpyxl, python-pptx, xlrd
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as _dt
 import shutil
 import subprocess
@@ -172,6 +173,11 @@ def extract_folder(root: Path, sub: str, out_root: Path) -> None:
 
 
 def main(argv: list[str]) -> int:
+    # Console output must tolerate non-ASCII (e.g. Thai) filenames on Windows.
+    for stream in (sys.stdout, sys.stderr):
+        with contextlib.suppress(AttributeError):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(description="Extract source files to markdown.")
     parser.add_argument("target", help="subfolder name under the root, or 'all'")
     parser.add_argument("--root", default=str(DEFAULT_ROOT), help="source root directory")
