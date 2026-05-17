@@ -1,30 +1,36 @@
 #!/usr/bin/env python3
-"""Extract raw corporate source files into readable markdown for wiki authoring.
+"""Extract raw corporate / research source files into readable markdown.
 
-Part of the `brooker-db-to-wiki` workflow. Walks `O:\\brooker_database\\{dept}\\`,
-converts each docx/pdf/xlsx/pptx file to plain markdown, and writes the result to
-`.source-extracts/{dept}/` (gitignored) so wiki articles can be authored from real
-content rather than filenames.
+Part of the `brooker-db-to-wiki` workflow. Walks a source root, converts each
+docx/pdf/xlsx/pptx/doc file to plain markdown, and writes the result to a
+gitignored scratch dir so wiki articles can be authored from real content.
 
-`O:\\brooker_database` is external corporate data — this script only READS from it.
+Each extract records the source file's last-modified timestamp, so the wiki
+articles can be dated for later recall.
+
+Source roots are READ ONLY — this script never writes to them.
 
 Usage:
-    python scripts/extract_sources.py ceo        # one department
-    python scripts/extract_sources.py all        # every department
+    python scripts/extract_sources.py ceo
+    python scripts/extract_sources.py all
+    python scripts/extract_sources.py --root "O:/2nd_Brain" Crypto
+    python scripts/extract_sources.py --root "O:/2nd_Brain" --out .source-extracts/2nd_brain all
 
 Requires: pdfplumber, python-docx, openpyxl, python-pptx, xlrd
+(.doc files fall back to the `antiword` CLI if available.)
 """
 from __future__ import annotations
 
+import argparse
+import datetime as _dt
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
-SOURCE_ROOT = Path("O:/brooker_database")
 REPO_ROOT = Path(__file__).resolve().parent.parent
-EXTRACT_ROOT = REPO_ROOT / ".source-extracts"
-
-DEPARTMENTS = ["ceo", "cio", "comms", "finance", "hr", "ic", "legal", "vcc"]
-SKIP_EXT = {".jpg", ".jpeg", ".png", ".gif"}
+DEFAULT_ROOT = Path("O:/brooker_database")
+SKIP_EXT = {".jpg", ".jpeg", ".png", ".gif", ".db", ".ini", ".php", ".css", ".js"}
 
 
 def extract_pdf(path: Path) -> str:
@@ -52,6 +58,18 @@ def extract_docx(path: Path) -> str:
             cells = [c.text.strip().replace("\n", " ") for c in row.cells]
             parts.append("| " + " | ".join(cells) + " |")
     return "\n\n".join(parts)
+
+
+def extract_doc(path: Path) -> str:
+    """Old-format .doc via the antiword CLI (if installed)."""
+    if shutil.which("antiword") is None:
+        raise RuntimeError("antiword not available for legacy .doc")
+    out = subprocess.run(
+        ["antiword", str(path)], capture_output=True, text=True, encoding="utf-8", errors="replace"
+    )
+    if out.returncode != 0:
+        raise RuntimeError(f"antiword failed: {out.stderr.strip()}")
+    return out.stdout
 
 
 def extract_xlsx(path: Path) -> str:
@@ -110,34 +128,35 @@ def extract_pptx(path: Path) -> str:
 EXTRACTORS = {
     ".pdf": extract_pdf,
     ".docx": extract_docx,
+    ".doc": extract_doc,
     ".xlsx": extract_xlsx,
     ".xls": extract_xls,
     ".pptx": extract_pptx,
 }
 
 
-def extract_department(dept: str) -> None:
-    src_dir = SOURCE_ROOT / dept
+def extract_folder(root: Path, sub: str, out_root: Path) -> None:
+    src_dir = root / sub
     if not src_dir.is_dir():
-        print(f"  [skip] {dept}: no source folder at {src_dir}")
+        print(f"  [skip] {sub}: no source folder at {src_dir}")
         return
 
-    out_dir = EXTRACT_ROOT / dept
+    out_dir = out_root / sub
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for path in sorted(p for p in src_dir.rglob("*") if p.is_file()):
         ext = path.suffix.lower()
         rel = path.relative_to(src_dir)
         if ext in SKIP_EXT:
-            print(f"  [image] {rel} — skipped")
             continue
         out_path = out_dir / rel.with_suffix(rel.suffix + ".md")
         out_path.parent.mkdir(parents=True, exist_ok=True)
+        mtime = _dt.date.fromtimestamp(path.stat().st_mtime).isoformat()
+        header = f"# {path.name}\n\n_Source: `{path}`_\n_Modified: {mtime}_\n\n"
         extractor = EXTRACTORS.get(ext)
         if extractor is None:
             out_path.write_text(
-                f"# {path.name}\n\n> Unsupported format `{ext}` — extract manually "
-                f"via the anthropic-skills toolkit.\n",
+                header + f"> Unsupported format `{ext}` — extract manually.\n",
                 encoding="utf-8",
             )
             print(f"  [manual] {rel} — unsupported {ext}")
@@ -145,30 +164,35 @@ def extract_department(dept: str) -> None:
         try:
             content = extractor(path)
         except Exception as exc:  # noqa: BLE001 - report and continue
-            out_path.write_text(
-                f"# {path.name}\n\n> Extraction failed: {exc}\n", encoding="utf-8"
-            )
+            out_path.write_text(header + f"> Extraction failed: {exc}\n", encoding="utf-8")
             print(f"  [error] {rel} — {exc}")
             continue
-        out_path.write_text(
-            f"# {path.name}\n\n_Source: `{path}`_\n\n{content}\n", encoding="utf-8"
-        )
-        print(f"  [ok]    {rel} -> {out_path.relative_to(REPO_ROOT)}")
+        out_path.write_text(header + content + "\n", encoding="utf-8")
+        print(f"  [ok]    {rel}  (modified {mtime})")
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 2:
-        print(__doc__)
+    parser = argparse.ArgumentParser(description="Extract source files to markdown.")
+    parser.add_argument("target", help="subfolder name under the root, or 'all'")
+    parser.add_argument("--root", default=str(DEFAULT_ROOT), help="source root directory")
+    parser.add_argument("--out", default=None, help="output dir (default .source-extracts/<root-name>)")
+    args = parser.parse_args(argv[1:])
+
+    root = Path(args.root)
+    if not root.is_dir():
+        print(f"Source root not found: {root}")
         return 1
-    target = argv[1].lower()
-    depts = DEPARTMENTS if target == "all" else [target]
-    if target != "all" and target not in DEPARTMENTS:
-        print(f"Unknown department '{target}'. Choose from: {', '.join(DEPARTMENTS)}, all")
-        return 1
-    for dept in depts:
-        print(f"Extracting {dept}/ ...")
-        extract_department(dept)
-    print(f"\nDone. Extracts written to {EXTRACT_ROOT}")
+    out_root = Path(args.out) if args.out else REPO_ROOT / ".source-extracts" / root.name.lower()
+
+    subs = (
+        sorted(p.name for p in root.iterdir() if p.is_dir())
+        if args.target == "all"
+        else [args.target]
+    )
+    for sub in subs:
+        print(f"Extracting {root.name}/{sub}/ ...")
+        extract_folder(root, sub, out_root)
+    print(f"\nDone. Extracts written to {out_root}")
     return 0
 
 

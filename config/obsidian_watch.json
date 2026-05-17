@@ -86,7 +86,19 @@
     {"path": "comms/meeting-notes/",         "collection": "comms_docs",      "doc_type": "meeting_note"},
     {"path": "comms/entities/",              "collection": "comms_docs",      "doc_type": "entity"},
     {"path": "comms/trends/",                "collection": "comms_knowledge", "doc_type": "trend"},
-    {"path": "comms/daily-logs/",            "collection": "comms_chat",      "doc_type": "interaction_log"}
+    {"path": "comms/daily-logs/",            "collection": "comms_chat",      "doc_type": "interaction_log"},
+
+    {"path": "macro/concepts/",              "collection": "macro_knowledge", "doc_type": "concept"},
+    {"path": "macro/entities/",              "collection": "macro_knowledge", "doc_type": "entity"},
+    {"path": "macro/trends/",                "collection": "macro_knowledge", "doc_type": "trend"},
+
+    {"path": "research/concepts/",           "collection": "research_knowledge", "doc_type": "concept"},
+    {"path": "research/entities/",           "collection": "research_knowledge", "doc_type": "entity"},
+    {"path": "research/trends/",             "collection": "research_knowledge", "doc_type": "trend"},
+
+    {"path": "regulations/concepts/",        "collection": "regulations_knowledge", "doc_type": "concept"},
+    {"path": "regulations/entities/",        "collection": "regulations_knowledge", "doc_type": "entity"},
+    {"path": "regulations/trends/",          "collection": "regulations_knowledge", "doc_type": "trend"}
   ],
   "ignore_folders": [".obsidian", "templates", "archive", "_memory"],
   "ignore_files": ["index.md", "log.md", "lint-report.md"],
