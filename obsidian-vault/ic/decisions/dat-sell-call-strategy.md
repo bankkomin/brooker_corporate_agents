@@ -6,10 +6,10 @@ status: "approval_required"
 target_completion: "2026-Q2"
 related: ["digital-asset-treasury-divestment", "investment-holding-40pct-limit", "binance-bnb-otc", "engine-framework", "deribit"]
 first_seen: "2026-03-19"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "decision", "options", "dat", "twap", "short-call", "deribit", "approval-pending"]
 ---
 
@@ -58,6 +58,15 @@ Only deviate (e.g. BTC-only sell, or BNB-only sell) if:
 1. The user explicitly requests one-sided
 2. **Surface the doctrine breach** if the BTC stack would drop below the Bt 1,000mn influence floor
 3. **Cross-check Action #5 cap** (Bt 450mn or 35% of stack) — overshoots require re-vote
+
+## Status timeline
+
+| Meeting | Status | Notes |
+|---------|--------|-------|
+| 2026-03-19 | **Approval required** — full TWAP + 3x short-call plan tabled | Strikes $85k/$92k/$98k; ~Bt 475 mn raise |
+| 2026-05-12 | **Sell plan simplified** — May deck slide 14 drops to a straight Round-1 reduction (40% BTC, 5% BNB, all ETH/SOL/MNT) raising **Bt 392 mn** → ratio 39.83% | The May deck no longer details the option overlay; "Sale of Digital Asset Treasury Program" appears on the [[IC-2026-05-12]] Action & Approval list. Strike-by-strike overlay parameters below remain the Mar 2026 design until re-tabled. |
+
+> **Note (May 2026):** the May deck presents a *simpler* execution than the Mar sell+call plan — a direct cash sale of Bt 392 mn rather than the premium-cushioned overlay. See [[digital-asset-treasury-divestment]] for the revised Round-1 economics. The 3x short-call overlay and the [[q2-2026-rebalance-proposal]] sizing analysis remain on file as the optionality-preserving alternative.
 
 ## The "Blind Sell Problem" *(deck slide 19)*
 
@@ -131,3 +140,5 @@ Only deviate (e.g. BTC-only sell, or BNB-only sell) if:
 
 - IC No1 Mar 2026 deck slides 16-25 (centrepiece of meeting)
 - [[IC-2026-03-19]] §7c Sell + Call Strategy
+- IC No2 May2026 deck slide 14 (revised simplified Round-1 reduction) + slide 26 (Action & Approval)
+- [[IC-2026-05-12]] §8 Digital Asset Treasury

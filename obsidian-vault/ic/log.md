@@ -134,3 +134,26 @@ Working analysis [[q2-2026-rebalance-proposal]] drafted in `decisions/` (status:
 - Output JSON for downstream agent consumption
 
 This is the first **proposal-type** decision file in the vault. Status flow: `draft_for_review` → `under_ic_review` → `approved` (becomes a running decision) | `rejected` (archived) | `superseded` (replaced by revised proposal).
+
+## [2026-05-17] ingest | 13 articles from brooker_database/ic (May 2026 IC meeting)
+
+Sources:
+- `IC 02 meeting May2026.docx` (minutes) → [[IC-2026-05-12]]
+- `IC No2 May2026.pptx` (27-slide deck) → augments [[IC-2026-05-12]]
+
+The Feb/Mar 2026 source files (`IC 01 meeting Feb2026.docx`, `IC No1 Mar 2026.pptx`) were already covered by [[IC-2026-03-19]] — re-compared, no missing substantive content; not re-ingested.
+
+New files (13):
+- 1 meeting note: [[IC-2026-05-12]] (IC Meeting #2 2026 — 12 May 2026, 10:30 AM)
+- 3 decisions (new 2026 objectives #9-11): [[gold-tokenization-advisory-mandate]] · [[preferred-shares-digital-credit]] · [[corporate-ai-orchestration-digital-twin]]
+- 9 entities: [[maven11]] · [[3iq]] · [[nickel-digital]] · [[watervalley]] (Yield FoF DD candidates) · [[interactive-brokers]] (CME broker) · [[kalshi]] · [[polymarket]] · [[opinion-lab]] · [[pump-fun]] (prediction-market venues)
+
+Updated files (status-timeline rows + May source references, `updated` bumped to 2026-05-17):
+- Decisions: [[digital-asset-treasury-divestment]] (revised Round-1 economics → 39.83%) · [[dat-sell-call-strategy]] (sell plan simplified) · [[investment-holding-40pct-limit]] (53.9% Q2 est.) · [[robinhood-token-ipo]] (status → exit/sell company) · [[option-wheel-prediction-markets]] (venue onboarding) · [[prediction-market-pilot]] (named venues) · [[singapore-vcc-structure]] (MCL $8.78, Yield FoF managers) · [[bicl-movie-private-credit]] (Cannes sourcing) · [[corporate-startup-partnerships]] (ZK pivot to robotics) · [[sukhothai-redemption]] (resume Q2) · [[red-flag-portfolio-reduction]] (MILL suspended) · [[capital-sovereignty-doctrine]]
+- Concepts: [[okr-500mb-recurring-income]] (revised May income build)
+- Entities: [[mill]] (SET trading suspension — failure to file Q4 2025 financials) · [[sukhothai-fund]] · [[binance-bnb-otc]] · [[hex-trust]] · [[fireblocks]] (migration near complete) · [[structured-loan-portfolio]] (loan book unchanged)
+- [[index]] — new decisions / meeting note / entities linked
+
+Notes:
+- No standalone dashboard `.xlsx` accompanied the May meeting — no new `trend` article created (the deck references "Dashboards" only as a macro section, not a portfolio snapshot file).
+- Name spelling: deck slide 13 has "Nickle Digital" — recorded as entity `nickel-digital` (manager's actual name) with the deck spelling noted.

@@ -6,10 +6,10 @@ status: "ongoing"
 target_amount: "USD 2mn / year"
 related: ["sukhothai-fund", "investment-holding-limit"]
 first_seen: "2025-01-23"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "decision", "redemption", "sukhothai", "running-objective"]
 ---
 
@@ -27,6 +27,7 @@ Run a phased redemption from the [[sukhothai-fund]] toward a steady **2 mn USD /
 | 2025-01-23 | **Resume** | 500k / quarter | "Now will resume 500k quarterly redemptions" |
 | 2025-04-02 | **Special** | 125k Q1 + 500k/q | "q1 special 125k" |
 | 2026-03-19 | **Pause requested** | — | Adrian requested pause as MAI near all-time low; **continue 2mn annually** |
+| 2026-05-12 | **Resume in Q2** | 2mn / year ($500k/quarter) | Objective #1: "decrease SUKHOTHAI (2mn) – equal $500k per quarter. Resume in Q2." Fund AUM 58.6 mn USD; +2.04% MoM |
 
 ## Rationale
 
@@ -45,3 +46,4 @@ Run a phased redemption from the [[sukhothai-fund]] toward a steady **2 mn USD /
 - IC-2025-01-23 — Sukhothai section
 - IC-2025-04-02 — Sukhothai section (special q1 125k)
 - IC-2026-03-19 — Sukhothai section (Adrian's pause request)
+- IC-2026-05-12 — Sukhothai section + Objective #1 ("equal $500k per quarter. Resume in Q2")

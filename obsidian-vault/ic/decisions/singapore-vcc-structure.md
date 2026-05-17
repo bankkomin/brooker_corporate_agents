@@ -4,12 +4,12 @@ type: "decision_log"
 department: "ic"
 status: "active_engine_1"
 structure: "Singapore Variable Capital Company"
-related: ["brook-limited-partners-fof"]
+related: ["brook-limited-partners-fof", "maven11", "3iq", "nickel-digital", "watervalley"]
 first_seen: "2026-03-19"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "decision", "vcc", "singapore", "fund-structure", "engine-1"]
 ---
 
@@ -48,6 +48,20 @@ Underlying funds: 12 / target 20-30. Underlying companies: 350+ / target 500+.
 ## Brook Turtle Yield FoF — underlying manager matrix
 
 Hyperithm · Edge Capital · Alphanounce · M1-A1 · Praxos · Valos · STRC
+
+**Additional DD candidates (May 2026 deck slide 13)** — "world class, long track record, survived black swans": [[maven11]] · [[3iq]] · [[nickel-digital]] · [[watervalley]].
+
+## May 2026 update *(deck slides 11-13)*
+
+| Item | Mar 2026 | May 2026 |
+|------|----------|----------|
+| MCL paid | $8.11 mn | **$8.78 mn** (commit unchanged $17.6 mn) |
+| Soft-close LP detail | $10mn / 1 LP | Named pipeline: Legacy HK FO, HaidiLao FO, Chris, Sumitomo, Siracha |
+| Yield Sub-Fund investor sizing | BICL $5mn + $1-5mn investors, Q2 | **BICL $0-5mn + $5-10mn investors, Q3** |
+| Yield Sub-Fund go-live | Q2 setup | **Live Q3** (setup ~$100k) |
+| Paul V. (Pantera) lunch April 21 | planned | **Complete** |
+
+Status (May 2026 Objective #7): "VC FoF: fund raise. Yield FoF: setup Q3."
 
 ## Product Discovery (sub-funds in R&D)
 
@@ -88,3 +102,5 @@ Status (Mar 2026): "Pause" except VC FoF.
 
 - IC-2025-04-02 (Objectives 2025 — "VC PE Trust- Pantera 25m, Metalayer 1m, Lucas ex inception, LV2C 2.5m, Bankless fund 2"; "Other PE Trust...")
 - IC-2026-03-19 (Objectives 2025 #8 — "Singapore Variable Capital Company Structure. Brook Technology VCC. SubFund 1: Brook Limited Partners Fund of Funds I. SubFund 2: yield stable return fund."; Objectives 2026 #7 — "Engine 1, VC FoF: fund raise; Yield FoF: setup")
+- IC No2 May2026 deck slides 11-13 (revised OKR-1 table; MCL $8.78 paid; additional Yield FoF managers Maven11/3iQ/Nickle Digital/Watervalley)
+- IC-2026-05-12 (Objectives 2026 #7 — "VC fof: fund raise Yield fof: setup q3")

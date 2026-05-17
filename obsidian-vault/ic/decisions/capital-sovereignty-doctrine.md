@@ -3,12 +3,12 @@ title: "Capital Sovereignty & Stay Liquid Doctrine"
 type: "decision_log"
 department: "ic"
 status: "active_doctrine"
-related: ["liquidity-management-policy", "investment-holding-40pct-limit", "dat-sell-call-strategy", "hex-trust"]
+related: ["liquidity-management-policy", "investment-holding-40pct-limit", "dat-sell-call-strategy", "hex-trust", "preferred-shares-digital-credit"]
 first_seen: "2026-03-19"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "doctrine", "liquidity", "sovereignty", "scb-recall-risk", "funding"]
 ---
 
@@ -30,7 +30,7 @@ Maintain **funding sovereignty** by diversifying the firm's funding channels and
 |---------|-----------|--------|
 | **Pledge crypto for dollar loan** via [[hex-trust]] | Custodial pledge | Active — open Hex Trust custody account (Action #2 in IC approval list) |
 | **Pledge crypto for dollar loan** via Aave | DeFi over-collateralised lending | Under consideration |
-| **Preferred Shares** | Capital structure addition | Under consideration |
+| **Preferred Shares as Digital Credit** | Capital structure addition — STRC-similar / financially-engineered digital credit | **In progress** — concept paper (2026 Objective #10) — see [[preferred-shares-digital-credit]] |
 | **Fixed Income product** | Issue paper | Under consideration |
 | **STRC** | (acronym not expanded in deck) | Under consideration |
 | **SCB credit line** | Bt 240 mn available | Active backstop |
@@ -45,11 +45,20 @@ Maintain **funding sovereignty** by diversifying the firm's funding channels and
 
 - **Open [[hex-trust]] Custody Account and migrate from [[fireblocks]]** — Action #2 in [[IC-2026-03-19]] Action & Approval list.
 
+## May 2026 update *(deck slide 18)*
+
+The doctrine was restated unchanged at the May 2026 IC meeting. Two developments:
+
+1. The **Preferred Shares as Digital Credit** funding channel was formalised as a tracked 2026 objective (#10, "In progress") — see [[preferred-shares-digital-credit]].
+2. **Hex Trust custody migration** is now reported as "almost complete; terminate Fireblocks" (deck slide 15) — the dual-custody window is closing.
+
 ## Source references
 
 - IC No1 Mar 2026 deck slide 31 — Capital Sovereignty & Staying Liquid Doctrine
 - IC No1 Mar 2026 deck slide 34 — Action & Approval (Hex Trust migration)
 - [[IC-2026-03-19]] §8
+- IC No2 May2026 deck slide 18 — Capital Sovereignty & Staying Liquid Doctrine
+- [[IC-2026-05-12]] §9
 
 ## Agent Notes
 

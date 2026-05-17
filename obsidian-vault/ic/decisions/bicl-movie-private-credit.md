@@ -6,10 +6,10 @@ status: "due_diligence"
 target_completion: "2026-Q3"
 related: ["singapore-vcc-structure", "obsidian-creek-capital", "structured-loan-portfolio", "engine-framework"]
 first_seen: "2026-03-19"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "decision", "private-credit", "movies", "film-financing", "bicl", "obsidian-creek"]
 ---
 
@@ -45,6 +45,15 @@ Stand up the **BICL Pilot Private Credit Facility** as a senior-lender film-fina
 
 - **Brook Turtle Yield FoF** (SubFund 2 of [[singapore-vcc-structure]]) — Obsidian Creek Film Private Credit listed on the "Product Discovery" line of sub-funds in R&D, with **target 15-20% gross**.
 
+## Status timeline
+
+| Meeting | Status | Notes |
+|---------|--------|-------|
+| 2026-03-19 | **DD for Q3** — BICL Pilot Private Credit Facility tabled | $10mn facility, 1:1 with [[obsidian-creek-capital]] |
+| 2026-05-12 | **DD for Q3 — sourcing at Cannes Festival** | Objective #8: "New Structured Loan for 60% growth portion – private credit movie receivables. DD for Q3. Cannes Festival." |
+
+> May 2026 detail: deal sourcing / DD for the movie-receivables book is targeted around the **Cannes Festival** — the first concrete sourcing channel recorded for this pilot.
+
 ## Why pilot now?
 
 - 2026 Objective #8: "New Structured Loan for 60% growth portion — **private credit movie receivables**. DD for Q3."
@@ -65,3 +74,4 @@ Stand up the **BICL Pilot Private Credit Facility** as a senior-lender film-fina
 - IC No1 Mar 2026 deck slide 29 — BICL Pilot Private Credit Facility for Q3
 - IC No1 Mar 2026 deck slide 13 — Brook Turtle Yield FoF Product Discovery line ("Obsidian Creek Film Private Credit (USD) - Status: Due Diligence")
 - [[IC-2026-03-19]] §10 Strategic Partner Map
+- IC-2026-05-12 (Objectives 2026 #8 — "New Structured Loan for 60% growth portion – private credit movie receivables. DD for Q3. Cannes Festival.")

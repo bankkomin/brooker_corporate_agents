@@ -6,10 +6,10 @@ status: "ongoing_critical"
 deadline: "2026-06-30"
 related: ["investment-holding-limit", "sukhothai-redemption", "digital-asset-treasury-divestment", "red-flag-portfolio-reduction"]
 first_seen: "2025-01-23"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "decision", "regulatory", "investment-holding", "bot", "deadline-2026Q2", "running-objective"]
 ---
 
@@ -26,6 +26,7 @@ Bring `Investment / Total Assets` below the **40% regulatory cap** by **30 June 
 | 2025-01-23 | 54.5% (Q3) | 2-yr grace, no new investment |
 | 2025-04-02 | 56.9% (Q4) | 2-yr grace, no new investment |
 | 2026-03-19 | 52.8% (Q4) | **Grace finished June 30. Rebalance in Q2.** Sell + call option |
+| 2026-05-12 | **53.9% (Q2 est.)** | Grace finished June 30. Rebalance in Q2 — Sell + call option. May deck slide 14 models a Round-1 sell to **39.83%** ✓ |
 
 ## Reduction levers (active workstreams)
 
@@ -51,3 +52,4 @@ Bring `Investment / Total Assets` below the **40% regulatory cap** by **30 June 
 - IC-2025-01-23 (Objectives 2024 — "Investment Holding 40% of Assets...2 year grace, no new investment")
 - IC-2025-04-02 (Objectives 2025 — same language)
 - IC-2026-03-19 (Objectives 2025 #4 — "Q2"; Objectives 2026 #3 — "Grace finished June 30. Rebalance in Q2. Sell + call option")
+- IC-2026-05-12 (Master sheet — "Investment/Total Asset estimated to be 53.9% for Q2"; Objective #3 — "Grace finished June 30. Rebalance in Q2. Sell + call option")

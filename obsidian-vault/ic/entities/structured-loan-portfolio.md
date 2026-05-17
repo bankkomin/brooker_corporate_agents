@@ -6,9 +6,9 @@ department: "ic"
 status: "active"
 related: ["concentration-policy", "b", "cv"]
 first_seen: "2025-01-23"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "entity", "structured-loan", "credit"]
 ---
 
@@ -79,4 +79,6 @@ Plus the historical book, two new loans planned:
 - IC-2026-03-19 (Objectives 2026 #8; "Structured loan -Please refer to presentation")
 - **IC No1 Mar 2026 deck slide 27** — canonical Mar 2026 inventory (12 loans, Bt 1,296.68 mn)
 - IC No1 Mar 2026 deck slide 28 — New Structure Loan plan
+- IC No2 May2026 deck slide 16 — loan book **unchanged** from Mar (same 12 loans, Bt 1,296.68 mn / 693.44 after reserved)
+- [[IC-2026-05-12]] §7
 - [[dashboard-2026-02]] row 31

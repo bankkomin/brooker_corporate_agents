@@ -4,12 +4,12 @@ type: "decision_log"
 department: "ic"
 status: "approval_required"
 budget: "USD 50,000"
-related: ["option-wheel-prediction-markets", "engine-framework"]
+related: ["option-wheel-prediction-markets", "engine-framework", "kalshi", "polymarket", "opinion-lab", "pump-fun"]
 first_seen: "2026-03-19"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "decision", "prediction-markets", "polymarket", "chainlink", "engine-3", "approval-pending"]
 ---
 
@@ -74,10 +74,26 @@ Pilot a **$50,000 USDC** budget across three prediction-market strategies on Pol
 
 > Buy near-certainty YES positions (>95% probability) **slightly below $1.00**. Hold to settlement. Capture the remaining time premium as pure yield. Risk: black swan reversals — mitigated by >95% threshold filter.
 
+## Status timeline
+
+| Meeting | Status | Notes |
+|---------|--------|-------|
+| 2026-03-19 | **Approval required** — $50k pilot, 3 strategies on Polymarket | Action & Approval item #4 |
+| 2026-05-12 | **Re-tabled with named venues** — "Pilot Prediction market arbitrage strategies – $50k. Approve and open accounts for [[kalshi]], [[polymarket]], [[opinion-lab]], [[pump-fun]]" | Venue list now explicit (Mar deck assumed Polymarket only) |
+
+## Venues (May 2026)
+
+The May 2026 deck (slide 26) names four venues for account opening — broadening the Mar deck's Polymarket-only assumption:
+
+- [[kalshi]] — US-regulated prediction-market exchange
+- [[polymarket]] — crypto-native, primary pilot venue (strategy design basis)
+- [[opinion-lab]] — prediction-market venue
+- [[pump-fun]] — Solana-based venue
+
 ## Required IC approvals
 
 - **$50k budget release** for pilot
-- Operational scope: Polymarket account, Chainlink oracle integration, trading infra (latency for strategy A)
+- Operational scope: accounts on [[kalshi]] / [[polymarket]] / [[opinion-lab]] / [[pump-fun]], Chainlink oracle integration, trading infra (latency for strategy A)
 - Risk limit: position size $2,500; total exposure ≤ $50k
 
 ## Linked
@@ -89,6 +105,8 @@ Pilot a **$50,000 USDC** budget across three prediction-market strategies on Pol
 
 - IC No1 Mar 2026 deck slide 33 — Prediction Market — Pilot Strategy
 - [[IC-2026-03-19]] §9 + Action & Approval
+- IC No2 May2026 deck slide 26 — "Pilot Prediction market arbitrage strategies – $50k. Approve and open accounts for Kalshi, Polymarket, Opinion Lab, Pump.fun"
+- [[IC-2026-05-12]] Action & Approval
 
 ## Agent Notes
 

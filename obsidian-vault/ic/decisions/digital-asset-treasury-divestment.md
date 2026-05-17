@@ -5,10 +5,10 @@ department: "ic"
 status: "ongoing"
 related: ["binance-bnb-otc", "nfts-cryptopunks-apes", "investment-holding-limit"]
 first_seen: "2025-01-23"
-last_seen: "2026-03-19"
+last_seen: "2026-05-12"
 decision_owner: "ic-chair-agent"
 created: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-17"
 tags: ["ic", "decision", "digital-asset", "divestment", "running-objective"]
 ---
 
@@ -25,6 +25,25 @@ Phased divestment of the digital asset treasury (BNB, BTC, ETH, ADA, DOT, ALGO, 
 | 2025-01-23 | **TBD** | "2024 Digital Asset Treasury Divestment Plan: TBD" |
 | 2025-04-02 | **Phase 1 begun** | "$200k bitcoin Q2" |
 | 2026-03-19 | **Revised Phase 1, 2, 3** + **Sell-Call overlay approved (pending IC vote)** | See [[dat-sell-call-strategy]] for full plan |
+| 2026-05-12 | **Round-1 sell plan simplified** — sale of the Digital Asset Treasury Program on the IC Action & Approval list | Sell 40% BTC @ $80k → 100 BTC core; sell 5% BNB @ $650 → 40,000 BNB core; sell ALL ETH/SOL/Mantle ($5.9mn); raise **Bt 392 mn** → new ratio **39.83%** ✓ |
+
+## Round 1 economics — REVISED (May 2026 deck slide 14)
+
+The May 2026 deck restates the Round-1 plan more conservatively than the Mar deck:
+
+| Action | Bt (mn) |
+|--------|---------|
+| Reduce Bitcoin 40% → 100 BTC (Survival) | -160 |
+| Reduce BNB 5% → 40,000 BNB (Survival) | -43 |
+| Realized Profit (BTC/BNB) | 71 |
+| Realize Profit (+ETH, SOL, MNT $5.9mn) | 106 |
+| New Loan | *240 |
+| **Total cash raised** | **~Bt 392 mn** |
+| Total Asset Q1 '26 | 3,127 → Adjusted **3,473** |
+| Investment — current → Projected | 1,711 → **1,383** |
+| **New Ratio** | **39.83%** ✓ |
+
+Core DAT retained after sale: **100 BTC + 40,000 BNB ≈ Bt 1.09 bn**. *Bt 240 mn new loan available. See [[IC-2026-05-12]] §8.
 
 ## Phase plan (Mar 2026 deck slides 17-18)
 
@@ -70,3 +89,4 @@ Phased divestment of the digital asset treasury (BNB, BTC, ETH, ADA, DOT, ALGO, 
 - IC-2025-01-23 (Objectives 2024 — "2024 Digital Asset Treasury Divestment Plan: TBD")
 - IC-2025-04-02 (Objectives 2025 — "$200k bitcoin Q2")
 - IC-2026-03-19 (Objectives 2025 — "Revised Phase 1,2,3"; multi-line digital asset workstreams)
+- IC-2026-05-12 (`IC No2 May2026.pptx` slide 14 — revised Round-1 reduction; slide 26 — Sale of DAT Program on Action & Approval list)
