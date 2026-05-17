@@ -9,7 +9,9 @@
       "qdrantCollection": "ceo_docs",
       "ingestSource": "sharepoint://CEO/Strategic",
       "frequency": "annual",
-      "crossReadAccess": ["legal"]
+      "crossReadAccess": [
+        "legal"
+      ]
     },
     {
       "id": "doc_ceo_leadership_monthly",
@@ -86,7 +88,12 @@
       "qdrantCollection": "finance_docs",
       "ingestSource": "sharepoint://Finance/Reports",
       "frequency": "annual",
-      "crossReadAccess": ["ceo", "cac", "risk", "cio"]
+      "crossReadAccess": [
+        "ceo",
+        "cac",
+        "risk",
+        "cio"
+      ]
     },
     {
       "id": "doc_finance_financial_statements",
@@ -97,7 +104,12 @@
       "qdrantCollection": "finance_docs",
       "ingestSource": "sharepoint://Finance/Reports",
       "frequency": "quarterly",
-      "crossReadAccess": ["ceo", "cac", "risk", "cio"]
+      "crossReadAccess": [
+        "ceo",
+        "cac",
+        "risk",
+        "cio"
+      ]
     },
     {
       "id": "doc_finance_networth_report",
@@ -108,7 +120,10 @@
       "qdrantCollection": "finance_docs",
       "ingestSource": "sharepoint://Finance/Reports",
       "frequency": "monthly",
-      "crossReadAccess": ["ceo", "cac"]
+      "crossReadAccess": [
+        "ceo",
+        "cac"
+      ]
     },
     {
       "id": "doc_finance_bg_weekly",
@@ -141,7 +156,10 @@
       "qdrantCollection": "ib_docs",
       "ingestSource": "sharepoint://IB/Reports",
       "frequency": "quarterly",
-      "crossReadAccess": ["ceo", "ic"]
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
     },
     {
       "id": "doc_ib_deal_docs",
@@ -152,7 +170,9 @@
       "qdrantCollection": "ib_docs",
       "ingestSource": "sharepoint://IB/Deals",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_ib_pitch_books",
@@ -251,7 +271,11 @@
       "qdrantCollection": "ic_docs",
       "ingestSource": "sharepoint://IC/Policies",
       "frequency": "annual",
-      "crossReadAccess": ["ceo", "cac", "cio"]
+      "crossReadAccess": [
+        "ceo",
+        "cac",
+        "cio"
+      ]
     },
     {
       "id": "doc_ic_ic_minutes",
@@ -262,7 +286,9 @@
       "qdrantCollection": "ic_docs",
       "ingestSource": "sharepoint://IC/Minutes",
       "frequency": "monthly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_ic_investment_memos",
@@ -273,7 +299,9 @@
       "qdrantCollection": "ic_docs",
       "ingestSource": "sharepoint://IC/Memos",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_cac_alco_tracker",
@@ -284,7 +312,11 @@
       "qdrantCollection": "cac_docs",
       "ingestSource": "sharepoint://CAC/Trackers",
       "frequency": "monthly",
-      "crossReadAccess": ["ceo", "finance", "risk"]
+      "crossReadAccess": [
+        "ceo",
+        "finance",
+        "risk"
+      ]
     },
     {
       "id": "doc_cac_capital_plan",
@@ -295,7 +327,9 @@
       "qdrantCollection": "cac_docs",
       "ingestSource": "sharepoint://CAC/Plans",
       "frequency": "annual",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_cac_funding_facilities",
@@ -306,7 +340,9 @@
       "qdrantCollection": "cac_docs",
       "ingestSource": "sharepoint://CAC/Funding",
       "frequency": "quarterly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_cac_liquidity_covenant",
@@ -317,7 +353,9 @@
       "qdrantCollection": "cac_docs",
       "ingestSource": "sharepoint://CAC/Covenants",
       "frequency": "quarterly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_cio_nav_report",
@@ -328,7 +366,12 @@
       "qdrantCollection": "cio_docs",
       "ingestSource": "sharepoint://CIO/Reports",
       "frequency": "monthly",
-      "crossReadAccess": ["ceo", "ic", "vcc", "finance"]
+      "crossReadAccess": [
+        "ceo",
+        "ic",
+        "vcc",
+        "finance"
+      ]
     },
     {
       "id": "doc_cio_custodian_report",
@@ -339,7 +382,9 @@
       "qdrantCollection": "cio_docs",
       "ingestSource": "sharepoint://CIO/Reports",
       "frequency": "monthly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_cio_ppm",
@@ -361,7 +406,10 @@
       "qdrantCollection": "legal_docs",
       "ingestSource": "sharepoint://Legal/Policies",
       "frequency": "annual",
-      "crossReadAccess": ["ceo", "risk"]
+      "crossReadAccess": [
+        "ceo",
+        "risk"
+      ]
     },
     {
       "id": "doc_legal_legal_opinions",
@@ -394,7 +442,12 @@
       "qdrantCollection": "risk_docs",
       "ingestSource": "sharepoint://Risk/Policies",
       "frequency": "annual",
-      "crossReadAccess": ["ceo", "cac", "finance", "legal"]
+      "crossReadAccess": [
+        "ceo",
+        "cac",
+        "finance",
+        "legal"
+      ]
     },
     {
       "id": "doc_vcc_nav_report",
@@ -405,7 +458,11 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/Reports",
       "frequency": "monthly",
-      "crossReadAccess": ["ceo", "cio", "ic"]
+      "crossReadAccess": [
+        "ceo",
+        "cio",
+        "ic"
+      ]
     },
     {
       "id": "doc_vcc_subscriptions_report",
@@ -416,7 +473,9 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/Reports",
       "frequency": "monthly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_vcc_client_list",
@@ -427,7 +486,9 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/Clients",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_vcc_presentations",
@@ -438,7 +499,9 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/Marketing",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_vcc_contracts",
@@ -449,7 +512,9 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/Legal",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_vcc_due_diligence",
@@ -460,7 +525,9 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/DDQ",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_vcc_newsletters",
@@ -471,7 +538,9 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/Marketing",
       "frequency": "quarterly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_vcc_memos",
@@ -482,7 +551,9 @@
       "qdrantCollection": "vcc_docs",
       "ingestSource": "sharepoint://VCC/Memos",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_comms_branding_policy",
@@ -493,7 +564,9 @@
       "qdrantCollection": "comms_docs",
       "ingestSource": "sharepoint://Comms/Policies",
       "frequency": "annual",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_comms_brand_guidelines",
@@ -504,7 +577,9 @@
       "qdrantCollection": "comms_docs",
       "ingestSource": "sharepoint://Comms/Policies",
       "frequency": "annual",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_comms_press_releases",
@@ -515,7 +590,9 @@
       "qdrantCollection": "comms_docs",
       "ingestSource": "sharepoint://Comms/PR",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_comms_ir_newsletters",
@@ -526,7 +603,9 @@
       "qdrantCollection": "comms_docs",
       "ingestSource": "sharepoint://Comms/IR",
       "frequency": "quarterly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_comms_earnings_decks",
@@ -537,7 +616,9 @@
       "qdrantCollection": "comms_docs",
       "ingestSource": "sharepoint://Comms/IR",
       "frequency": "quarterly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_comms_web_social_content",
@@ -548,7 +629,9 @@
       "qdrantCollection": "comms_docs",
       "ingestSource": "sharepoint://Comms/Digital",
       "frequency": "weekly",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_comms_marketing_materials",
@@ -559,7 +642,9 @@
       "qdrantCollection": "comms_docs",
       "ingestSource": "sharepoint://Comms/Marketing",
       "frequency": "on_demand",
-      "crossReadAccess": ["ceo"]
+      "crossReadAccess": [
+        "ceo"
+      ]
     },
     {
       "id": "doc_it_it_policies",
@@ -582,6 +667,79 @@
       "ingestSource": "sharepoint://IT/SOPs",
       "frequency": "on_demand",
       "crossReadAccess": []
+    },
+    {
+      "id": "doc_ceo_khao_yai_retreat_pack",
+      "title": "BOD Khao Yai Retreat Pack 2026",
+      "ownerDept": "ceo",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ceo/meeting-notes/2026-02-21-khao-yai-strategic-retreat.md",
+      "qdrantCollection": "ceo_docs",
+      "ingestSource": "file://O:/brooker_database/ceo/BOD Khao Yai Retreat Pack 2026.docx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "cio",
+        "ic",
+        "vcc",
+        "finance"
+      ]
+    },
+    {
+      "id": "doc_ceo_strategic_retreat_deck",
+      "title": "Brook Strategic Retreat Khao Yai 2026 (deck)",
+      "ownerDept": "ceo",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ceo/meeting-notes/2026-02-21-khao-yai-strategic-retreat.md",
+      "qdrantCollection": "ceo_docs",
+      "ingestSource": "file://O:/brooker_database/ceo/Brook Strategic Retreat Khao Yai 2026.pptx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "cio",
+        "ic",
+        "vcc"
+      ]
+    },
+    {
+      "id": "doc_ceo_brooker_worldview_2026",
+      "title": "The Brooker Worldview 2026",
+      "ownerDept": "ceo",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ceo/concepts/brooker-worldview-2026.md",
+      "qdrantCollection": "ceo_docs",
+      "ingestSource": "file://O:/brooker_database/ceo/The Brooker Worldview 2026.docx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "comms",
+        "cio",
+        "vcc"
+      ]
+    },
+    {
+      "id": "doc_ceo_digital_twin_platform",
+      "title": "AI Agent Digital Twin Orchestration Platform",
+      "ownerDept": "ceo",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ceo/concepts/brooker-operating-system.md",
+      "qdrantCollection": "ceo_docs",
+      "ingestSource": "file://O:/brooker_database/ceo/AI Agent Digital Twin Orchestration Platform.docx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "it"
+      ]
+    },
+    {
+      "id": "doc_ceo_da_budget_2026",
+      "title": "DA Budget Plan 2026",
+      "ownerDept": "ceo",
+      "tier": "tracker",
+      "vaultPath": "obsidian-vault/ceo/trends/2026-budget.md",
+      "qdrantCollection": "ceo_docs",
+      "ingestSource": "file://O:/brooker_database/ceo/DA budget plan 2026.xlsx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "finance",
+        "cio"
+      ]
     }
   ]
 }
