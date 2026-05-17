@@ -740,6 +740,456 @@
         "finance",
         "cio"
       ]
+    },
+    {
+      "id": "doc_cio_investment_policy",
+      "title": "Brooker Group Investment Policy (Feb 2024)",
+      "ownerDept": "cio",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/cio/concepts/investment-policy.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/NEW INVESTMENT POLICY Feb 2024.doc",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ic",
+        "ceo",
+        "finance",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_cio_ht_markets_mta",
+      "title": "HT Markets (SVG) Master Trading Agreement Template (Mar 2026)",
+      "ownerDept": "cio",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/cio/concepts/ht-markets-trading-arrangement.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/Brooker Group Master Trading Agreement Template_SVG (March 2026).docx",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "ic",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_cio_mta_options_supplement",
+      "title": "HT Markets MTA Supplement - Options and Margin (Mar 2026)",
+      "ownerDept": "cio",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/cio/concepts/ht-markets-trading-arrangement.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/Brooker Group_MTA Supplement_Options and Margin_HT Markets (SVG) Limited(Mar 2026).docx",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "ic",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_cio_hex_trust_custody_fee",
+      "title": "Hex Trust Custody Fee Supplement (Mar 2026)",
+      "ownerDept": "cio",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/cio/concepts/hex-trust-custody-arrangement.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/Brooker Group_ Custody Fee Supplement - Hex Trust Limited (HK)_March2026.docx",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "ic",
+        "legal",
+        "finance"
+      ]
+    },
+    {
+      "id": "doc_cio_ht_markets_mta_review",
+      "title": "HT Markets MTA Contract Review Memorandum",
+      "ownerDept": "cio",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/cio/decisions/2026-04-22-ht-markets-mta-review.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/HT_Markets_MTA_Review_Memo.docx",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "ic",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_cio_hex_trust_kyc",
+      "title": "Hex Trust General KYC Requirements - Corporate Clients",
+      "ownerDept": "cio",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/cio/concepts/hex-trust-kyc-requirements.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/Hex Trust_General KYC Requirements_Corporate Clients_March2026.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ic",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_cio_mining_summary",
+      "title": "Crypto Mining Project Summary",
+      "ownerDept": "cio",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/cio/concepts/crypto-mining-project.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/Mining Summary.pptx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_cio_dashboard_feb2026",
+      "title": "CIO Portfolio Dashboard Feb 2026",
+      "ownerDept": "cio",
+      "tier": "tracker",
+      "vaultPath": "obsidian-vault/cio/trends/dashboard-cio-feb-2026.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/Dashboard Feb2026.xlsx",
+      "frequency": "monthly",
+      "crossReadAccess": [
+        "ic",
+        "finance"
+      ]
+    },
+    {
+      "id": "doc_cio_coin_weekly_report",
+      "title": "Coin Weekly Report (portfolio series, Jan-Apr 2026)",
+      "ownerDept": "cio",
+      "tier": "report",
+      "vaultPath": "obsidian-vault/cio/trends/digital-asset-coin-book-trend.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/portfolio/Jan/2026.01.31 Coin Weekly Report (UPDATE)_.pdf",
+      "frequency": "weekly",
+      "crossReadAccess": [
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_cio_weekly_bg_portfolio",
+      "title": "Weekly BG Listed Portfolio (series, Jan-Apr 2026)",
+      "ownerDept": "cio",
+      "tier": "tracker",
+      "vaultPath": "obsidian-vault/cio/trends/brooker-portfolio-trend.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/portfolio/Jan/Weekly BG 2026.01.31.xlsx",
+      "frequency": "weekly",
+      "crossReadAccess": [
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_cio_bsfl_monthly_portfolio",
+      "title": "BSFL Monthly Portfolio (series, Jan-Apr 2026)",
+      "ownerDept": "cio",
+      "tier": "tracker",
+      "vaultPath": "obsidian-vault/cio/entities/bsfl-portfolio.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/portfolio/Jan/BSFL Monthly 260131.xlsx",
+      "frequency": "monthly",
+      "crossReadAccess": [
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_cio_net_worth_quarterly",
+      "title": "Net Worth Every Quarter 2025-26",
+      "ownerDept": "cio",
+      "tier": "tracker",
+      "vaultPath": "obsidian-vault/cio/trends/net-worth-quarterly-trend.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/portfolio/Mar/NET WORTH EVERY QUARTER (2025_26).xls",
+      "frequency": "quarterly",
+      "crossReadAccess": [
+        "ic",
+        "finance",
+        "ceo"
+      ]
+    },
+    {
+      "id": "doc_cio_asianfinance_business_plan",
+      "title": "Asian Finance BOD Business Plan (15 Dec 2025)",
+      "ownerDept": "cio",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/cio/entities/asian-finance.md",
+      "qdrantCollection": "cio_docs",
+      "ingestSource": "file://O:/brooker_database/cio/portfolio/nonlisted/AsianFinance BOD BUSINESS PLAN (15 DEC 2025).pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_comms_bnb_gala_speech",
+      "title": "BNB $1K Gala Night CEO Speech",
+      "ownerDept": "comms",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/comms/meeting-notes/2026-bnb-1k-gala-night.md",
+      "qdrantCollection": "comms_docs",
+      "ingestSource": "file://O:/brooker_database/comms/events/BNB $1K Gala Night CEO speech.docx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_comms_pantera_april_event",
+      "title": "Pantera x Brooker April Event Brief",
+      "ownerDept": "comms",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/comms/meeting-notes/2026-04-21-pantera-x-brooker-investor-lunch.md",
+      "qdrantCollection": "comms_docs",
+      "ingestSource": "file://O:/brooker_database/comms/events/Pantera x Brooker April Event.docx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_comms_pantera_macro_talk",
+      "title": "Pantera x Brooker Macro Talk Script",
+      "ownerDept": "comms",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/comms/concepts/macro-outlook-geopolitical-recalibration.md",
+      "qdrantCollection": "comms_docs",
+      "ingestSource": "file://O:/brooker_database/comms/events/Pantera x Brooker macro talk.docx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ceo"
+      ]
+    },
+    {
+      "id": "doc_comms_pantera_macro_outlook",
+      "title": "Pantera x Brooker Macro Outlook Deck",
+      "ownerDept": "comms",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/comms/concepts/macro-outlook-geopolitical-recalibration.md",
+      "qdrantCollection": "comms_docs",
+      "ingestSource": "file://O:/brooker_database/comms/events/Pantera x Brooker macro outlook.pptx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ceo"
+      ]
+    },
+    {
+      "id": "doc_comms_pantera_talk_deck",
+      "title": "Pantera Talk April 2026 Deck",
+      "ownerDept": "comms",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/comms/trends/pantera-blockchain-venture-performance.md",
+      "qdrantCollection": "comms_docs",
+      "ingestSource": "file://O:/brooker_database/comms/events/Pantera x Brooker Pantera Talk April 2026.pptx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_comms_chinese_assoc_macro",
+      "title": "Chinese Association Macro Slides",
+      "ownerDept": "comms",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/comms/meeting-notes/2026-chinese-association-macro-talk.md",
+      "qdrantCollection": "comms_docs",
+      "ingestSource": "file://O:/brooker_database/comms/events/chinese association slides.pptx",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ceo"
+      ]
+    },
+    {
+      "id": "doc_hr_employment_contract_storage",
+      "title": "Internal Control Questionnaire - Employment Contract Storage",
+      "ownerDept": "hr",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/hr/concepts/employment-contract-document-retention.md",
+      "qdrantCollection": "hr_docs",
+      "ingestSource": "file://O:/brooker_database/hr/แบบสอบถาม การเก็บเอกสารสัญญาจ้าง.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_hr_wfh_rights",
+      "title": "Internal Control Questionnaire - Work-From-Home Rights",
+      "ownerDept": "hr",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/hr/concepts/work-from-home-policy.md",
+      "qdrantCollection": "hr_docs",
+      "ingestSource": "file://O:/brooker_database/hr/แบบสอบถาม การให้สิทธิพนักงานทำงานที่บ้าน (WFH).pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_legal_thai_reg_tax_opinion",
+      "title": "Brooker Group - Opinion on Thai Regulatory and Tax Advice (29 Dec 2025)",
+      "ownerDept": "legal",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/legal/decisions/2025-12-29-thai-regulatory-tax-opinion.md",
+      "qdrantCollection": "legal_docs",
+      "ingestSource": "file://O:/brooker_database/legal/Brooker Group -  Opinion on Thai Regulatory and Tax Advice - 29 December 2025.docx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic",
+        "vcc"
+      ]
+    },
+    {
+      "id": "doc_legal_engagement_letter",
+      "title": "Law Studios Thailand - Engagement Letter (Legal Due Diligence)",
+      "ownerDept": "legal",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/legal/decisions/2026-03-23-law-studios-engagement-obsidian-creek-dd.md",
+      "qdrantCollection": "legal_docs",
+      "ingestSource": "file://O:/brooker_database/legal/Engagement Letter.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_vcc_lpfof_deck",
+      "title": "Brook Limited Partners Fund of Funds I - Investor Deck",
+      "ownerDept": "vcc",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/vcc/concepts/brook-lp-fof-strategy.md",
+      "qdrantCollection": "vcc_docs",
+      "ingestSource": "file://O:/brooker_database/vcc/Brook Limited Partners FoF_I_Full_Deck_HemrajVersion.pptx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_vcc_lpfof_supplement",
+      "title": "Brook LP FoF I - Supplemental Memorandum (tracked 30 Mar 2026)",
+      "ownerDept": "vcc",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/vcc/concepts/brook-lp-fof-terms.md",
+      "qdrantCollection": "vcc_docs",
+      "ingestSource": "file://O:/brooker_database/vcc/Brook Technology Capital VCC  Brook Limited Partners Fund of Funds I  - Supplement [tracked 30 March 2026] [KC IV 202507993 TFN].docx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_vcc_turtle_deck",
+      "title": "Brook Turtle Fund of Funds - Investor Deck",
+      "ownerDept": "vcc",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/vcc/entities/brook-turtle-fund-of-funds.md",
+      "qdrantCollection": "vcc_docs",
+      "ingestSource": "file://O:/brooker_database/vcc/Brook-Turtle-Fund-of-Funds.pptx",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_vcc_cig_contract",
+      "title": "Crypto Insights Group - Brooker Customer Agreement (2026-03-23)",
+      "ownerDept": "vcc",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/vcc/decisions/2026-03-23-crypto-insights-platform-subscription.md",
+      "qdrantCollection": "vcc_docs",
+      "ingestSource": "file://O:/brooker_database/vcc/Crypto Insights Group _ The Brooker Group - Contract 2026_03_23.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_vcc_ternary_tsa",
+      "title": "Ternary x Brooker - Technical Services Agreement",
+      "ownerDept": "vcc",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/vcc/decisions/2026-04-29-ternary-technical-services-agreement.md",
+      "qdrantCollection": "vcc_docs",
+      "ingestSource": "file://O:/brooker_database/vcc/Ternary x Brooker - TSA - Jan2026 v2.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_ic_feb2026_minutes",
+      "title": "IC Meeting Minutes - Feb/Mar 2026 (Meeting No.1)",
+      "ownerDept": "ic",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ic/meeting-notes/IC-2026-03-19.md",
+      "qdrantCollection": "ic_docs",
+      "ingestSource": "file://O:/brooker_database/ic/IC 01 meeting Feb2026.docx",
+      "frequency": "per_meeting",
+      "crossReadAccess": [
+        "finance",
+        "cio",
+        "vcc",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_ic_mar2026_deck",
+      "title": "IC Meeting Deck - Mar 2026 (No.1)",
+      "ownerDept": "ic",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ic/meeting-notes/IC-2026-03-19.md",
+      "qdrantCollection": "ic_docs",
+      "ingestSource": "file://O:/brooker_database/ic/IC No1 Mar 2026.pptx",
+      "frequency": "per_meeting",
+      "crossReadAccess": [
+        "finance",
+        "cio",
+        "vcc",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_ic_may2026_minutes",
+      "title": "IC Meeting Minutes - May 2026 (Meeting No.2)",
+      "ownerDept": "ic",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ic/meeting-notes/IC-2026-05-12.md",
+      "qdrantCollection": "ic_docs",
+      "ingestSource": "file://O:/brooker_database/ic/IC 02 meeting May2026.docx",
+      "frequency": "per_meeting",
+      "crossReadAccess": [
+        "finance",
+        "cio",
+        "vcc",
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_ic_may2026_deck",
+      "title": "IC Meeting Deck - May 2026 (No.2)",
+      "ownerDept": "ic",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ic/meeting-notes/IC-2026-05-12.md",
+      "qdrantCollection": "ic_docs",
+      "ingestSource": "file://O:/brooker_database/ic/IC No2 May2026.pptx",
+      "frequency": "per_meeting",
+      "crossReadAccess": [
+        "finance",
+        "cio",
+        "vcc",
+        "legal"
+      ]
     }
   ]
 }

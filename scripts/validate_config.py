@@ -23,8 +23,8 @@ def main():
     errors = []
 
     # Validate departments
-    dept_schema = json.loads(Path(args.departments_schema).read_text())
-    depts_data = json.loads(Path(args.departments).read_text())
+    dept_schema = json.loads(Path(args.departments_schema).read_text(encoding="utf-8"))
+    depts_data = json.loads(Path(args.departments).read_text(encoding="utf-8"))
 
     # Handle both old format (nested object) and new format (array)
     if "departments" in depts_data and isinstance(depts_data["departments"], dict):
@@ -51,8 +51,8 @@ def main():
     # Validate inventory
     inv_path = Path(args.inventory)
     if inv_path.exists():
-        inv_schema = json.loads(Path(args.inventory_schema).read_text())
-        inv_data = json.loads(inv_path.read_text())
+        inv_schema = json.loads(Path(args.inventory_schema).read_text(encoding="utf-8"))
+        inv_data = json.loads(inv_path.read_text(encoding="utf-8"))
         inv = inv_data.get("documents", [])
         dept_ids = {d.get("dept_id", d.get("name", "").lower()) for d in depts}
 
