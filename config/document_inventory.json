@@ -1190,6 +1190,160 @@
         "vcc",
         "legal"
       ]
+    },
+    {
+      "id": "doc_finance_audited_report_2024",
+      "title": "BICL Audited Report 31 Dec 2024",
+      "ownerDept": "finance",
+      "tier": "report",
+      "vaultPath": "obsidian-vault/finance/trends/bicl-audited-financials-2024.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/BICL_AuditedReport_31Dec2024.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_finance_audited_report_2025",
+      "title": "BICL Audited Report 31 Dec 2025",
+      "ownerDept": "finance",
+      "tier": "report",
+      "vaultPath": "obsidian-vault/finance/trends/bicl-audited-financials-2025.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/BICL_AuditedReport_31Dec2025.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_finance_bicl_certificate_incorporation",
+      "title": "BICL Certificate of Incorporation",
+      "ownerDept": "finance",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/finance/entities/bicl-corporate-profile.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/BICL - CI (CTC) (2).pdf",
+      "frequency": "once",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_finance_bicl_memorandum_articles",
+      "title": "BICL Memorandum & Articles of Association",
+      "ownerDept": "finance",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/finance/concepts/bicl-memorandum-and-articles.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/BICL - M&A (CTC).pdf",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_finance_bicl_address_proof",
+      "title": "BICL Address Proof (HSBC Bank Statement)",
+      "ownerDept": "finance",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/finance/entities/bicl-corporate-profile.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/BICL address proof (HSBC bank statement).pdf",
+      "frequency": "on_demand",
+      "crossReadAccess": []
+    },
+    {
+      "id": "doc_finance_bicl_register_directors",
+      "title": "BICL Register of Directors (April 2026)",
+      "ownerDept": "finance",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/finance/entities/bicl-corporate-registry.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/BICL Register of Directors CTC April 2026.pdf",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_finance_bicl_register_members",
+      "title": "BICL Register of Members (April 2026)",
+      "ownerDept": "finance",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/finance/entities/bicl-corporate-registry.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/BICL Register of Members CTC April 2026.pdf",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_finance_bicl_w8bene",
+      "title": "BICL Form W-8BEN-E (signed)",
+      "ownerDept": "finance",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/finance/entities/bicl-tax-status.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/Form W-8BEN-E(Rev.Oct 2021) signed.pdf",
+      "frequency": "on_change",
+      "crossReadAccess": [
+        "legal"
+      ]
+    },
+    {
+      "id": "doc_finance_loan_pn35",
+      "title": "Loan Agreement PN.35 - USD 39.02M (Brooker Group to BICL)",
+      "ownerDept": "finance",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/finance/decisions/2025-04-08-loan-pn35-39m.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/No.35 LOAN AGREEMENT PN from BG = 39.02 USD Million (Renew PN.34).pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_finance_loan_pn36",
+      "title": "Loan Agreement PN.36 - USD 2.3M (Brooker Group to BICL)",
+      "ownerDept": "finance",
+      "tier": "policy",
+      "vaultPath": "obsidian-vault/finance/decisions/2026-01-16-loan-pn36-2.3m.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/BICL/No.36 LOAN AGREEMENT PN from BG = 2.3 USD Million.pdf",
+      "frequency": "annual",
+      "crossReadAccess": [
+        "ceo",
+        "ic"
+      ]
+    },
+    {
+      "id": "doc_finance_travel_emirates_ticket",
+      "title": "Emirates Ticket - Dubai Business Travel (Aug 2025)",
+      "ownerDept": "finance",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/finance/entities/dubai-business-travel-aug-2025.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/reimbursement/EmiratesTicket1 (2).pdf",
+      "frequency": "on_demand",
+      "crossReadAccess": []
+    },
+    {
+      "id": "doc_finance_travel_hotel_confirmation",
+      "title": "Hotels.com Travel Confirmation - Dubai (Aug 2025)",
+      "ownerDept": "finance",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/finance/entities/dubai-business-travel-aug-2025.md",
+      "qdrantCollection": "finance_docs",
+      "ingestSource": "file://O:/brooker_database/finance/reimbursement/Gmail - Hotels.com travel confirmation - Fri, Aug 22 - (Itinerary # 72064997297700).pdf",
+      "frequency": "on_demand",
+      "crossReadAccess": []
     }
   ]
 }
