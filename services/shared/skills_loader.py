@@ -50,7 +50,7 @@ class SkillsLoader:
             return self._cache[skill_path]
         raw = await self._read_raw(skill_path)
         if raw is None:
-            logger.warning("skill_not_found", path=skill_path)
+            logger.warning("skill_not_found", path=skill_path, skills_dir=self._skills_dir)
             self._cache[skill_path] = ""
             return ""
         content = _FRONTMATTER_RE.sub("", raw).strip()
@@ -67,7 +67,11 @@ class SkillsLoader:
         if raw is not None:
             m = _FRONTMATTER_RE.match(raw)
             if m:
-                parsed = yaml.safe_load(m.group(1))
+                try:
+                    parsed = yaml.safe_load(m.group(1))
+                except yaml.YAMLError:
+                    logger.warning("skill_frontmatter_parse_error", path=skill_path)
+                    parsed = None
                 if isinstance(parsed, dict):
                     fm = parsed
         self._fm_cache[skill_path] = fm

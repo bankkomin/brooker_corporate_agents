@@ -96,3 +96,11 @@ async def test_content_only_rule(skills_dir):
     # The consuming agent's own permissions are unchanged by loading the cluster skill.
     assert fm["permissions"]["mode"] == "read_only"
     assert fm["permissions"]["outbound_apis"] == []
+
+
+async def test_load_frontmatter_malformed_yaml_returns_empty(skills_dir):
+    _write(skills_dir / "finance" / "malformed.md",
+           "name: malformed\npermissions: [unclosed", "Body text.")
+    loader = SkillsLoader(str(skills_dir))
+    fm = await loader.load_frontmatter("finance/malformed")
+    assert fm == {}
