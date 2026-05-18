@@ -56,3 +56,10 @@ def test_cluster_skill_outbound_apis_must_be_empty(tmp_path):
     result = _run(tmp_path)
     assert result.returncode == 1
     assert "outbound_apis" in result.stderr
+
+
+def test_cluster_skill_missing_permissions_fails(tmp_path):
+    _write(tmp_path / "shared" / "investment-cluster" / "noperm.md", "name: noperm")
+    result = _run(tmp_path)
+    assert result.returncode == 1
+    assert "read_only" in result.stderr
