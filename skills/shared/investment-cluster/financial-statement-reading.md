@@ -64,14 +64,14 @@ Agents should compute and cite the following ratios when assessing an investee's
 - *Interest coverage* = EBIT ÷ Finance costs. A ratio below 1.5× is a caution signal; below 1.0× means interest is not covered by operating earnings.
 
 **Profitability**
-- *Return on equity (ROE)* = Net profit ÷ Average equity. Brooker Group's Investment Policy sets a minimum return hurdle of the long-term Thai government bond yield; for most investments the IC targets ≥ 12% p.a.
+- *Return on equity (ROE)* = Net profit ÷ Average equity. Brooker Group's Investment Policy sets a minimum return hurdle of the long-term Thai government bond yield; for most investments the IC targets ≥ 12% p.a. [Source: NEW INVESTMENT POLICY Feb 2024.doc | 2024-02-29]
 - *Net profit margin* = Net profit ÷ Revenue.
 - *Return on assets (ROA)* = Net profit ÷ Average total assets.
 
 **Asset quality (for finance-company investees such as AsianFinance)**
 - *NPL ratio* = Non-performing loans ÷ Total loans.
 - *ECL coverage* = Expected Credit Loss provision ÷ Total loans. AsianFinance's 2026 plan targets ECL at ~4% of new loan book.
-- *Cost/income ratio* = Operating expenses ÷ Net interest income + other income. AsianFinance benchmarks this against Thai banks; the board target is competitive with listed peers.
+- *Cost/income ratio* = Operating expenses ÷ (Net interest income + other income). AsianFinance benchmarks this against Thai banks; the board target is competitive with listed peers.
 
 All ratios must be cited with the period-end date and the source document: `[Source: BICL_AuditedReport_31Dec2025.pdf | 2025-12-31]`.
 

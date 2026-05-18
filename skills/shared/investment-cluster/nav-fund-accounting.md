@@ -88,6 +88,6 @@ The authoritative period-end figures for the consolidated Brooker Group investme
 | Minority Interests | Minority share |
 | Net worth CONSO | Total consolidated net worth |
 
-When a cluster agent cites a fund or portfolio value, it must reconcile to the most recent quarterly Net Worth figure. If the BSFL Monthly NAV and the Net Worth file differ, the Net Worth file (being the audited/reviewed consolidation) takes precedence for formal reporting; the BSFL Monthly figure may be more current for intra-quarter use.
+When a cluster agent cites a fund or portfolio value, it must reconcile to the most recent quarterly Net Worth figure. If the BSFL Monthly NAV and the Net Worth file differ, the Net Worth file (being the authoritative quarterly consolidation for internal reporting purposes) takes precedence for formal reporting; the BSFL Monthly figure may be more current for intra-quarter use.
 
 Agents must cite: `[Source: NET WORTH EVERY QUARTER (2025_26).xls | <quarter-end date>]` for any consolidated net-worth figure.
