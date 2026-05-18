@@ -22,7 +22,7 @@ def main():
 
     inv_path = Path(args.inventory)
     if inv_path.exists():
-        inv = json.loads(inv_path.read_text()).get("documents", [])
+        inv = json.loads(inv_path.read_text(encoding="utf-8")).get("documents", [])
         known_collections = {d["qdrantCollection"] for d in inv} | {"shared_policies"}
     else:
         known_collections = set()
