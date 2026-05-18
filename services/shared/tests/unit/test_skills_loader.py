@@ -1,5 +1,6 @@
 import pytest
-from skills_loader import SharedSkillNotFoundError, SkillsLoader
+
+from services.shared.skills_loader import SharedSkillNotFoundError, SkillsLoader
 
 pytestmark = pytest.mark.asyncio
 
