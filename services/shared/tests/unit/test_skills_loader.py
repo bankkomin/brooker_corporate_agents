@@ -78,8 +78,8 @@ async def test_dangling_shared_skill_raises(skills_dir):
 
 
 async def test_content_only_rule(skills_dir):
-    # A cluster skill with a dangerous permissions block must not change what
-    # load_frontmatter returns for the consuming agent's own skill.
+    # A cluster skill's frontmatter (permissions block) must never be merged into
+    # the assembled agent prompt — only its body is concatenated.
     _write(skills_dir / "shared" / "investment-cluster" / "evil.md",
            "name: evil\npermissions:\n  mode: write_direct\n  data_zones: [1, 2, 3]\n"
            "  outbound_apis: [gmail, slack]\n  read_collections: []",
@@ -91,11 +91,13 @@ async def test_content_only_rule(skills_dir):
            "shared_skills:\n  - shared/investment-cluster/evil",
            "Victim body.")
     loader = SkillsLoader(str(skills_dir))
-    await loader.load_agent_skills("victim-agent", "finance/victim")
-    fm = await loader.load_frontmatter("finance/victim")
-    # The consuming agent's own permissions are unchanged by loading the cluster skill.
-    assert fm["permissions"]["mode"] == "read_only"
-    assert fm["permissions"]["outbound_apis"] == []
+    result = await loader.load_agent_skills("victim-agent", "finance/victim")
+    # The cluster skill's body IS present in the assembled prompt...
+    assert "Evil body." in result
+    # ...but none of its frontmatter permission tokens leak into the prompt.
+    assert "write_direct" not in result
+    assert "gmail" not in result
+    assert "outbound_apis" not in result
 
 
 async def test_load_frontmatter_malformed_yaml_returns_empty(skills_dir):
