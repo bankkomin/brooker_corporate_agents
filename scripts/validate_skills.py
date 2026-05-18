@@ -49,6 +49,24 @@ def main():
             continue
 
         checked += 1
+
+        # shared_skills references must resolve to existing skill files
+        for ref in fm.get("shared_skills") or []:
+            ref_path = skill_dir / f"{ref}.md"
+            if not ref_path.exists():
+                errors.append(f"{f.relative_to(skill_dir)}: shared_skills entry "
+                              f"'{ref}' does not resolve to a file under {skill_dir}")
+
+        # investment-cluster skills must be content-only (read_only, no outbound)
+        if "investment-cluster" in f.parts:
+            ic_perms = fm.get("permissions")
+            if not isinstance(ic_perms, dict) or ic_perms.get("mode") != "read_only":
+                errors.append(f"{f.relative_to(skill_dir)}: investment-cluster skills "
+                              f"must declare permissions.mode 'read_only'")
+            if isinstance(ic_perms, dict) and ic_perms.get("outbound_apis"):
+                errors.append(f"{f.relative_to(skill_dir)}: investment-cluster skills "
+                              f"must declare an empty outbound_apis list")
+
         perms = fm.get("permissions")
         if perms is None:
             continue  # old-format skill without permissions block — skip until migration
