@@ -8,6 +8,8 @@ permissions:
   data_zones: [1]
   outbound_apis: []
   read_collections: ["{DEPT}_docs", "{DEPT}_chat", "{DEPT}_knowledge", "shared_policies"]
+# shared_skills:                                       # optional — cluster skills this agent loads
+#   - shared/investment-cluster/financial-statement-reading
 output_types: [text]
 ---
 
