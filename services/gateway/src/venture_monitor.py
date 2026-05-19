@@ -15,9 +15,9 @@ router = APIRouter(prefix="/api/vm", tags=["venture-monitor"])
 async def get_fund_scores(request: Request):
     """Get latest fund risk scores from venture-monitor."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     try:
         import os
@@ -27,9 +27,9 @@ async def get_fund_scores(request: Request):
         scores = await bridge.get_fund_scores()
         return {"scores": scores}
     except ImportError:
-        raise HTTPException(501, "VM bridge not available")
+        raise HTTPException(501, "VM bridge not available") from None
     except Exception as e:
-        raise HTTPException(502, f"Venture monitor unavailable: {e}")
+        raise HTTPException(502, f"Venture monitor unavailable: {e}") from e
 
 
 @router.get("/fund-scores/{fund_id}")
@@ -37,9 +37,9 @@ async def get_fund_scores(request: Request):
 async def get_fund_score(fund_id: int, request: Request):
     """Get score details for a specific fund."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     try:
         import os
@@ -48,9 +48,9 @@ async def get_fund_score(fund_id: int, request: Request):
         bridge = VentureMonitorBridge(base_url=os.environ.get("VM_BASE_URL", "http://localhost:8000"))
         return await bridge.get_fund_score(fund_id)
     except ImportError:
-        raise HTTPException(501, "VM bridge not available")
+        raise HTTPException(501, "VM bridge not available") from None
     except Exception as e:
-        raise HTTPException(502, f"Venture monitor unavailable: {e}")
+        raise HTTPException(502, f"Venture monitor unavailable: {e}") from e
 
 
 @router.get("/alerts")
@@ -58,9 +58,9 @@ async def get_fund_score(fund_id: int, request: Request):
 async def get_vm_alerts(request: Request, severity: str = "high"):
     """Get high-severity signals from venture-monitor."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     try:
         import os
@@ -70,9 +70,9 @@ async def get_vm_alerts(request: Request, severity: str = "high"):
         signals = await bridge.get_high_severity_signals(min_severity=severity)
         return {"signals": signals}
     except ImportError:
-        raise HTTPException(501, "VM bridge not available")
+        raise HTTPException(501, "VM bridge not available") from None
     except Exception as e:
-        raise HTTPException(502, f"Venture monitor unavailable: {e}")
+        raise HTTPException(502, f"Venture monitor unavailable: {e}") from e
 
 
 @router.get("/reconciliation-summary")
@@ -80,9 +80,9 @@ async def get_vm_alerts(request: Request, severity: str = "high"):
 async def get_reconciliation_summary(request: Request):
     """Get latest reconciliation status from venture-monitor."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     try:
         import os
@@ -91,6 +91,6 @@ async def get_reconciliation_summary(request: Request):
         bridge = VentureMonitorBridge(base_url=os.environ.get("VM_BASE_URL", "http://localhost:8000"))
         return {"reconciliations": await bridge.get_reconciliation_summary()}
     except ImportError:
-        raise HTTPException(501, "VM bridge not available")
+        raise HTTPException(501, "VM bridge not available") from None
     except Exception as e:
-        raise HTTPException(502, f"Venture monitor unavailable: {e}")
+        raise HTTPException(502, f"Venture monitor unavailable: {e}") from e

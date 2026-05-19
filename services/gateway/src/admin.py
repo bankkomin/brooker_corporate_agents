@@ -19,7 +19,7 @@ async def list_knowledge_gaps(request: Request):
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     if claims.role not in _ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Admin role required")
@@ -58,7 +58,7 @@ async def resolve_gap(gap_id: int, request: Request):
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     if claims.role not in _ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Admin role required")

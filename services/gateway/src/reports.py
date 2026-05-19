@@ -20,9 +20,9 @@ router = APIRouter(prefix="/api/reports", tags=["reports"])
 async def get_weekly_brief(dept_id: str, request: Request):
     """Generate a weekly department brief."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     from services.shared.report_generator import generate_weekly_brief
     report = await generate_weekly_brief(dept_id, dept_id.upper(), request.app.state.db_pool)
@@ -45,9 +45,9 @@ async def get_weekly_brief(dept_id: str, request: Request):
 async def get_meeting_prep(dept_id: str, request: Request, meeting_date: str = None):
     """Generate a pre-meeting preparation document."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     from services.shared.report_generator import generate_meeting_prep
 
@@ -79,7 +79,7 @@ async def run_email_ingestion(request: Request):
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     if claims.role not in ("admin", "ceo", "cto"):
         raise HTTPException(403, "Admin role required")
@@ -129,9 +129,9 @@ async def run_email_ingestion(request: Request):
 async def natural_language_query(request: Request):
     """Parse a natural language query into structured data."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     body = await request.json()
     query = body.get("query", "")
@@ -161,7 +161,7 @@ async def natural_language_query(request: Request):
 
         return response
     except ImportError:
-        raise HTTPException(501, "NLQ engine not available")
+        raise HTTPException(501, "NLQ engine not available") from None
 
 
 # ---------------------------------------------------------------------------
@@ -175,13 +175,13 @@ async def evaluate_auto_approve(proposal_id: int, request: Request):
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     if claims.role not in ("admin", "ceo", "cto"):
         raise HTTPException(403, "Admin role required")
 
     try:
-        from services.shared.auto_approve import AutoApproveRule, evaluate_auto_approve
+        from services.shared.auto_approve import evaluate_auto_approve
 
         db = request.app.state.db_pool
         async with db.acquire() as conn:
@@ -205,4 +205,4 @@ async def evaluate_auto_approve(proposal_id: int, request: Request):
                 "historical_rate": decision.historical_rate,
             }
     except ImportError:
-        raise HTTPException(501, "Auto-approve module not available")
+        raise HTTPException(501, "Auto-approve module not available") from None
