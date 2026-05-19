@@ -209,7 +209,7 @@
       "icon": "crown",
       "agents": [],
       "dataAccess": {
-        "qdrantCollections": ["shared_policies"],
+        "qdrantCollections": ["ceo_docs", "shared_policies"],
         "mirrorPaths": ["/data/mirror/"],
         "excelFiles": [],
         "sensitivityLevel": "restricted",

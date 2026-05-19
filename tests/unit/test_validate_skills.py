@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -6,11 +7,11 @@ REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "scripts" / "validate_skills.py"
 
 
-def _run(skill_dir: Path):
-    return subprocess.run(
-        [sys.executable, str(SCRIPT), "--skill-dir", str(skill_dir)],
-        capture_output=True, text=True,
-    )
+def _run(skill_dir: Path, departments: Path | None = None):
+    cmd = [sys.executable, str(SCRIPT), "--skill-dir", str(skill_dir)]
+    if departments is not None:
+        cmd += ["--departments", str(departments)]
+    return subprocess.run(cmd, capture_output=True, text=True)
 
 
 def _write(path: Path, frontmatter: str, body: str = "Body."):
@@ -63,3 +64,34 @@ def test_cluster_skill_missing_permissions_fails(tmp_path):
     result = _run(tmp_path)
     assert result.returncode == 1
     assert "read_only" in result.stderr
+
+
+def test_known_chat_collection_passes(tmp_path):
+    # A _chat collection defined in departments.json is a known collection.
+    dept_file = tmp_path / "departments.json"
+    dept_file.write_text(json.dumps({
+        "departments": {
+            "fin": {"dataAccess": {"qdrantCollections": [
+                "fin_docs", "fin_chat", "fin_knowledge", "shared_policies"]}}
+        }
+    }), encoding="utf-8")
+    _write(tmp_path / "skills" / "fin" / "agent.md",
+           "name: fin-agent\npermissions:\n  mode: read_only\n"
+           "  data_zones: [1]\n  outbound_apis: []\n  read_collections: [fin_chat]")
+    result = _run(tmp_path / "skills", departments=dept_file)
+    assert result.returncode == 0, result.stderr
+
+
+def test_unknown_collection_fails(tmp_path):
+    dept_file = tmp_path / "departments.json"
+    dept_file.write_text(json.dumps({
+        "departments": {
+            "fin": {"dataAccess": {"qdrantCollections": ["fin_docs", "shared_policies"]}}
+        }
+    }), encoding="utf-8")
+    _write(tmp_path / "skills" / "fin" / "agent.md",
+           "name: fin-agent\npermissions:\n  mode: read_only\n"
+           "  data_zones: [1]\n  outbound_apis: []\n  read_collections: [bogus_collection]")
+    result = _run(tmp_path / "skills", departments=dept_file)
+    assert result.returncode == 1
+    assert "bogus_collection" in result.stderr
