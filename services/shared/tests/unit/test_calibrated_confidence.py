@@ -23,14 +23,17 @@ def test_low_confidence_no_sources():
     assert result.composite < 0.5
 
 def test_medium_confidence():
+    # 2 chunks containing proposed value → verbatim=1.0, retrieval=0.4 (no sim boost),
+    # citation=0.5, history=0.5 (unknown) → composite=0.62 → "Medium"
     result = compute_confidence(
-        retrieved_chunks=[{"text": "Some data"}] * 2,
+        retrieved_chunks=[{"text": "The rate is 3.15% as of last quarter"}] * 2,
         top_similarity=0.65,
         answer_text="The rate appears to be 3.15%",
         proposed_value="3.15",
         citation_accuracy=0.5,
     )
     assert result.label == "Medium"
+    assert 0.50 <= result.composite < 0.75
 
 def test_verbatim_boosts_confidence():
     result_with = compute_confidence(
