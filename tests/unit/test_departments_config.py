@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 try:
-    from jsonschema import ValidationError, validate
+    from jsonschema import ValidationError, validate  # noqa: F401
 except ImportError:
     pytest.skip("jsonschema not installed", allow_module_level=True)
 

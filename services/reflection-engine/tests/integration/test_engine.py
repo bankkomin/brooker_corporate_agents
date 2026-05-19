@@ -154,7 +154,6 @@ async def test_reflection_full_with_mock_llm(synthetic_vault, mock_db_pool):
 
     # Verify history archive was created
     for agent in ["liquidity-agent", "capital-agent", "funding-agent"]:
-        history_dir = synthetic_vault / "cac" / "_memory" / agent / "history"
         if (synthetic_vault / "cac" / "_memory" / agent / "memory.md").exists():
             # memory.md was updated, so history should exist
             pass  # Archive only created if memory_md_updates was non-empty

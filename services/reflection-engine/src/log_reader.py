@@ -1,3 +1,4 @@
+import contextlib
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -55,10 +56,8 @@ def parse_daily_log(path: Path) -> list[LogEntry]:
             elif key == "citations":
                 entry.citations = [c.strip() for c in val.split(",") if c.strip()]
             elif key == "confidence":
-                try:
+                with contextlib.suppress(ValueError):
                     entry.confidence = float(val)
-                except ValueError:
-                    pass
             elif key == "outcome":
                 entry.outcome = val
 
