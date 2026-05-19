@@ -23,9 +23,15 @@ markers = [
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+extend-exclude = ["services/_template-orchestrator"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# service entrypoints call load_dotenv() before imports by design
+"services/*/src/main.py" = ["E402"]
 
 [tool.mypy]
 python_version = "3.11"
