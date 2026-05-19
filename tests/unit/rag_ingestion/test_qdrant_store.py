@@ -24,7 +24,14 @@ def store(mock_settings: MagicMock) -> QdrantStore:
 
 class TestCollections:
     def test_collections_list_has_expected_names(self) -> None:
-        assert COLLECTIONS == ["cac_docs", "cac_chat", "cac_knowledge", "shared_policies"]
+        _depts = ("cac", "risk", "legal", "invest", "ops", "hr", "it")
+        expected = (
+            [f"{d}_docs" for d in _depts]
+            + [f"{d}_chat" for d in _depts]
+            + [f"{d}_knowledge" for d in _depts]
+            + ["shared_policies"]
+        )
+        assert expected == COLLECTIONS
 
     def test_collections_is_nonempty(self) -> None:
         assert len(COLLECTIONS) > 0

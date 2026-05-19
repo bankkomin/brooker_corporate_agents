@@ -164,7 +164,7 @@ class DocumentChunker:
                     structured_rows,
                     sheet_name=sheet_name,
                     source=str(path),
-                    max_chunk_size=self._chunk_size,
+                    max_rows_per_chunk=self._chunk_size,
                 )
                 for c in excel_chunks:
                     sections.append({
