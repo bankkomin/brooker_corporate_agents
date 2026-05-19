@@ -1,7 +1,5 @@
-import pytest
-from unittest.mock import AsyncMock, MagicMock
-from services.shared.email_ingestion import EmailIngestionPipeline, EmailMessage, _clean_email_body, _resolve_department
-from datetime import datetime
+from services.shared.email_ingestion import _clean_email_body, _resolve_department
+
 
 def test_clean_email_body_removes_signature():
     body = "Hi team, the LCR is 118.5% as of today. Best regards, Jane"

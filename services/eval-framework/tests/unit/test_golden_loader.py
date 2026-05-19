@@ -1,10 +1,6 @@
 """Tests for the golden answer YAML loader."""
 
-import tempfile
-from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 from src.golden_loader import load_golden_answers
 

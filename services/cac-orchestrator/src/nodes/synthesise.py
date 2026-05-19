@@ -14,7 +14,7 @@ except ImportError:
     detect_self_report = None  # type: ignore[assignment]
 
 try:
-    from services.shared.citation_grounding import ground_citations, add_grounding_badges
+    from services.shared.citation_grounding import add_grounding_badges, ground_citations
 except ImportError:
     ground_citations = None
 
@@ -24,7 +24,11 @@ except ImportError:
     compute_confidence = None
 
 try:
-    from services.shared.chain_of_thought import classify_complexity, build_cot_prompt, parse_cot_response
+    from services.shared.chain_of_thought import (
+        build_cot_prompt,
+        classify_complexity,
+        parse_cot_response,
+    )
 except ImportError:
     classify_complexity = None
 
@@ -148,8 +152,6 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient) -> dict:
             citation_accuracy=citation_accuracy,
         )
         confidence_score = conf.composite
-        confidence_label = conf.label
-        confidence_explanation = conf.explanation
 
     confidence = _confidence_label(confidence_score)
     has_proposal = staging_proposal_id is not None
@@ -157,7 +159,6 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient) -> dict:
     # Phase 2: detect knowledge gaps from LLM self-report phrases
     if detect_self_report is not None:
         try:
-            from ..tools.db_client import DBClient  # noqa: F811
 
             # detect_self_report needs a db connection; use a no-op if unavailable
             dept_id = state.get("dept_id", "cac")

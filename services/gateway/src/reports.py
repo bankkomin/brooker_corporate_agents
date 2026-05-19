@@ -85,9 +85,10 @@ async def run_email_ingestion(request: Request):
         raise HTTPException(403, "Admin role required")
 
     try:
-        from services.shared.email_ingestion import EmailIngestionPipeline
-        from services.shared.ms_graph_client import MSGraphClient, GraphConfig
         import os
+
+        from services.shared.email_ingestion import EmailIngestionPipeline
+        from services.shared.ms_graph_client import GraphConfig, MSGraphClient
 
         config = GraphConfig(
             tenant_id=os.environ.get("MS_TENANT_ID", ""),
@@ -180,7 +181,7 @@ async def evaluate_auto_approve(proposal_id: int, request: Request):
         raise HTTPException(403, "Admin role required")
 
     try:
-        from services.shared.auto_approve import evaluate_auto_approve, AutoApproveRule
+        from services.shared.auto_approve import AutoApproveRule, evaluate_auto_approve
 
         db = request.app.state.db_pool
         async with db.acquire() as conn:

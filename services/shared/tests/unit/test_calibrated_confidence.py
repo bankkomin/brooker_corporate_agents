@@ -1,5 +1,6 @@
 from services.shared.calibrated_confidence import compute_confidence
 
+
 def test_high_confidence():
     result = compute_confidence(
         retrieved_chunks=[{"text": "LCR is 118.5%"}] * 5,

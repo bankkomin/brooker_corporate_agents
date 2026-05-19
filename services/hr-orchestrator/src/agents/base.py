@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import structlog
 
-from ..tools.llm_client import LLMClient
 from ..skills.loader import SkillsLoader
+from ..tools.llm_client import LLMClient
 
 logger = structlog.get_logger("hr-orchestrator.agent")
 

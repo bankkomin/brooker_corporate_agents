@@ -1,10 +1,9 @@
 import logging
-from typing import List
 
 log = logging.getLogger(__name__)
 
 
-async def gather_context(dept_id: str, context_sources: List[str]) -> str:
+async def gather_context(dept_id: str, context_sources: list[str]) -> str:
     """Gather context from configured sources for a department's proactive heartbeat.
 
     Supported URI prefixes (stubs for now):

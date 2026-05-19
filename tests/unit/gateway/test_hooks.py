@@ -9,12 +9,10 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from services.gateway.src.hooks import (
-    _post_fire_and_forget,
     on_proposal_approved,
     on_proposal_rejected,
 )
 from services.gateway.src.main import app
-
 
 # ---------------------------------------------------------------------------
 # Helpers shared across hook unit tests

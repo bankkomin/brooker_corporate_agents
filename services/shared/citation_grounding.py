@@ -1,8 +1,8 @@
 """Post-generation citation grounding — verify LLM citations match actual sources."""
 import logging
 import re
-from difflib import SequenceMatcher
 from dataclasses import dataclass, field
+from difflib import SequenceMatcher
 
 log = logging.getLogger(__name__)
 

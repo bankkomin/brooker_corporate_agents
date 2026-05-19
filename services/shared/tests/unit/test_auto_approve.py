@@ -2,11 +2,10 @@
 import pytest
 
 from services.shared.auto_approve import (
-    AutoApproveRule,
     AutoApproveDecision,
+    AutoApproveRule,
     evaluate_auto_approve,
 )
-
 
 # --- Helpers ---
 

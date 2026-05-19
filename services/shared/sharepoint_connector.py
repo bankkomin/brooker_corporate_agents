@@ -1,6 +1,5 @@
 """SharePoint/OneDrive connector — syncs documents from SharePoint folders to the RAG pipeline."""
 import logging
-import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -92,7 +91,7 @@ class SharePointConnector:
                 ))
             return files
 
-        except Exception as e:
+        except Exception:
             log.exception("Failed to list SharePoint folder: %s", folder_path)
             return []
 

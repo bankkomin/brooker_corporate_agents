@@ -1,9 +1,8 @@
 """Tests for cross_dept_router module."""
-import pytest
 
 from services.shared.cross_dept_router import (
-    detect_departments,
     _synthesize_results,
+    detect_departments,
 )
 
 

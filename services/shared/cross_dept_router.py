@@ -1,8 +1,5 @@
 """Cross-department query router — routes questions that span multiple departments."""
-import json
 import logging
-import re
-from pathlib import Path
 
 import httpx
 

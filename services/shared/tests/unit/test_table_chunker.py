@@ -1,4 +1,5 @@
-from services.shared.table_chunker import chunk_document, chunk_excel_sheet, _classify_line
+from services.shared.table_chunker import _classify_line, chunk_document, chunk_excel_sheet
+
 
 def test_classify_header():
     assert _classify_line("## Section Title") == "header"

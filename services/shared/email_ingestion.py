@@ -86,7 +86,7 @@ class EmailIngestionPipeline:
 
             return result
 
-        except Exception as e:
+        except Exception:
             log.exception("Failed to fetch emails")
             return []
 

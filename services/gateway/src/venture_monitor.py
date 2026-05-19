@@ -1,6 +1,8 @@
 """API endpoints for venture-monitor integration."""
 import logging
+
 from fastapi import APIRouter, HTTPException, Request
+
 from .auth import AuthError, extract_claims
 from .rate_limit import limiter
 
@@ -18,8 +20,9 @@ async def get_fund_scores(request: Request):
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
     try:
-        from services.shared.vm_bridge import VentureMonitorBridge
         import os
+
+        from services.shared.vm_bridge import VentureMonitorBridge
         bridge = VentureMonitorBridge(base_url=os.environ.get("VM_BASE_URL", "http://localhost:8000"))
         scores = await bridge.get_fund_scores()
         return {"scores": scores}
@@ -39,8 +42,9 @@ async def get_fund_score(fund_id: int, request: Request):
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
     try:
-        from services.shared.vm_bridge import VentureMonitorBridge
         import os
+
+        from services.shared.vm_bridge import VentureMonitorBridge
         bridge = VentureMonitorBridge(base_url=os.environ.get("VM_BASE_URL", "http://localhost:8000"))
         return await bridge.get_fund_score(fund_id)
     except ImportError:
@@ -59,8 +63,9 @@ async def get_vm_alerts(request: Request, severity: str = "high"):
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
     try:
-        from services.shared.vm_bridge import VentureMonitorBridge
         import os
+
+        from services.shared.vm_bridge import VentureMonitorBridge
         bridge = VentureMonitorBridge(base_url=os.environ.get("VM_BASE_URL", "http://localhost:8000"))
         signals = await bridge.get_high_severity_signals(min_severity=severity)
         return {"signals": signals}
@@ -80,8 +85,9 @@ async def get_reconciliation_summary(request: Request):
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
     try:
-        from services.shared.vm_bridge import VentureMonitorBridge
         import os
+
+        from services.shared.vm_bridge import VentureMonitorBridge
         bridge = VentureMonitorBridge(base_url=os.environ.get("VM_BASE_URL", "http://localhost:8000"))
         return {"reconciliations": await bridge.get_reconciliation_summary()}
     except ImportError:

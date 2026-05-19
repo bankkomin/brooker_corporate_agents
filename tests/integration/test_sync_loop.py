@@ -7,17 +7,14 @@ Also verifies the rollback handler reverts DB status on Excel write failure.
 from __future__ import annotations
 
 import json
-import shutil
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import openpyxl
 import pytest
-
 from services.sync_back.src.models import ApprovedProposal
 from services.sync_back.src.openpyxl_writer import ExcelWriteError, write_cell
-
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -71,7 +71,7 @@ def parse_nlq(query: str) -> NLQResult:
         query_type="text_search",
         sql_query=None,
         parameters={"query": query},
-        explanation=f"No structured pattern matched. Routing as free-text query.",
+        explanation="No structured pattern matched. Routing as free-text query.",
     )
 
 

@@ -1,12 +1,11 @@
 import json
 import logging
 from pathlib import Path
-from typing import List
 
 log = logging.getLogger(__name__)
 
 
-def load_enabled_departments(config_path: str) -> List[dict]:
+def load_enabled_departments(config_path: str) -> list[dict]:
     """Load departments.json and return only those with heartbeat.enabled=true."""
     path = Path(config_path)
     if not path.exists():

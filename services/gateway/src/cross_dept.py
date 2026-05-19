@@ -1,6 +1,8 @@
 """API endpoint for cross-department query routing."""
 import logging
+
 from fastapi import APIRouter, HTTPException, Request
+
 from .auth import AuthError, extract_claims
 from .rate_limit import limiter
 

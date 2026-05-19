@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 
+
 class Settings(BaseSettings):
     PORT: int = 3040
     POSTGRES_DSN: str = "postgresql://postgres:postgres@postgres:5432/brooker"

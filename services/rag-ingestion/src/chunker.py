@@ -10,7 +10,8 @@ import structlog
 from .config import RAGSettings
 
 try:
-    from services.shared.table_chunker import chunk_document as table_aware_chunk, chunk_excel_sheet
+    from services.shared.table_chunker import chunk_document as table_aware_chunk
+    from services.shared.table_chunker import chunk_excel_sheet
 except ImportError:
     table_aware_chunk = None
     chunk_excel_sheet = None

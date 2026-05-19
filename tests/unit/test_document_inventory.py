@@ -1,10 +1,11 @@
 """Tests for document_inventory.json schema validation."""
 import json
-import pytest
 from pathlib import Path
 
+import pytest
+
 try:
-    from jsonschema import validate, ValidationError
+    from jsonschema import ValidationError, validate
 except ImportError:
     pytest.skip("jsonschema not installed", allow_module_level=True)
 

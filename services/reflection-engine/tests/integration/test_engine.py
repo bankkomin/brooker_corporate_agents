@@ -2,11 +2,10 @@
 
 Tests the full reflection cycle without requiring a running database or LLM.
 """
-import json
-import pytest
 from datetime import datetime
-from pathlib import Path
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 
 @pytest.fixture
@@ -105,8 +104,9 @@ async def test_reflection_dry_run(synthetic_vault, mock_db_pool):
 @pytest.mark.asyncio
 async def test_reflection_reads_daily_log(synthetic_vault):
     """Verify daily log parsing works with synthetic data."""
-    from src.log_reader import parse_daily_log
     from datetime import datetime
+
+    from src.log_reader import parse_daily_log
 
     yesterday = datetime.utcnow().strftime("%Y-%m-%d")
     log_path = synthetic_vault / "cac" / "daily-logs" / f"{yesterday}.md"

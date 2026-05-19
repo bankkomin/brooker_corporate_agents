@@ -1,7 +1,6 @@
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
 
 
 @dataclass
@@ -22,7 +21,7 @@ HEADER_RE = re.compile(
 FIELD_RE = re.compile(r"\*\*(\w+):\*\*\s*(.*)")
 
 
-def parse_daily_log(path: Path) -> List[LogEntry]:
+def parse_daily_log(path: Path) -> list[LogEntry]:
     """Parse a daily-log markdown file into structured entries."""
     if not path.exists():
         return []

@@ -1,4 +1,9 @@
-from services.shared.chain_of_thought import classify_complexity, build_cot_prompt, parse_cot_response
+from services.shared.chain_of_thought import (
+    build_cot_prompt,
+    classify_complexity,
+    parse_cot_response,
+)
+
 
 def test_simple_query():
     assert classify_complexity("What is the LCR?") == "simple"

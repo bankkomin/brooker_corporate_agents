@@ -8,7 +8,6 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport
-
 from services.email_notifier.src.main import app
 
 

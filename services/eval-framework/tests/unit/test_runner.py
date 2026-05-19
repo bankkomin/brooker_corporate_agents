@@ -1,10 +1,8 @@
 """Tests for the eval runner scoring logic."""
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from src.runner import run_eval
 
 
