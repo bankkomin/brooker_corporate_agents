@@ -9,7 +9,7 @@ from services.cac_orchestrator.src.config import OrchestratorSettings
 class TestOrchestratorSettingsDefaults:
     def test_vllm_large_url_default(self) -> None:
         cfg = OrchestratorSettings()
-        assert cfg.vllm_large_url == "http://nginx:8080/v1"
+        assert cfg.vllm_large_url == "https://generativelanguage.googleapis.com/v1beta/openai"
 
     def test_vllm_large_url_not_host_docker_internal(self) -> None:
         """Ensure default goes via nginx LB, not host.docker.internal."""
@@ -18,7 +18,7 @@ class TestOrchestratorSettingsDefaults:
 
     def test_vllm_large_model_default(self) -> None:
         cfg = OrchestratorSettings()
-        assert cfg.vllm_large_model == "qwen-122b"
+        assert cfg.vllm_large_model == "gemini-3.1-flash-lite-preview"
 
     def test_qdrant_defaults(self) -> None:
         cfg = OrchestratorSettings()
