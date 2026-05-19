@@ -62,7 +62,7 @@ class TestQueryRequest:
 
         q = QueryRequest(
             query="What is the current LCR?",
-            channel_id="C0123456789",
+            channel="C0123456789",
             user_id="U12345",
         )
         assert q.thread_ts is None
@@ -73,7 +73,7 @@ class TestQueryRequest:
 
         q = QueryRequest(
             query="Follow up",
-            channel_id="C123",
+            channel="C123",
             user_id="U456",
             thread_ts="1711234567.000100",
         )
