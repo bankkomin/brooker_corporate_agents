@@ -294,9 +294,10 @@ class TestRejectProposal:
         pool, conn = _mock_pool()
 
         already_rejected = dict(_SAMPLE_ROW, status="rejected")
-        # First fetchrow (atomic UPDATE) returns None (not pending),
-        # second fetchrow (SELECT for error detail) returns existing row.
-        conn.fetchrow = AsyncMock(side_effect=[None, already_rejected])
+        # The reject endpoint pre-reads the row first (SELECT), checks dept,
+        # then checks status. With status="rejected" it returns 409 immediately
+        # without a second fetchrow call.
+        conn.fetchrow = AsyncMock(return_value=already_rejected)
 
         app.state.db_pool = pool
         with patch("services.gateway.src.auth.validate_jwt") as mock_validate:
