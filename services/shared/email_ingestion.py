@@ -223,12 +223,18 @@ def _clean_email_body(text: str) -> str:
     # Remove common signature markers
     for marker in ["--", "Sent from", "Best regards", "Kind regards", "Thanks,"]:
         idx = text.rfind(marker)
-        if idx > len(text) * 0.7:  # only if near the end
+        if idx > len(text) * 0.5:  # only if in the second half
+            # Avoid stripping "--" that is part of a longer "---" sequence (e.g. reply headers)
+            if marker == "--" and (
+                (idx > 0 and text[idx - 1] == "-")
+                or (idx + 2 < len(text) and text[idx + 2] == "-")
+            ):
+                continue
             text = text[:idx]
-    # Remove reply chains
+    # Remove reply chains (strip at any position — reply headers always follow new content)
     for marker in ["From:", "-----Original Message-----", "On .+ wrote:"]:
         match = re.search(marker, text)
-        if match and match.start() > len(text) * 0.5:
+        if match:
             text = text[:match.start()]
     return text.strip()
 

@@ -179,14 +179,16 @@ def _split_sections(text: str) -> dict[str, str]:
     lines: list[str] = []
     for line in text.split("\n"):
         if line.startswith("## "):
-            if lines:
-                sections[current] = "\n".join(lines).strip()
+            content = "\n".join(lines).strip()
+            if content:
+                sections[current] = content
             current = line[3:].strip()
             lines = []
         else:
             lines.append(line)
-    if lines:
-        sections[current] = "\n".join(lines).strip()
+    content = "\n".join(lines).strip()
+    if content:
+        sections[current] = content
     return sections
 
 

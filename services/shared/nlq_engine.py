@@ -33,7 +33,11 @@ PATTERNS = [
         "handler": "_handle_comparison",
     },
     {
-        "pattern": r"(?:trend|how has|history of)\s+(.+?)(?:\s+(?:over|in|for)\s+(?:the\s+)?(?:last\s+)?(\d+)\s*(days?|weeks?|months?|quarters?))?",
+        "pattern": (
+            r"(?:trend|how has|history of)\s+(?:of\s+)?"
+            r"(\w+(?:\s+(?!over\b|in\b|for\b)\w+)?)"
+            r"(?:\s+(?:over|in|for)\s+(?:the\s+)?(?:last\s+)?(\d+)\s*(days?|weeks?|months?|quarters?))?"
+        ),
         "type": "trend_analysis",
         "handler": "_handle_trend",
     },

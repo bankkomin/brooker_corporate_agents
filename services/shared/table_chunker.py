@@ -122,7 +122,7 @@ def _classify_line(line: str) -> str:
         return "header"
 
     # Table separator (---|---|---)
-    if re.match(r"^\|?[\s-:|]+\|[\s-:|]+$", stripped):
+    if re.match(r"^\|?[\s\-:|]+\|[\s\-:|]+$", stripped):
         return "separator"
 
     # Markdown table row (| col | col | col |)
