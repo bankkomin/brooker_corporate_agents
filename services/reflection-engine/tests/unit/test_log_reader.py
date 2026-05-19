@@ -18,7 +18,7 @@ def test_parses_daily_log_entries(tmp_path):
 **Citations:**
 **Confidence:** 0.85
 **Outcome:** pending
-""")
+""", encoding="utf-8")
     entries = parse_daily_log(f)
     assert len(entries) == 2
     assert entries[0].outcome == "approved"
@@ -29,7 +29,7 @@ def test_parses_daily_log_entries(tmp_path):
 
 def test_empty_file_returns_empty(tmp_path):
     f = tmp_path / "empty.md"
-    f.write_text("")
+    f.write_text("", encoding="utf-8")
     assert parse_daily_log(f) == []
 
 
