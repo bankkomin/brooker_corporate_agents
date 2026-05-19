@@ -31,7 +31,7 @@ def _make_mock_pool(overdue_rows: list, already_reminded_rows: list) -> MagicMoc
 
 
 def _proposal_row(proposal_id: str, dept: str) -> dict:
-    return {"proposal_id": proposal_id, "dept": dept}
+    return {"id": proposal_id, "dept": dept}
 
 
 def _email_log_row(proposal_id: str) -> dict:
