@@ -7,7 +7,7 @@ permissions:
   mode: read_only
   data_zones: [1]
   outbound_apis: []
-  read_collections: [ic_docs, ic_chat, ic_knowledge, shared_policies, finance_docs, cio_docs, vcc_docs, legal_docs, cac_docs, cac_knowledge]
+  read_collections: [ic_docs, ic_chat, ic_knowledge, shared_policies, finance_docs, cio_docs, vcc_docs, legal_docs]
 output_types: [text, table]
 ---
 
