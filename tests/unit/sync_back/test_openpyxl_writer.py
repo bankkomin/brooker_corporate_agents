@@ -27,6 +27,7 @@ def _make_proposal(**overrides) -> ApprovedProposal:
         confidence=0.95,
         reasoning="test",
         status="approved",
+        dept="cac",
         approved_at=datetime(2026, 4, 1, 12, 0, 0, tzinfo=UTC),
         approved_by="head_of_dept",
     )
