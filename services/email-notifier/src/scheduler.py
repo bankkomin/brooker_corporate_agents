@@ -1,4 +1,4 @@
-"""APScheduler job for 24h overdue proposal reminders."""
+"""APScheduler jobs: 24h overdue proposal reminders + monthly CFO report."""
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -99,3 +99,30 @@ async def check_overdue_proposals(
 
     logger.info("scheduler.done", total_overdue=len(overdue), reminders_sent=sent)
     return sent
+
+
+async def run_monthly_cfo_report(pool: asyncpg.Pool | None) -> None:
+    """APScheduler entry-point for the monthly CFO report email.
+
+    Skips silently when the recipient is not configured so the scheduler never
+    crashes the service at startup or on a mis-configured deployment.
+
+    Args:
+        pool: asyncpg connection pool for DB logging (may be None if Postgres
+              is unavailable at the time the job fires).
+    """
+    from .cfo_report import send_monthly_cfo_report
+
+    try:
+        result = await send_monthly_cfo_report(pool=pool, dry_run=False)
+        logger.info("scheduler.monthly_cfo_report_done", **result)
+    except ValueError as exc:
+        # Recipient not configured — expected on deployments where the address
+        # is intentionally unset.  Log a warning, do not re-raise.
+        logger.warning("scheduler.monthly_cfo_report_skipped", reason=str(exc))
+    except Exception as exc:
+        logger.error(
+            "scheduler.monthly_cfo_report_failed",
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )

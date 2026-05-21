@@ -392,6 +392,8 @@ services:
       - EMAIL_DRY_RUN=${EMAIL_DRY_RUN:-true}
       - CEO_EMAIL=${CEO_EMAIL:-}
       - SLACK_ESCALATIONS_WEBHOOK_URL=${SLACK_ESCALATIONS_WEBHOOK_URL:-}
+      - MONTHLY_CFO_EMAIL=${MONTHLY_CFO_EMAIL:-}
+      - CAC_ORCHESTRATOR_URL=http://cac-orchestrator:3001
     volumes:
       - ./config/departments.json:/app/config/departments.json:ro
     depends_on:

@@ -46,9 +46,24 @@ def write_cell(
         FileNotFoundError: Source Excel not found in mirror.
         ExcelWriteError: Worksheet not found, write failed, or verification failed.
     """
+    # Primary path: direct join (e.g. manifest.file = "alco/ALCO_Tracker.xlsx")
     source = Path(mirror_path) / proposal.file
     if not source.exists():
-        raise FileNotFoundError(f"Source Excel not found: {source}")
+        # Fallback: search the mirror tree by filename (handles bare filenames
+        # like "ALCO_Tracker.xlsx" where the file lives in a subdirectory).
+        filename = Path(proposal.file).name
+        matches = list(Path(mirror_path).rglob(filename))
+        if not matches:
+            raise FileNotFoundError(
+                f"Source Excel not found in mirror: {source} "
+                f"(also searched recursively for '{filename}')"
+            )
+        source = matches[0]
+        logger.info(
+            "openpyxl_writer.resolved_via_glob",
+            proposal_id=proposal.proposal_id,
+            resolved=str(source),
+        )
 
     # Copy to staging/approved/{proposal_id}/
     dest_dir = Path(staging_path) / "approved" / proposal.proposal_id

@@ -214,3 +214,16 @@ services:
       - ./obsidian-vault:/vault:rw
       - ./services/cac-orchestrator/src:/app/src
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3001", "--reload"]
+
+  # reflection-engine: base compose left it on the default network so it could
+  # not resolve `postgres` (DSN failed -> db_available=false). Put it on
+  # agent-net and point the LLM at the DGX. Bind-mount src for hot-reload.
+  reflection-engine:
+    networks: [agent-net]
+    environment:
+      VLLM_LARGE_URL: ${VLLM_LARGE_URL:-http://nginx:8080/v1}
+      VLLM_LARGE_MODEL: ${VLLM_LARGE_MODEL:-qwen-large}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+    volumes:
+      - ./services/reflection-engine/src:/app/src
+      - ./obsidian-vault:/vault:rw

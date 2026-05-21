@@ -11,6 +11,7 @@ from langchain_openai import ChatOpenAI
 from qdrant_client import AsyncQdrantClient
 
 from .config import settings
+from .staging_writer import maybe_write_staging_proposal
 
 try:
     from services.shared.citation_grounding import ground_citations, add_grounding_badges
@@ -231,10 +232,30 @@ async def run_query(
 
     latency = int((time.monotonic() - start) * 1000)
 
-    # Step 5: Log interaction
-    _log_daily(dept_id, user_id, query, answer, sources, latency)
+    # ── Staging proposal (write-tier departments only) ─────────────────────
+    # Runs AFTER the grounded answer is finalised. Gate logic inside:
+    #   • capabilityTier must be "write" (finance, cio, vcc — NOT ic/read_only)
+    #   • top chunk score must be >= STAGING_CONFIDENCE_THRESHOLD (default 0.85)
+    #   • answer must contain a concrete value-change sentence
+    # On success writes JSON manifest exclusively to /data/staging/pending/.
+    # /data/mirror/ is NEVER written; ic is "read_only" so also skipped.
+    top_score = grounded_chunks[0].get("score", 0.0) if grounded_chunks else 0.0
+    proposal_id = await maybe_write_staging_proposal(
+        dept_id=dept_id,
+        dept_config=dept_config,
+        answer=answer,
+        query=query,
+        user_id=user_id,
+        specialist=specialist,
+        top_chunk_score=top_score,
+    )
+    # ─────────────────────────────────────────────────────────────────────────
 
-    return {
+    # Step 5: Log interaction
+    proposal_label = proposal_id if proposal_id else "none"
+    _log_daily(dept_id, user_id, query, answer, sources, latency, proposal_label)
+
+    result: dict = {
         "response": answer,
         "citations": [s["source"] for s in sources],
         "dept_id": dept_id,
@@ -242,6 +263,9 @@ async def run_query(
         "chunks_retrieved": len(chunks),
         "latency_ms": latency,
     }
+    if proposal_id:
+        result["proposal_id"] = proposal_id
+    return result
 
 
 def _load_memory(dept_id: str, dept_config: dict) -> str:
@@ -316,7 +340,15 @@ async def _search_collections(query: str, collections: list[str]) -> list[dict]:
         return []
 
 
-def _log_daily(dept_id: str, user_id: str, query: str, answer: str, sources: list, latency: int):
+def _log_daily(
+    dept_id: str,
+    user_id: str,
+    query: str,
+    answer: str,
+    sources: list,
+    latency: int,
+    proposal_label: str = "none",
+) -> None:
     """Append to daily log file."""
     from datetime import datetime
     vault = Path(settings.VAULT_ROOT) / dept_id / "daily-logs"
@@ -324,6 +356,10 @@ def _log_daily(dept_id: str, user_id: str, query: str, answer: str, sources: lis
     today = datetime.utcnow().strftime("%Y-%m-%d")
     now = datetime.utcnow().strftime("%H:%M")
 
-    entry = f"\n## {now} · @{user_id} · proposal: none\n**Q:** {query}\n**A:** {answer[:500]}\n**Latency:** {latency}ms\n**Outcome:** n/a\n"
+    entry = (
+        f"\n## {now} · @{user_id} · proposal: {proposal_label}\n"
+        f"**Q:** {query}\n**A:** {answer[:500]}\n"
+        f"**Latency:** {latency}ms\n**Outcome:** n/a\n"
+    )
     with (vault / f"{today}.md").open("a", encoding="utf-8") as f:
         f.write(entry)

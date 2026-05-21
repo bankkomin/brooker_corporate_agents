@@ -367,6 +367,119 @@ async def query(req: QueryRequest) -> QueryResponse:
     )
 
 
+@app.get("/report/monthly-cfo")
+async def monthly_cfo_report() -> dict:
+    """Generate the monthly CAC report for the CFO.
+
+    Queries cac_docs + cac_knowledge for the current month's balance-sheet,
+    liquidity, funding, and ALM data, then asks the LLM to produce a
+    structured executive brief using the CAC monthly CFO report template.
+
+    Returns:
+        {"report": "<markdown>", "month": "May 2026", "sources": [...]}
+    """
+    from datetime import date
+
+    graph_components = _state
+    llm_client = graph_components.get("llm_client")
+    rag_client = graph_components.get("rag_client")
+    embed_fn = graph_components.get("embed_fn")
+    if llm_client is None or rag_client is None:
+        raise HTTPException(503, "orchestrator components not ready")
+
+    today = date.today()
+    month_label = today.strftime("%B %Y")   # e.g. "May 2026"
+    period_ym = today.strftime("%Y-%m")     # e.g. "2026-05"
+
+    # Build a rich retrieval query that covers all four pillars
+    retrieval_query = (
+        f"CAC monthly report {period_ym}: balance sheet assets liabilities "
+        "capital allocation liquidity runway funding covenants ALM duration gap "
+        "limit breaches recommendations CFO"
+    )
+
+    from .nodes.retrieve_context import retrieve_context
+    import httpx as _httpx
+    import os as _os
+
+    _embed_url = (
+        _os.getenv("RAG_INGESTION_URL", "http://rag-ingestion:3004").rstrip("/")
+        + "/embed"
+    )
+
+    async def _embed(text: str) -> list[float]:
+        async with _httpx.AsyncClient(timeout=15.0) as c:
+            r = await c.post(_embed_url, json={"text": text})
+            r.raise_for_status()
+            return r.json()["vector"]
+
+    _embed_fn = embed_fn if embed_fn is not None else _embed
+
+    state = {"query": retrieval_query, "dept_id": settings.dept_id}
+    retrieved = await retrieve_context(
+        state,
+        rag_client=rag_client,
+        embed_fn=_embed_fn,
+        top_k=12,
+        min_relevance=0.60,
+    )
+    sources = retrieved.get("sources", [])
+    context_text = retrieved.get("context_text", "")
+
+    system_prompt = (
+        "You are the Capital Allocation & ALCO Committee AI. "
+        "Produce the monthly CAC report to the CFO (Supane) in markdown. "
+        "Follow this exact structure — fill every section from the retrieved context. "
+        "If a figure is unavailable, write 'data pending'. "
+        "Never invent numbers. Cite source filenames inline like [filename.pdf].\n\n"
+        "## Required sections\n"
+        "1. Executive Summary (3–5 sentences: overall health, biggest change, any limit breaches)\n"
+        "2. Balance Sheet (total assets, liabilities, net worth, D/E ratio, MoM movement)\n"
+        "3. Capital Allocation (investment-to-assets ratio vs 40% ceiling, Three-Engine targets)\n"
+        "4. Liquidity — Stay Liquid (runway months, BTC sovereignty buffer, stress test)\n"
+        "5. Funding & Covenants (drawn/available, leverage, cost of funds, maturities <90d)\n"
+        "6. Asset-Liability Risk (duration gap, refinancing due 12m, collateral coverage)\n"
+        "7. Limit Breaches & Escalations (table — Metric | Value | Limit | Action)\n"
+        "8. Recommendations to CFO / IC / Board (numbered, tagged by approval level)\n\n"
+        "Begin the report with:\n"
+        f"# CAC Monthly Report — {month_label}\n"
+        f"**To:** Supane, CFO  ·  **From:** Capital Allocation & ALCO Committee\n"
+        f"**Period:** {month_label}  ·  **Prepared:** {today.isoformat()}\n"
+    )
+
+    user_msg = (
+        f"Month: {month_label}\n\n"
+        f"Retrieved CAC knowledge:\n{context_text or '(no relevant context retrieved — include data-pending placeholders)'}"
+    )
+
+    logger.info("monthly_cfo_report.generating", month=month_label, source_count=len(sources))
+
+    report_text = await llm_client.chat(
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_msg},
+        ],
+        temperature=0.15,
+        max_tokens=2000,
+    )
+
+    logger.info("monthly_cfo_report.done", month=month_label, chars=len(report_text))
+
+    return {
+        "report": report_text,
+        "month": month_label,
+        "period": period_ym,
+        "sources": [
+            {
+                "filename": s.get("filename", ""),
+                "excerpt": s.get("excerpt", "")[:200],
+                "relevance_score": s.get("relevance_score", 0.0),
+            }
+            for s in sources
+        ],
+    }
+
+
 @app.get("/health")
 async def health() -> dict:
     """Service health check."""

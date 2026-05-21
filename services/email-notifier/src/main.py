@@ -16,6 +16,7 @@ import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, HTTPException, Request
 
+from .cfo_report import send_monthly_cfo_report
 from .email_sender import send_confirmed, send_escalation, send_proposal_notification, send_reminder
 from .jwt_generator import generate_proposal_token
 from .models import (
@@ -24,7 +25,7 @@ from .models import (
     ProposalNotification,
     ReminderNotification,
 )
-from .scheduler import check_overdue_proposals
+from .scheduler import check_overdue_proposals, run_monthly_cfo_report
 
 logger = structlog.get_logger("email-notifier")
 
@@ -105,7 +106,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.warning("email_notifier.db_pool_failed", error=str(exc))
         app.state.db_pool = None
 
-    # Start APScheduler for 24h overdue proposal reminders
+    # Start APScheduler for 24h overdue proposal reminders + monthly CFO report
     scheduler = AsyncIOScheduler()
     if app.state.db_pool is not None:
         scheduler.add_job(
@@ -116,10 +117,41 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             id="overdue_reminder",
             name="24h overdue proposal reminder",
         )
-        scheduler.start()
+
+    # Monthly CFO report — 1st business day of each month at 08:00.
+    # APScheduler `cron` fires day_of_week=mon-fri on day 1..7 of the month.
+    # This covers the first Monday-Friday of the month (i.e. first business day).
+    # The job is no-op when MONTHLY_CFO_EMAIL is unset (run_monthly_cfo_report
+    # catches ValueError and logs a warning instead of crashing).
+    _cfo_report_dry_run = os.environ.get("EMAIL_DRY_RUN", "true").lower() in (
+        "1", "true", "yes"
+    )
+    if _cfo_report_dry_run:
+        logger.info(
+            "email_notifier.cfo_report_dry_run",
+            message=(
+                "EMAIL_DRY_RUN=true — monthly CFO report will fetch but NOT send. "
+                "Set EMAIL_DRY_RUN=false and MONTHLY_CFO_EMAIL to enable real delivery."
+            ),
+        )
+
+    scheduler.add_job(
+        run_monthly_cfo_report,
+        "cron",
+        day="1-7",
+        day_of_week="mon-fri",
+        hour=8,
+        minute=0,
+        args=[app.state.db_pool],
+        id="monthly_cfo_report",
+        name="Monthly CAC report to CFO",
+    )
+
+    scheduler.start()
+    if app.state.db_pool is not None:
         logger.info("email_notifier.scheduler_started")
     else:
-        logger.warning("email_notifier.scheduler_skipped", reason="no db pool")
+        logger.warning("email_notifier.scheduler_started_no_db")
 
     yield
 
@@ -278,3 +310,37 @@ async def notify_confirmed(payload: ConfirmedNotification, request: Request) -> 
         recipient=recipient,
     )
     return {"status": "sent", "notification_id": nid}
+
+
+@app.post("/send-monthly-cfo-report")
+async def send_monthly_cfo_report_endpoint(request: Request) -> dict:
+    """Trigger the monthly CAC report email to the CFO immediately.
+
+    Intended for manual triggering, cron-curl, or integration tests.
+    Respects EMAIL_DRY_RUN: when true, fetches the report but does not send.
+
+    Returns:
+        - status "sent" or "dry_run" with recipient + month details.
+        - HTTP 422 when neither MONTHLY_CFO_EMAIL nor CAC_HOD_EMAIL is set.
+        - HTTP 502 when the cac-orchestrator is unreachable.
+    """
+    dry_run = os.environ.get("EMAIL_DRY_RUN", "true").lower() in ("1", "true", "yes")
+    pool = getattr(request.app.state, "db_pool", None)
+
+    try:
+        result = await send_monthly_cfo_report(pool=pool, dry_run=dry_run)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error(
+            "monthly_cfo_report_endpoint_failed",
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to generate or send monthly CFO report: {exc}",
+        ) from exc
+
+    logger.info("monthly_cfo_report_endpoint.done", **result)
+    return result
