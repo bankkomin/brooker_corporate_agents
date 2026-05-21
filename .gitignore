@@ -99,3 +99,9 @@ secrets/*.pem
 
 # brooker-db-to-wiki extraction scratch (derived from external corporate data)
 .source-extracts/
+
+# Agent runtime memory — reflection-engine rewrites these nightly.
+# soul.md is the seed (committed); memory.md/user.md/history are runtime state.
+obsidian-vault/*/_memory/*/memory.md
+obsidian-vault/*/_memory/*/user.md
+obsidian-vault/*/_memory/*/history/
