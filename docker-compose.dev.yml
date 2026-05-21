@@ -88,7 +88,7 @@ services:
       # template for every request (e.g. for testing).
       DECK_OUTPUT_DIR: /data/decks
       RAG_TOP_K: ${RAG_TOP_K:-8}
-      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.50}
+      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
     volumes:
       - ./config:/app/config:ro
       - ./data/decks:/data/decks:rw
@@ -162,7 +162,7 @@ services:
       VLLM_LARGE_MODEL: ${VLLM_LARGE_MODEL:-qwen-large}
       LLM_API_KEY: ${LLM_API_KEY:-}
       RAG_INGESTION_URL: http://rag-ingestion:3004
-      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.50}
+      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
     volumes:
       - ./obsidian-vault:/vault:rw
       - ./services/hr-orchestrator/src:/app/src
@@ -187,7 +187,7 @@ services:
       DEPARTMENTS_CONFIG: /app/config/departments.json
       SKILLS_ROOT: /skills
       VAULT_ROOT: /vault
-      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.50}
+      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
     volumes:
       - ./obsidian-vault:/vault:rw
       - ./services/read-only-orchestrator/src:/app/src
@@ -209,7 +209,7 @@ services:
       VLLM_LARGE_MODEL: ${VLLM_LARGE_MODEL:-qwen-large}
       LLM_API_KEY: ${LLM_API_KEY:-}
       RAG_INGESTION_URL: http://rag-ingestion:3004
-      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.50}
+      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
     volumes:
       - ./obsidian-vault:/vault:rw
       - ./services/cac-orchestrator/src:/app/src

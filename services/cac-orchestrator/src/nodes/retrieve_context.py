@@ -53,11 +53,14 @@ def _build_collection_list(dept_id: str) -> list[str]:
     shared = ["shared_policies"]
 
     if "*" in cross:
-        # wildcard: every other live dept's _docs
+        # wildcard: every other live dept
         other = [k for k, v in depts.items() if k != dept_id and v.get("live", False)]
     else:
         other = list(cross)
-    cross_collections = [f"{d}_docs" for d in other]
+    # Cross-read both raw docs AND the compiled wiki knowledge of the other dept,
+    # so e.g. CAC can surface CEO strategy (Khao Yai resolutions live in
+    # ceo_knowledge, not ceo_docs).
+    cross_collections = [f"{d}_docs" for d in other] + [f"{d}_knowledge" for d in other]
 
     return own + shared + cross_collections
 

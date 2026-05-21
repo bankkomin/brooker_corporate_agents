@@ -103,7 +103,9 @@ async def run_query(
     collections = [f"{dept_id}_docs", f"{dept_id}_chat", f"{dept_id}_knowledge", "shared_policies"]
     cross_read = dept_config.get("crossReadAccess", [])
     if cross_read and "*" not in cross_read:
+        # Cross-read raw docs AND compiled wiki knowledge of the other dept.
         collections += [f"{d}_docs" for d in cross_read]
+        collections += [f"{d}_knowledge" for d in cross_read]
 
     # ── Capability / identity bypass ──────────────────────────────────────────
     # "What is your task?", "who are you?", greetings — answer from the dept's

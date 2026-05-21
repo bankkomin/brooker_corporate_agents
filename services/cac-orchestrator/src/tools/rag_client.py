@@ -52,11 +52,15 @@ class RAGClient:
             except Exception as exc:
                 logger.warning("qdrant_search_failed", collection=collection, error=str(exc))
 
-        # Deduplicate by (filename, page) and sort by relevance
-        seen: set[tuple[str, int | None]] = set()
+        # Deduplicate by (filename, page, excerpt) and sort by relevance.
+        # NOTE: keying on (filename, page) alone collapsed every multi-chunk
+        # document to ONE chunk — vault/wiki docs are chunked with page=None,
+        # so an entire retreat note surfaced as a single fragment. Including the
+        # excerpt keeps distinct chunks of the same file while removing true dups.
+        seen: set[tuple[str, int | None, str]] = set()
         deduped: list[dict] = []
         for r in sorted(all_results, key=lambda x: x["relevance_score"], reverse=True):
-            key = (r["filename"], r.get("page"))
+            key = (r["filename"], r.get("page"), (r.get("excerpt") or "")[:160])
             if key not in seen:
                 seen.add(key)
                 deduped.append(r)
