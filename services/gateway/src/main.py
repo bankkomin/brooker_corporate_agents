@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv()
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
@@ -29,8 +28,8 @@ from services.gateway.src.chat import router as chat_router
 from services.gateway.src.auth import (
     AuthError,
     extract_claims,
-    resolve_agent_permissions,
     permissions_from_access,
+    resolve_all_agent_permissions,
     validate_jwt,
 )
 from services.gateway.src.errors import auth_error_handler
@@ -44,6 +43,7 @@ from services.gateway.src.compliance import router as compliance_router
 from services.gateway.src.reports import router as reports_router
 from services.gateway.src.cross_dept import router as cross_dept_router
 from services.gateway.src.venture_monitor import router as vm_router
+from services.gateway.src.slack_proxy import router as slack_proxy_router
 
 logger = structlog.get_logger(__name__)
 
@@ -129,19 +129,27 @@ async def brooker_token_middleware(request: Request, call_next):
     if claims.source == "brooker":
         pool = getattr(request.app.state, "db_pool", None)
         try:
-            # Resolve by email (since employee_id in agent_access may be placeholder)
-            access = await resolve_agent_permissions(
-                pool, employee_id=None, email=claims.email, department_name="cac",
+            access_by_dept = await resolve_all_agent_permissions(
+                pool, employee_id=None, email=claims.email,
             )
-            request.state.agent_permissions = permissions_from_access(access)
-            request.state.brooker_email = claims.email
-            request.state.brooker_employee_id = claims.sub
         except AuthError as exc:
             from fastapi.responses import JSONResponse
             return JSONResponse(
                 status_code=exc.status_code,
                 content={"error": exc.message, "code": exc.code},
             )
+
+        # Expose both shapes:
+        # - agent_permissions_by_dept: { "cac": ["query","approve"], "hr": [...] }
+        # - agent_permissions: flat list for the JWT's primary dept (back-compat)
+        perms_by_dept = {
+            dept: permissions_from_access(row)
+            for dept, row in access_by_dept.items()
+        }
+        request.state.agent_permissions_by_dept = perms_by_dept
+        request.state.agent_permissions = perms_by_dept.get(claims.dept or "cac", [])
+        request.state.brooker_email = claims.email
+        request.state.brooker_employee_id = claims.sub
 
     return await call_next(request)
 
@@ -158,6 +166,7 @@ app.include_router(compliance_router)
 app.include_router(reports_router)
 app.include_router(cross_dept_router)
 app.include_router(vm_router)
+app.include_router(slack_proxy_router)
 
 
 @app.get("/")
@@ -180,9 +189,10 @@ async def validate_token_endpoint(request: Request) -> dict:
     claims = validate_jwt(token)
 
     permissions = list(claims.permissions)
+    permissions_by_dept: dict[str, list[str]] = {}
     if claims.source == "brooker":
-        # Return agent_access permissions resolved by the middleware
         permissions = getattr(request.state, "agent_permissions", [])
+        permissions_by_dept = getattr(request.state, "agent_permissions_by_dept", {})
 
     return {
         "valid": True,
@@ -192,6 +202,7 @@ async def validate_token_endpoint(request: Request) -> dict:
         "email": claims.email,
         "source": claims.source,
         "permissions": permissions,
+        "permissions_by_dept": permissions_by_dept,
     }
 
 

@@ -1,9 +1,8 @@
 """Email-notifier service — JWT generation + SMTP sending."""
 from __future__ import annotations
 
-from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv()
 
 import json
 import os
@@ -34,10 +33,12 @@ DATABASE_URL = os.environ.get(
     "postgresql://agents:changeme@localhost:5432/corporate_agents",
 )
 
-# Load departments config for HOD email resolution
+# Load departments config for HOD email resolution. Default to the
+# container path (/app/config/departments.json) so this works both
+# inside Docker and when run from a repo checkout via the env override.
 _DEPARTMENTS_PATH = os.environ.get(
     "DEPARTMENTS_JSON_PATH",
-    str(Path(__file__).resolve().parents[3] / "config" / "departments.json"),
+    "/app/config/departments.json",
 )
 _departments: dict | None = None
 

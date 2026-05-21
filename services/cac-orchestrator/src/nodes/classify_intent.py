@@ -9,12 +9,16 @@ from ..tools.llm_client import LLMClient
 
 logger = structlog.get_logger("cac-orchestrator.classify")
 
-INTENT_CATEGORIES = ["liquidity", "capital", "alm", "funding", "cfo", "general"]
+INTENT_CATEGORIES = [
+    "liquidity", "capital", "alm", "funding", "covenant", "cfo", "general",
+]
 
 SYSTEM_PROMPT = (
     "You are an intent classifier for a Capital Allocation & ALCO Committee AI system.\n"
     "Classify the following query into exactly one of these categories: "
-    "liquidity, capital, alm, funding, cfo, general.\n"
+    "liquidity, capital, alm, funding, covenant, cfo, general.\n"
+    "- covenant: questions about debt covenant compliance, headroom, breach risk, "
+    "or covenant-driven facility constraints.\n"
     "Use 'cfo' when the query asks for a whole-of-firm, board-level, or "
     "cross-domain risk overview that spans multiple domains (liquidity + capital, "
     "ALM + funding, overall risk posture, composite metrics, etc.).\n"

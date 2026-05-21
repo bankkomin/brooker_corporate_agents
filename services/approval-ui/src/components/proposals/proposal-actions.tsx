@@ -27,7 +27,7 @@ import { CheckIcon, XIcon, PencilIcon } from "lucide-react";
 
 interface ProposalActionsProps {
   proposalId: string;
-  currentNewValue: string;
+  currentNewValue: string | null;
   onActionComplete?: () => void;
 }
 
@@ -37,7 +37,7 @@ export function ProposalActions({
   onActionComplete,
 }: ProposalActionsProps) {
   const [rejectReason, setRejectReason] = useState("");
-  const [editValue, setEditValue] = useState(currentNewValue);
+  const [editValue, setEditValue] = useState(currentNewValue ?? "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);

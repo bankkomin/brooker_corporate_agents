@@ -31,6 +31,7 @@ Zone 4: /data/archive/  — permanent audit + sync back to corporate
 - **Email** — HOD formal approval notifications and escalation alerts ONLY
 - **Approval UI (port 4000)** — browser, HOD clicks email link, reviews diff, decides
 - **Obsidian** — human-facing knowledge UI for SKILL.md, meeting notes, decision log
+- **Portal** (`brooker-internal-company-interface` @ `/paperclip-agent`) — employee-facing chat surface with per-employee + per-department agent grants, file uploads (PDF/Word/Excel/PowerPoint/images, 50 MB cap), and inline preview. See `docs/Portal-Integration.md` for the data model and the two known integration gaps (gateway routing, file ingestion).
 
 ## Services
 | Service | Port | Purpose |

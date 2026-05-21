@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { StatsCards } from "@/components/analytics/stats-cards";
 import { apiClient } from "@/lib/api-client";
 import type { AnalyticsSummary } from "@/types/api";
 
 export default function AnalyticsPage() {
+  const params = useParams<{ dept: string }>();
+  const dept = params.dept;
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +18,7 @@ export default function AnalyticsPage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await apiClient.getAnalyticsSummary();
+        const data = await apiClient.getAnalyticsSummary(dept);
         setSummary(data);
       } catch {
         setError("Failed to load analytics.");
@@ -24,7 +27,7 @@ export default function AnalyticsPage() {
       }
     }
     load();
-  }, []);
+  }, [dept]);
 
   return (
     <div className="space-y-6">

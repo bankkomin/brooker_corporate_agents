@@ -1,11 +1,11 @@
 """FastAPI application for CAC Orchestrator."""
 from __future__ import annotations
 
-from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv()
 
 import logging
+import os
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -27,6 +27,7 @@ from .models import QueryRequest, QueryResponse, Source
 from .skills.loader import SkillsLoader
 from .tools.db_client import DBClient
 from .tools.llm_client import LLMClient
+from .tools.portal_files import fetch_and_extract
 from .tools.rag_client import RAGClient
 
 logging.basicConfig(level=settings.log_level.upper())
@@ -49,6 +50,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         host=settings.qdrant_host,
         port=settings.qdrant_rest_port,
     )
+
+    # HTTP embedder: calls rag-ingestion's /embed (Gemini under the hood today).
+    import httpx as _httpx
+    _embed_http = _httpx.AsyncClient(timeout=15.0)
+    _embed_url = (
+        os.getenv("RAG_INGESTION_URL", "http://rag-ingestion:3004").rstrip("/")
+        + "/embed"
+    )
+
+    async def embed_fn(text: str) -> list[float]:
+        r = await _embed_http.post(_embed_url, json={"text": text})
+        r.raise_for_status()
+        return r.json()["vector"]
 
     # DB pool -- graceful degradation if Postgres unavailable
     db_pool = None
@@ -89,6 +103,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db_client=db_client,
         skills_loader=skills_loader,
         checkpointer=checkpointer,
+        embed_fn=embed_fn,
     )
 
     _state["llm_client"] = llm_client
@@ -96,6 +111,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     _state["db_client"] = db_client
     _state["db_pool"] = db_pool
     _state["graph"] = compiled_graph
+    _state["embed_fn"] = embed_fn
     _state["checkpointer"] = checkpointer
     _state["checkpointer_cm"] = checkpointer_cm
 
@@ -127,6 +143,100 @@ if make_metrics_app is not None:
     app.mount("/metrics", metrics_app)
 
 
+_SUMMARY_SYSTEM = (
+    "You are a corporate committee AI assistant for the Capital Allocation & "
+    "ALCO Committee. Produce a concise EXECUTIVE BRIEF (max 200 words) in "
+    "markdown. Use this structure:\n"
+    "**Answer:** 1-2 sentences directly answering the question.\n"
+    "**Key facts:** 3-5 bullets with cited numbers / dates / sources [filename].\n"
+    "**Risks / caveats:** 1-3 bullets (omit if none apply).\n"
+    "Cite source filenames inline like [filename.pdf]. Never invent figures. "
+    "If retrieved context is empty, say so explicitly and ask the user to share "
+    "a relevant document. No greeting, no preamble."
+)
+
+
+@app.post("/summary")
+async def summary(req: QueryRequest) -> dict:
+    """Concise executive brief endpoint. Same retrieval as /query but a single
+    LLM call with a summary-mode prompt — returns markdown, no agent path,
+    no escalation, no staging proposal. Useful for quick committee briefings."""
+    graph_components = _state
+    llm_client = graph_components.get("llm_client")
+    rag_client = graph_components.get("rag_client")
+    if llm_client is None or rag_client is None:
+        raise HTTPException(503, "orchestrator components not ready")
+
+    # Use the graph's retrieve_context helper directly.
+    from .nodes.retrieve_context import retrieve_context
+    import httpx as _httpx, os as _os
+    _embed_url = (_os.getenv("RAG_INGESTION_URL", "http://rag-ingestion:3004").rstrip("/") + "/embed")
+    async def _embed(text: str) -> list[float]:
+        async with _httpx.AsyncClient(timeout=15.0) as c:
+            r = await c.post(_embed_url, json={"text": text})
+            r.raise_for_status()
+            return r.json()["vector"]
+
+    state = {"query": req.query, "dept_id": req.dept_id or settings.dept_id}
+    retrieved = await retrieve_context(state, rag_client=rag_client, embed_fn=_embed,
+                                        top_k=settings.rag_top_k,
+                                        min_relevance=settings.rag_min_relevance)
+    sources = retrieved.get("sources", [])
+    context_text = retrieved.get("context_text", "")
+
+    user_msg = (
+        f"Question: {req.query}\n\n"
+        f"Retrieved context:\n{context_text or '(no relevant context retrieved)'}"
+    )
+    answer = await llm_client.chat(
+        messages=[
+            {"role": "system", "content": _SUMMARY_SYSTEM},
+            {"role": "user", "content": user_msg},
+        ],
+        temperature=0.2,
+        max_tokens=600,
+    )
+    return {
+        "answer": answer,
+        "confidence": "Medium",
+        "sources": [
+            {"filename": s.get("filename", ""), "excerpt": s.get("excerpt", "")[:200],
+             "relevance_score": s.get("relevance_score", 0.0)}
+            for s in sources
+        ],
+    }
+
+
+@app.get("/proposals/pending")
+async def list_pending_proposals() -> dict:
+    """List the JSON manifests sitting in /data/staging/pending/."""
+    from pathlib import Path as _Path
+    staging = _Path(settings.staging_path) / "pending"
+    items: list[dict] = []
+    if staging.is_dir():
+        import json as _json
+        for f in sorted(staging.glob("*.json"))[:50]:
+            try:
+                m = _json.loads(f.read_text(encoding="utf-8"))
+                items.append({
+                    "id": m.get("id") or f.stem,
+                    "agent": m.get("agent"),
+                    "file": m.get("file"),
+                    "tab": m.get("tab"),
+                    "cell": m.get("cell"),
+                    "old_value": m.get("old_value"),
+                    "new_value": m.get("new_value"),
+                    "confidence": m.get("confidence"),
+                    "reasoning": (m.get("reasoning") or "")[:200],
+                    "status": m.get("status", "pending"),
+                    "source": m.get("source"),
+                    "filename": f.name,
+                })
+            except Exception:
+                continue
+    return {"count": len(items), "proposals": items}
+
+
 @app.post("/query", response_model=QueryResponse)
 async def query(req: QueryRequest) -> QueryResponse:
     """Process a committee query through the agent graph."""
@@ -136,6 +246,14 @@ async def query(req: QueryRequest) -> QueryResponse:
         raise HTTPException(status_code=503, detail="Graph not initialized")
 
     start = time.monotonic()
+
+    # Pull any portal-attached files and pre-load their contents into context
+    # before the graph runs. Failures are logged but never block the query.
+    attached_context = await fetch_and_extract(
+        files=req.files,
+        portal_base_url=req.portal_base_url,
+        auth_token=req.auth_token,
+    )
 
     # Build initial state
     initial_state = {
@@ -148,6 +266,7 @@ async def query(req: QueryRequest) -> QueryResponse:
         "intent_confidence": 0.0,
         "sources": [],
         "context_text": "",
+        "attached_files_text": attached_context,
         "agent_response": "",
         "agent_name": "",
         "proposed_value": None,
@@ -168,8 +287,10 @@ async def query(req: QueryRequest) -> QueryResponse:
         # Phase 2 shared library fields
         "agent_memory": "",
         "vault_root": settings.vault_root,
-        "agent_id": "cac-orchestrator",
-        "dept_id": "cac",
+        "agent_id": settings.agent_id,
+        # Honour the dept_id the gateway forwards so a single orchestrator
+        # binary can serve multiple departments without a redeploy.
+        "dept_id": req.dept_id or settings.dept_id,
     }
 
     # Phase 1: create interaction before graph

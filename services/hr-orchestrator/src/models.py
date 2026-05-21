@@ -18,12 +18,18 @@ class Source(BaseModel):
 
 
 class QueryRequest(BaseModel):
-    """Incoming query from a Slack user."""
+    """Incoming query from a Slack user or web channel."""
 
     query: str
     user_id: str
     channel: str
     thread_ts: str | None = None
+    # Gateway-forwarded slug — HR ignores this (single dept) but accepts it
+    # so the gateway can use a uniform payload across all orchestrators.
+    dept_id: str | None = None
+    files: list[dict] = []
+    auth_token: str | None = None
+    portal_base_url: str | None = None
 
 
 class QueryResponse(BaseModel):

@@ -30,16 +30,41 @@ def log_interaction_node(state: dict) -> dict:
     today = now.strftime("%Y-%m-%d")
     f = log_dir / f"{today}.md"
 
-    citations = state.get("citations", [])
-    citations_str = ", ".join(citations) if citations else ""
-    proposal_id = state.get("proposal_id", "none")
+    # Audit bug #8: state keys for cac/hr orchestrators are
+    # `sources` (not `citations`), `answer` (not `response`),
+    # `staging_proposal_id` (not `proposal_id`). Accept either set.
+    citations_raw = state.get("citations") or state.get("sources") or []
+    citation_strs: list[str] = []
+    for c in citations_raw:
+        if isinstance(c, str):
+            citation_strs.append(c)
+        elif isinstance(c, dict):
+            citation_strs.append(
+                c.get("filename")
+                or c.get("source")
+                or c.get("type")
+                or "src"
+            )
+    citations_str = ", ".join(citation_strs)
+    proposal_id = (
+        state.get("proposal_id")
+        or state.get("staging_proposal_id")
+        or "none"
+    )
+    response_text = state.get("response") or state.get("answer") or ""
+
+    confidence = state.get("confidence", 0.0)
+    if isinstance(confidence, (int, float)):
+        confidence_str = f"{confidence:.2f}"
+    else:
+        confidence_str = str(confidence)
 
     entry = (
         f"\n## {now.strftime('%H:%M')} · @{state.get('user_id', '?')} · proposal: {proposal_id}\n"
         f"**Q:** {state.get('query', '')}\n"
-        f"**A:** {state.get('response', '')}\n"
+        f"**A:** {response_text}\n"
         f"**Citations:** {citations_str}\n"
-        f"**Confidence:** {state.get('confidence', 0.0):.2f}\n"
+        f"**Confidence:** {confidence_str}\n"
         f"**Outcome:** pending\n"
     )
 

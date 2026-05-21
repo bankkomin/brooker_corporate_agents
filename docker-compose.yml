@@ -526,6 +526,7 @@ services:
       LLM_BASE_URL: http://nginx:8080/v1
       LLM_MODEL: qwen-122b
       VAULT_ROOT: /vault
+      RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.70}
     volumes:
       - ./config:/app/config:ro
       - ./skills:/skills:ro

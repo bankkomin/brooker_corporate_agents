@@ -10,9 +10,9 @@ class HROrchestratorSettings(BaseSettings):
 
     model_config = {"env_prefix": "", "case_sensitive": False}
 
-    # LLM -- OpenAI-compatible endpoint (vLLM, Gemini, etc.)
-    vllm_large_url: str = "https://generativelanguage.googleapis.com/v1beta/openai"
-    vllm_large_model: str = "gemini-3.1-flash-lite-preview"
+    # LLM -- OpenAI-compatible vLLM endpoint serving Qwen.
+    vllm_large_url: str = "http://nginx:8080/v1"
+    vllm_large_model: str = "qwen-large"
     llm_api_key: str = ""
 
     # Qdrant

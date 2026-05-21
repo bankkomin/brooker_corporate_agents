@@ -10,9 +10,9 @@ class OrchestratorSettings(BaseSettings):
 
     model_config = {"env_prefix": "", "case_sensitive": False}
 
-    # LLM — OpenAI-compatible endpoint (vLLM, Gemini, etc.)
-    vllm_large_url: str = "https://generativelanguage.googleapis.com/v1beta/openai"
-    vllm_large_model: str = "gemini-3.1-flash-lite-preview"
+    # LLM — OpenAI-compatible vLLM endpoint serving Qwen.
+    vllm_large_url: str = "http://nginx:8080/v1"
+    vllm_large_model: str = "qwen-large"
     llm_api_key: str = ""
 
     # Qdrant
@@ -52,6 +52,11 @@ class OrchestratorSettings(BaseSettings):
 
     # Departments config
     departments_config_path: str = "/app/config/departments.json"
+
+    # Department identity — set per-orchestrator deployment.
+    # Lets a single image be reused for hr-orchestrator, risk-orchestrator, etc.
+    dept_id: str = "cac"
+    agent_id: str = "cac-orchestrator"
 
     # Logging
     log_level: str = "INFO"

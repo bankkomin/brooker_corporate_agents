@@ -16,7 +16,8 @@ export function ProposalDiff({ proposal }: ProposalDiffProps) {
             Current Value
           </h3>
           <p className="text-xs text-red-600 dark:text-red-500 mt-0.5">
-            {proposal.file} &rarr; {proposal.tab} &rarr; {proposal.cell}
+            {proposal.file ?? "—"} &rarr; {proposal.tab ?? "—"} &rarr;{" "}
+            {proposal.cell ?? "—"}
           </p>
         </div>
         <div className="bg-red-50/50 dark:bg-red-950/20 px-4 py-3">
@@ -33,12 +34,12 @@ export function ProposalDiff({ proposal }: ProposalDiffProps) {
             Proposed Value
           </h3>
           <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">
-            Agent: {proposal.agent}
+            Agent: {proposal.agent ?? "Unknown"}
           </p>
         </div>
         <div className="bg-green-50/50 dark:bg-green-950/20 px-4 py-3">
           <pre className="text-sm font-mono whitespace-pre-wrap break-words text-green-800 dark:text-green-300">
-            {proposal.new_value}
+            {proposal.new_value ?? "—"}
           </pre>
         </div>
       </div>

@@ -7,11 +7,7 @@ from typing import Any
 import structlog
 from langgraph.graph import END, StateGraph
 
-from .agents.alm import AlmAgent
-from .agents.capital import CapitalAgent
-from .agents.cfo import CFOAgent
-from .agents.funding import FundingAgent
-from .agents.liquidity import LiquidityAgent
+from .agents.cac import CacAgent
 try:
     from services.shared.load_memory import load_memory_node
 except ImportError:
@@ -25,6 +21,7 @@ except ImportError:
 from .nodes.classify_intent import classify_intent
 from .nodes.escalation_check import escalation_check
 from .nodes.excel_navigator import excel_navigator
+from .nodes.grounding_gate import grounding_gate
 from .nodes.notify_escalation import notify_escalation
 from .nodes.paperclip_ticket import create_paperclip_ticket
 from .nodes.retrieve_context import retrieve_context
@@ -96,24 +93,17 @@ def build_graph(
 
     cfg = config or default_config
 
-    # Build agent instances with DI (requires llm_client + skills_loader)
+    # Single consolidated CAC agent (doc-faithful — retreat §2.8 defines ONE
+    # committee with one mandate, not specialist sub-agents). The graph below is
+    # generic over `agents`, so a one-entry dict collapses the former fan-out.
     agents: dict[str, Any] = {}
     if llm_client is not None and skills_loader is not None:
-        agents = {
-            "liquidity": LiquidityAgent(llm_client, skills_loader),
-            "capital": CapitalAgent(llm_client, skills_loader),
-            "alm": AlmAgent(llm_client, skills_loader),
-            "funding": FundingAgent(llm_client, skills_loader),
-            # CFO is a cross-domain synthesiser; routed by classify_intent
-            # when the query requires a whole-of-firm view.
-            "cfo": CFOAgent(llm_client, skills_loader),
-        }
+        agents = {"cac": CacAgent(llm_client, skills_loader)}
 
     def _route_to_agent(state: dict) -> str:
-        """Route to specialist agent based on classified intent."""
-        intent = state.get("intent", "general")
-        if intent in agents:
-            return f"{intent}_agent"
+        """Single-agent routing: grounded substantive turns go to the CAC agent."""
+        if "cac" in agents:
+            return "cac_agent"
         return "general_handler"
 
     graph = StateGraph(AgentState)
@@ -135,6 +125,7 @@ def build_graph(
             min_relevance=cfg.rag_min_relevance,
         ),
     )
+    graph.add_node("grounding_gate", grounding_gate)
 
     # Specialist agents
     for name, agent in agents.items():
@@ -167,7 +158,9 @@ def build_graph(
             confidence_threshold=cfg.confidence_threshold,
         ),
     )
-    graph.add_node("synthesise", partial(synthesise_response, llm_client=llm_client))
+    graph.add_node("synthesise",
+                   partial(synthesise_response,
+                            llm_client=llm_client, db_client=db_client))
 
     # Phase 2: log_interaction as last node before END (if shared library available)
     if log_interaction_node is not None:
@@ -189,19 +182,29 @@ def build_graph(
     else:
         graph.set_entry_point("classify_intent")
     graph.add_edge("classify_intent", "retrieve_context")
+    graph.add_edge("retrieve_context", "grounding_gate")
 
-    # Conditional: route to correct agent.
-    # Build the map dynamically so it only references nodes that were actually
-    # registered above.  When llm_client/skills_loader is None the agents dict
-    # is empty and none of the specialist node names exist in the graph.
+    # Conditional: if the gate blocked (no grounding), skip agents and go straight
+    # to synthesise so the canned abstention answer is returned through the normal
+    # output path without any LLM call.
+    # Build the agent-routing map dynamically so it only references nodes that were
+    # actually registered above (when llm_client/skills_loader is None the agents
+    # dict is empty).
     _agent_edge_map: dict[str, str] = {
         f"{name}_agent": f"{name}_agent" for name in agents
     }
     _agent_edge_map["general_handler"] = "general_handler"
+    _agent_edge_map["synthesise"] = "synthesise"
+
+    def _gate_then_route(state: dict) -> str:
+        """After grounding_gate: blocked turns go to synthesise; others to agent."""
+        if not state.get("is_grounded", True):
+            return "synthesise"
+        return _route_to_agent(state)
 
     graph.add_conditional_edges(
-        "retrieve_context",
-        _route_to_agent,
+        "grounding_gate",
+        _gate_then_route,
         _agent_edge_map,
     )
 

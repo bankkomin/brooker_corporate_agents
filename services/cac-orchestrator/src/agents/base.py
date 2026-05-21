@@ -43,6 +43,16 @@ class BaseAgent(ABC):
                   "proposed_tab": str|None, "confidence_score": float}
         """
         system_prompt = await self._build_system_prompt()
+        # Supervisor routing: classify_intent already picked the sub-domain. The
+        # single CAC agent acts as that backend sub-agent for this query (route-
+        # to-relevant), focusing its grounded answer on the chosen sub-domain.
+        intent = state.get("intent")
+        if intent and intent not in ("general", "cfo"):
+            system_prompt += (
+                f"\n\nThis query is routed to your **{intent}** sub-agent (backend). "
+                f"Answer with that sub-domain's focus, grounded strictly in the skill "
+                f"and retrieved context."
+            )
         user_prompt = self._build_user_prompt(state)
 
         try:
@@ -67,10 +77,19 @@ class BaseAgent(ABC):
             }
 
     async def run(self, state: dict) -> dict:
-        """Execute with timing and logging."""
+        """Execute with timing and logging. Also surfaces this agent's skill
+        permissions into state so downstream nodes (staging_writer) can enforce
+        the write_via_staging gate documented in PRD §11."""
         start = time.monotonic()
         result = await self.analyze(state)
         elapsed = (time.monotonic() - start) * 1000
+        # Audit bug #6: populate skill_permissions so staging_writer's gate fires
+        try:
+            perms = await self._skills.get_skill_permissions(self.skill_path)
+            if perms:
+                result["skill_permissions"] = perms
+        except Exception as exc:
+            logger.debug("skill_permissions_unavailable", agent=self.name, error=str(exc))
         logger.info("agent_complete", agent=self.name, elapsed_ms=round(elapsed, 1))
         return result
 

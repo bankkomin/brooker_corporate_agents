@@ -1,13 +1,13 @@
 """HR specialist agents."""
 
-from .general import GeneralHRAgent
 from .compensation import CompensationAgent
-from .compliance import ComplianceAgent
-from .recruitment import RecruitmentAgent
+from .general import GeneralHRAgent
+from .policy import PolicyAgent
+from .talent import TalentAgent
 
 __all__ = [
-    "GeneralHRAgent",
     "CompensationAgent",
-    "ComplianceAgent",
-    "RecruitmentAgent",
+    "GeneralHRAgent",
+    "PolicyAgent",
+    "TalentAgent",
 ]

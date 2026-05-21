@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { EscalationCard } from "@/components/escalations/escalation-card";
 import { apiClient } from "@/lib/api-client";
 import type { EscalationItem } from "@/types/api";
@@ -14,13 +15,15 @@ const SEVERITY_ORDER: Record<string, number> = {
 
 function sortBySeverity(items: EscalationItem[]): EscalationItem[] {
   return [...items].sort((a, b) => {
-    const aOrder = SEVERITY_ORDER[a.severity] ?? 99;
-    const bOrder = SEVERITY_ORDER[b.severity] ?? 99;
+    const aOrder = SEVERITY_ORDER[a.severity ?? ""] ?? 99;
+    const bOrder = SEVERITY_ORDER[b.severity ?? ""] ?? 99;
     return aOrder - bOrder;
   });
 }
 
 export default function EscalationsPage() {
+  const params = useParams<{ dept: string }>();
+  const dept = params.dept;
   const [escalations, setEscalations] = useState<EscalationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +33,7 @@ export default function EscalationsPage() {
       setLoading(true);
       setError(null);
       try {
-        const resp = await apiClient.listEscalations();
+        const resp = await apiClient.listEscalations(dept);
         setEscalations(sortBySeverity(resp.escalations));
       } catch {
         setError("Failed to load escalations.");
@@ -39,7 +42,7 @@ export default function EscalationsPage() {
       }
     }
     load();
-  }, []);
+  }, [dept]);
 
   return (
     <div className="space-y-4">

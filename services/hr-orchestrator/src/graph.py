@@ -14,10 +14,7 @@ from typing import Any
 import structlog
 from langgraph.graph import END, StateGraph
 
-from .agents.compensation import CompensationAgent
-from .agents.compliance import ComplianceAgent
 from .agents.general import GeneralHRAgent
-from .agents.recruitment import RecruitmentAgent
 
 # Phase 2 shared library: load_memory (FIRST node)
 try:
@@ -33,6 +30,7 @@ except ImportError:
 
 from .nodes.classify_intent import classify_intent
 from .nodes.escalation_check import escalation_check
+from .nodes.grounding_gate import grounding_gate
 from .nodes.paperclip_ticket import create_paperclip_ticket
 from .nodes.retrieve_context import retrieve_context
 from .nodes.synthesise import synthesise_response
@@ -77,21 +75,17 @@ def build_graph(
 
     cfg = config or default_config
 
-    # Build agent instances with DI
+    # Single consolidated HR agent (doc-faithful — HR functions sit under the
+    # NRC per the retreat; there is no doc defining HR sub-agents). Uses the
+    # consolidated skills/hr/hr-agent.md. The graph is generic over `agents`.
     agents: dict[str, Any] = {}
     if llm_client is not None and skills_loader is not None:
-        agents = {
-            "recruitment": RecruitmentAgent(llm_client, skills_loader),
-            "compensation": CompensationAgent(llm_client, skills_loader),
-            "compliance": ComplianceAgent(llm_client, skills_loader),
-            "general": GeneralHRAgent(llm_client, skills_loader),
-        }
+        agents = {"hr": GeneralHRAgent(llm_client, skills_loader)}
 
     def _route_to_agent(state: dict) -> str:
-        """Route to specialist agent based on classified intent."""
-        intent = state.get("intent", "general")
-        if intent in agents:
-            return f"{intent}_agent"
+        """Single-agent routing: grounded substantive turns go to the HR agent."""
+        if "hr" in agents:
+            return "hr_agent"
         return "general_handler"
 
     graph = StateGraph(HRAgentState)
@@ -113,6 +107,7 @@ def build_graph(
             min_relevance=cfg.rag_min_relevance,
         ),
     )
+    graph.add_node("grounding_gate", grounding_gate)
 
     # Specialist agents
     for name, agent in agents.items():
@@ -155,16 +150,24 @@ def build_graph(
         graph.set_entry_point("classify_intent")
 
     graph.add_edge("classify_intent", "retrieve_context")
+    graph.add_edge("retrieve_context", "grounding_gate")
 
-    # Conditional: route to correct HR agent
+    # Conditional: if the gate blocked (no grounding), skip agents and go
+    # straight to synthesise so the canned abstention answer is returned.
     _agent_edge_map: dict[str, str] = {
         f"{name}_agent": f"{name}_agent" for name in agents
     }
     _agent_edge_map["general_handler"] = "general_handler"
+    _agent_edge_map["synthesise"] = "synthesise"
+
+    def _gate_then_route(state: dict) -> str:
+        if not state.get("is_grounded", True):
+            return "synthesise"
+        return _route_to_agent(state)
 
     graph.add_conditional_edges(
-        "retrieve_context",
-        _route_to_agent,
+        "grounding_gate",
+        _gate_then_route,
         _agent_edge_map,
     )
 

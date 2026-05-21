@@ -1,11 +1,17 @@
 """Format and post Slack replies."""
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
+import httpx
 import structlog
 
 from .models import Citation, QueryResponse
 
 logger = structlog.get_logger("slack-bot.responder")
+
+_FILE_FETCH_TIMEOUT = 30.0
 
 
 def format_response(response: QueryResponse) -> tuple[str, list[dict] | None]:
@@ -37,13 +43,12 @@ def format_response(response: QueryResponse) -> tuple[str, list[dict] | None]:
             }
         )
 
-    if response.confidence > 0:
-        confidence_pct = int(response.confidence * 100)
+    if response.confidence:
         blocks.append(
             {
                 "type": "context",
                 "elements": [
-                    {"type": "mrkdwn", "text": f"_Confidence: {confidence_pct}%_"},
+                    {"type": "mrkdwn", "text": f"_Confidence: {response.confidence}_"},
                 ],
             }
         )
@@ -60,17 +65,57 @@ def _format_citations(citations: list[Citation]) -> str:
     return "\n".join(lines)
 
 
+async def _upload_artefact(client: object, channel: str, thread_ts: str, response: QueryResponse) -> None:
+    """If the response carries a file (deck-writer etc.), upload it to the thread."""
+    name = response.file_name or (Path(response.file_path).name if response.file_path else None)
+    if not name:
+        return
+    payload_bytes: bytes | None = None
+    # Prefer HTTP fetch via the producing service (works across containers without shared mounts).
+    if response.file_url:
+        try:
+            async with httpx.AsyncClient(timeout=_FILE_FETCH_TIMEOUT) as h:
+                r = await h.get(response.file_url)
+                r.raise_for_status()
+                payload_bytes = r.content
+        except Exception as exc:
+            logger.warning("responder.file_fetch_failed", url=response.file_url, error=str(exc))
+    # Fallback to local path if mounted in this container.
+    if payload_bytes is None and response.file_path and os.path.isfile(response.file_path):
+        payload_bytes = Path(response.file_path).read_bytes()
+    if payload_bytes is None:
+        logger.warning("responder.file_unavailable", file=name)
+        return
+    try:
+        await client.files_upload_v2(  # type: ignore[attr-defined]
+            channel=channel,
+            thread_ts=thread_ts,
+            filename=name,
+            content=payload_bytes,
+            initial_comment=f":page_facing_up: {name}",
+        )
+        logger.info("responder.file_uploaded", file=name, channel=channel, bytes=len(payload_bytes))
+    except Exception as exc:
+        logger.error("responder.file_upload_failed", file=name, error=str(exc))
+
+
 async def reply_in_thread(
     client: object,
     channel: str,
     thread_ts: str,
     content: str | QueryResponse,
 ) -> None:
-    """Post a message into the thread identified by (channel, thread_ts)."""
+    """Post a message into the thread identified by (channel, thread_ts).
+
+    If `content` is a QueryResponse carrying a file_url/file_path, also upload
+    that file into the thread before the text reply.
+    """
     if isinstance(content, str):
         text = content
         blocks = None
     else:
+        if content.file_url or content.file_path:
+            await _upload_artefact(client, channel, thread_ts, content)
         text, blocks = format_response(content)
 
     try:

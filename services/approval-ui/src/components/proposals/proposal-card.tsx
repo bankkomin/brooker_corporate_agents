@@ -61,7 +61,7 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
         </div>
 
         <div className="font-medium text-sm">
-          {proposal.agent} &mdash; {proposal.file}
+          {proposal.agent ?? "Unknown agent"} &mdash; {proposal.file ?? "—"}
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono">
@@ -70,13 +70,16 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
           </span>
           <span className="text-muted-foreground">&rarr;</span>
           <span className="rounded bg-green-100 px-1.5 py-0.5 text-green-700 dark:bg-green-900/30 dark:text-green-400 truncate max-w-[40%]">
-            {proposal.new_value}
+            {proposal.new_value ?? "—"}
           </span>
         </div>
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            Confidence: {Math.round(proposal.confidence * 100)}%
+            Confidence:{" "}
+            {proposal.confidence == null
+              ? "—"
+              : `${Math.round(proposal.confidence * 100)}%`}
           </span>
           <span
             className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${status.className}`}

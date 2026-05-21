@@ -62,13 +62,20 @@ async def _fetch_proposal(proposal_id: str, pool: Any) -> dict[str, Any] | None:
 async def list_proposals(
     request: Request,
     status: str | None = None,
+    dept: str | None = None,
 ) -> JSONResponse:
-    """List proposals scoped to the caller's department.
+    """List proposals scoped to a department.
 
     Query params:
         status: Optional filter by proposal status (pending/approved/rejected).
+        dept:   Optional override; defaults to the caller's JWT dept. Callers
+                supplying an alternative dept must have view_proposals for it.
     """
     claims = extract_claims(request)
+    target_dept = (dept or claims.dept).lower()
+    if dept and dept.lower() != (claims.dept or "").lower():
+        check_dept_access(claims, target_dept, request=request)
+
     pool = request.app.state.db_pool
 
     async with pool.acquire() as conn:
@@ -76,14 +83,14 @@ async def list_proposals(
             rows = await conn.fetch(
                 "SELECT * FROM staging_proposals WHERE dept = $1 AND status = $2 "
                 "ORDER BY created_at DESC",
-                claims.dept,
+                target_dept,
                 status,
             )
         else:
             rows = await conn.fetch(
                 "SELECT * FROM staging_proposals WHERE dept = $1 "
                 "ORDER BY created_at DESC",
-                claims.dept,
+                target_dept,
             )
 
     proposals = [serialize_row(dict(r)) for r in rows]
@@ -107,7 +114,7 @@ async def get_proposal(request: Request, proposal_id: str) -> JSONResponse:
         )
 
     # RBAC: check dept access (raises AuthError → 403 if mismatch)
-    check_dept_access(claims, proposal["dept"])
+    check_dept_access(claims, proposal["dept"], request=request)
 
     return JSONResponse(content=serialize_row(proposal))
 
@@ -139,7 +146,7 @@ async def approve_proposal(request: Request, proposal_id: str) -> JSONResponse:
                         code="PROPOSAL_NOT_FOUND",
                     ).model_dump(),
                 )
-            check_dept_access(claims, existing["dept"])
+            check_dept_access(claims, existing["dept"], request=request)
             return JSONResponse(
                 status_code=409,
                 content=ErrorResponse(
@@ -148,7 +155,9 @@ async def approve_proposal(request: Request, proposal_id: str) -> JSONResponse:
                 ).model_dump(),
             )
 
-        check_dept_access(claims, result["dept"])
+        check_dept_access(
+            claims, result["dept"], request=request, required_perm="approve",
+        )
 
         await conn.execute(
             "INSERT INTO approval_decisions (proposal_id, decision, decided_by, dept) "
@@ -215,7 +224,9 @@ async def reject_proposal(
             )
 
         # 2. Dept access check — raises AuthError → 403 if mismatch.
-        check_dept_access(claims, existing["dept"])
+        check_dept_access(
+            claims, existing["dept"], request=request, required_perm="approve",
+        )
 
         # 3. Guard: must still be pending.
         if existing["status"] != "pending":
@@ -314,7 +325,9 @@ async def edit_proposal(
             )
 
         # 2. Dept access check — raises AuthError → 403 if mismatch.
-        check_dept_access(claims, existing["dept"])
+        check_dept_access(
+            claims, existing["dept"], request=request, required_perm="approve",
+        )
 
         # 3. Guard: must still be pending.
         if existing["status"] != "pending":

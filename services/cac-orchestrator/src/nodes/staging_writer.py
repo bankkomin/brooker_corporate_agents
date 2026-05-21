@@ -49,15 +49,21 @@ async def staging_writer(
         logger.info("staging_skipped_no_proposal")
         return {"staging_proposal_id": None}
 
-    # Permission check — ensure skill allows write_via_staging
+    # Permission gate — only proceed if the agent's skill declared
+    # mode=write_via_staging (audit bug #6). If skill_permissions is missing
+    # we now FAIL CLOSED rather than silently allowing the write.
     if ensure_can_write is not None:
-        skill_perms = state.get("skill_permissions", {})
-        if skill_perms:
-            try:
-                ensure_can_write(skill_perms)
-            except Exception as perm_err:
-                logger.warning("staging_blocked_by_permission", error=str(perm_err))
-                return {"staging_proposal_id": None, "staging_error": str(perm_err)}
+        skill_perms = state.get("skill_permissions")
+        if not skill_perms:
+            logger.warning("staging_blocked_no_skill_perms",
+                            agent=state.get("agent_name"))
+            return {"staging_proposal_id": None,
+                    "staging_error": "no skill permissions declared"}
+        try:
+            ensure_can_write(skill_perms)
+        except Exception as perm_err:
+            logger.warning("staging_blocked_by_permission", error=str(perm_err))
+            return {"staging_proposal_id": None, "staging_error": str(perm_err)}
 
     proposal_id = _next_proposal_id()
 

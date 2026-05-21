@@ -27,7 +27,10 @@ class SlackBotSettings(BaseSettings):
     allowed_file_types: str = "pdf,xlsx,docx,txt,md"
 
     # --- HTTP client ---
-    http_timeout_seconds: float = 10.0
+    # Two-agent deck composition (drafter + designer + render) currently runs
+    # 45-60s end-to-end. 120s gives headroom for the occasional slow Qwen draft
+    # without dropping the connection just before completion.
+    http_timeout_seconds: float = 120.0
     http_max_retries: int = 3
 
     # --- Logging ---

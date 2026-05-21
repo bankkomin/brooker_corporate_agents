@@ -75,10 +75,11 @@ export default function ProposalDetailPage() {
         </Button>
         <div>
           <h1 className="text-xl font-semibold">
-            {proposal.agent} &mdash; {proposal.file}
+            {proposal.agent ?? "Unknown agent"} &mdash;{" "}
+            {proposal.file ?? "—"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {proposal.tab} &rarr; {proposal.cell}
+            {proposal.tab ?? "—"} &rarr; {proposal.cell ?? "—"}
           </p>
         </div>
       </div>

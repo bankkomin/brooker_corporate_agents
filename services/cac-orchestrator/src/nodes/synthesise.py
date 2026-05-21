@@ -4,9 +4,23 @@ Phase 2: integrates knowledge gap detection via shared library.
 """
 from __future__ import annotations
 
+import re
+
 import structlog
 
 from ..tools.llm_client import LLMClient
+
+# Strip any [N] citation markers the model may emit even when told not to.
+# Applied as a last-resort defence when a turn was not grounded.
+_CITATION_RE = re.compile(r"\[\d+\]")
+
+# Shown when an answer cites sources but none of them actually support its
+# claims — i.e. the model fabricated figures and attached citations that don't
+# back them. Kept identical to grounding_gate's message for a consistent voice.
+_ABSTENTION_ANSWER = (
+    "I don't have reference material on this topic in my knowledge base yet. "
+    "Please share a relevant document or data source and I'll analyse it."
+)
 
 try:
     from services.shared.knowledge_gaps import detect_self_report
@@ -27,6 +41,8 @@ try:
     from services.shared.chain_of_thought import classify_complexity, build_cot_prompt, parse_cot_response
 except ImportError:
     classify_complexity = None
+    build_cot_prompt = None  # type: ignore[assignment]
+    parse_cot_response = None  # type: ignore[assignment]
 
 logger = structlog.get_logger("cac-orchestrator.synthesise")
 
@@ -35,12 +51,19 @@ You are a corporate committee AI assistant for the Capital Allocation & ALCO Com
 Synthesise a clear, professional answer using the provided context and agent analysis.
 
 Rules:
-- Include source citations in [N] format referencing the provided sources
-- Be precise and factual — never speculate
-- If no relevant sources were found, say so clearly
-- Include any escalation warnings if present
-- Mention the Excel navigation pointer if a change was proposed
-- Keep the response concise but complete"""
+- For substantive committee questions: include source citations in [N] format
+  referencing the provided sources. Be precise and factual — never speculate
+  beyond the sources.
+- For greetings, small talk, or meta-questions about your capabilities (e.g.
+  "hi", "hello", "what can you do?"): reply conversationally in 1-2 sentences.
+  Briefly mention you cover liquidity, capital, ALM, funding, and covenant
+  topics for the CAC. Do NOT say "no documents found" for these.
+- For substantive questions where no sources were retrieved: say you don't have
+  reference material for that topic and suggest the user share a relevant doc.
+  Do NOT fabricate facts or cite sources that weren't provided.
+- Include any escalation warnings if present.
+- Mention the Excel navigation pointer if a change was proposed.
+- Keep the response concise but complete."""
 
 
 def _confidence_label(score: float) -> str:
@@ -52,12 +75,14 @@ def _confidence_label(score: float) -> str:
     return "Low"
 
 
-async def synthesise_response(state: dict, *, llm_client: LLMClient) -> dict:
+async def synthesise_response(state: dict, *, llm_client: LLMClient,
+                              db_client=None) -> dict:
     """Synthesise final answer with citations.
 
     Returns {"answer": str, "confidence": str}.
     """
     context_text = state.get("context_text", "")
+    attached_files_text = state.get("attached_files_text", "")
     agent_response = state.get("agent_response", "")
     excel_nav = state.get("excel_nav")
     escalation_triggered = state.get("escalation_triggered", False)
@@ -66,12 +91,27 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient) -> dict:
     validation_warnings = state.get("validation_warnings", [])
     confidence_score = state.get("confidence_score", 0.0)
 
+    # Defence-in-depth: if grounding_gate already set a canned abstention answer,
+    # return it immediately without calling the LLM.  Also strip any [N] markers
+    # that may have survived from a prior turn's state residue.
+    if not state.get("is_grounded", True):
+        canned = _CITATION_RE.sub("", state.get("answer", "")).strip()
+        logger.info("synthesise_abstention_passthrough", answer_preview=canned[:60])
+        return {"answer": canned, "confidence": "Low"}
+
     # Build user prompt with all context
     parts: list[str] = []
 
+    if attached_files_text:
+        parts.append(
+            "Files attached to this turn (user-uploaded, treat as ground truth "
+            "for what they describe):\n"
+            f"{attached_files_text}"
+        )
+
     if context_text:
         parts.append(f"Retrieved sources:\n{context_text}")
-    else:
+    elif not attached_files_text:
         parts.append("No relevant documents found in the knowledge base.")
 
     if agent_response:
@@ -125,62 +165,88 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient) -> dict:
         if cot_result.final_answer:
             answer = cot_result.final_answer
 
+    # retrieve_context writes the key `sources` (not `retrieved_sources`) and
+    # each source uses {filename, page, excerpt, relevance_score, type, ...}.
+    # ground_citations expects {id, text, source} keyed by 1-based position,
+    # and compute_confidence wants a chunks list + top similarity. Normalize
+    # once so both downstream helpers can do their job.
+    raw_sources = state.get("sources", []) or []
+    grounding_sources: list[dict] = []
+    top_sim = 0.0
+    for i, s in enumerate(raw_sources, start=1):
+        text = s.get("text") or s.get("excerpt") or ""
+        grounding_sources.append({
+            "id": str(i),
+            "text": text,
+            "source": s.get("filename") or s.get("type") or f"src{i}",
+        })
+        score = float(s.get("relevance_score") or s.get("score") or 0.0)
+        if score > top_sim:
+            top_sim = score
+
     # Citation grounding
     if ground_citations is not None:
-        sources = state.get("retrieved_sources", [])
-        grounding_report = ground_citations(answer, sources)
+        grounding_report = ground_citations(answer, grounding_sources)
+        # Hard backstop: an answer that cites sources but verifies NONE of them
+        # is fabrication — the model invented claims (e.g. specific figures) and
+        # attached citations that don't support them. A weakly-relevant chunk can
+        # slip past grounding_gate; this catches the resulting hallucination and
+        # replaces it with abstention rather than showing false data with a
+        # "0/N verified" badge.
+        if grounding_report.total_citations > 0 and grounding_report.verified == 0:
+            logger.warning(
+                "synthesise_ungrounded_replaced",
+                citations=grounding_report.total_citations,
+                query_preview=state.get("query", "")[:80],
+            )
+            return {"answer": _ABSTENTION_ANSWER, "confidence": "Low"}
         answer = add_grounding_badges(answer, grounding_report)
-        # Use grounding accuracy for calibrated confidence
         citation_accuracy = grounding_report.accuracy
     else:
         citation_accuracy = 1.0
 
-    # Calibrated confidence (replaces LLM self-reported score)
+    # Defence-in-depth citation strip: if no sources passed the relevance bar and
+    # the user sent no attachments, remove any [N] markers the model still emitted.
+    # grounding_gate already blocks this path for substantive queries, but this
+    # catches edge cases where is_grounded was True (e.g. conversational query
+    # that somehow generated inline citations).
+    if not grounding_sources and not attached_files_text:
+        answer = _CITATION_RE.sub("", answer).strip()
+
+    # Calibrated confidence (replaces LLM self-reported score). The composite
+    # numeric score is the only thing we propagate; label is recomputed below
+    # from threshold buckets (was previously assigned-then-overwritten via
+    # conf.label, audit bug #11).
     if compute_confidence is not None:
-        retrieved_chunks = state.get("retrieved_chunks", [])
-        top_sim = state.get("top_similarity", 0.0)
         proposed = state.get("proposed_value")
         conf = compute_confidence(
-            retrieved_chunks=retrieved_chunks,
+            retrieved_chunks=grounding_sources,
             top_similarity=top_sim,
             answer_text=answer,
             proposed_value=proposed,
             citation_accuracy=citation_accuracy,
         )
         confidence_score = conf.composite
-        confidence_label = conf.label
-        confidence_explanation = conf.explanation
 
     confidence = _confidence_label(confidence_score)
     has_proposal = staging_proposal_id is not None
 
-    # Phase 2: detect knowledge gaps from LLM self-report phrases
-    if detect_self_report is not None:
+    # Phase 2: detect knowledge gaps from LLM self-report phrases.
+    # Audit bug #5 fix: acquire a real connection from db_client's pool
+    # (was hardcoded to None, so every call hit AttributeError).
+    if detect_self_report is not None and db_client is not None and getattr(db_client, "_pool", None) is not None:
         try:
-            from ..tools.db_client import DBClient  # noqa: F811
-
-            # detect_self_report needs a db connection; use a no-op if unavailable
             dept_id = state.get("dept_id", "cac")
             agent_id = state.get("agent_id", state.get("agent_name", "cac-orchestrator"))
             query = state.get("query", "")
-
-            # Try to get a db connection from the db_client if available
-            # detect_self_report is async so we import and call it
-            gap_detected = False
-            try:
-                # The db_conn parameter in detect_self_report expects an
-                # asyncpg connection. We pass None if unavailable — the
-                # function will handle the exception internally.
+            async with db_client._pool.acquire() as conn:
                 gap_detected = await detect_self_report(
                     response=answer,
                     dept_id=dept_id,
                     agent_id=agent_id,
                     query=query,
-                    db_conn=None,  # Will be wired to real pool in future iteration
+                    db_conn=conn,
                 )
-            except Exception as gap_exc:
-                logger.debug("knowledge_gap_detect_call_failed", error=str(gap_exc))
-
             if gap_detected:
                 logger.info("knowledge_gap_self_report_detected", query=query[:80])
         except Exception as exc:

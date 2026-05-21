@@ -216,6 +216,18 @@ flowchart TB
     style STORE fill:#fff9c4
 ```
 
+## Channels
+
+**Inbound channels:**
+- **Slack** — `@bot` mentions in channels; file drops auto-ingested into RAG (see `services/slack-bot/`).
+- **Portal** (`brooker-internal-company-interface` @ `/paperclip-agent`) — chat with per-agent access grants, file uploads with inline preview. See [Portal-Integration.md](docs/Portal-Integration.md).
+- **Obsidian vault** — markdown notes auto-ingested by `rag-ingestion`.
+
+**Outbound channels:**
+- **Approval UI** (port 4000) — HOD reviews staged changes via emailed link.
+- **HOD email** — escalations and approval requests via `email-notifier`.
+- **Slack** — answers in-thread, `:rotating_light:` escalations posted to a configured channel.
+
 ## Quick start
 
 ```bash
@@ -289,3 +301,5 @@ mypy services/
 - [Implementation Progress](docs/Implementation.md) — canonical stage-by-stage checklist
 - [Phase 2 framework spec](docs/superpowers/specs/2026-04-28-stage10-phase2-framework-design.md) — department onboarding framework
 - [Per-dept plans (Stages 11–19)](docs/superpowers/plans/) — one plan/spec pair per upcoming department
+- [Portal Integration](docs/Portal-Integration.md) — how the Brooker employee portal connects (per-agent grants, file uploads, gateway routing gaps)
+- [Agent Communication Flow](docs/agent-communication-flow.md)

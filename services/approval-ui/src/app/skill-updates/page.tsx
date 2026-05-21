@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiClient } from "@/lib/api-client";
 
 interface SkillProposal {
   id: number;
@@ -11,7 +12,7 @@ interface SkillProposal {
   evidence: { count: number; avg_signal: number };
   status: string;
   proposed_diff: string | null;
-  created_at: string;
+  created_at: string | null;
 }
 
 export default function SkillUpdatesPage() {
@@ -25,9 +26,7 @@ export default function SkillUpdatesPage() {
 
   async function fetchProposals() {
     try {
-      const res = await fetch("/api/skill-proposals?status=hod_review");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await apiClient.listSkillProposals("hod_review");
       setProposals(data.proposals || []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
@@ -38,12 +37,7 @@ export default function SkillUpdatesPage() {
 
   async function handleDecision(id: number, action: "approved" | "rejected") {
     try {
-      await fetch(`/api/skill-proposals/${id}/decision`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
-        credentials: "same-origin",
-        body: JSON.stringify({ action }),
-      });
+      await apiClient.decideSkillProposal(id, action);
       setProposals((prev) => prev.filter((p) => p.id !== id));
     } catch (e) {
       console.error("Decision failed:", e);
@@ -72,7 +66,10 @@ export default function SkillUpdatesPage() {
                 <div>
                   <h3 className="font-semibold text-lg">{p.skill_path}</h3>
                   <p className="text-sm text-gray-500">
-                    {p.dept_id} / {p.agent_id} · {new Date(p.created_at).toLocaleDateString()}
+                    {p.dept_id} / {p.agent_id} ·{" "}
+                    {p.created_at
+                      ? new Date(p.created_at).toLocaleDateString()
+                      : "—"}
                   </p>
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">

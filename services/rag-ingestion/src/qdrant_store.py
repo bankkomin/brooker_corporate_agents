@@ -18,12 +18,18 @@ from .config import RAGSettings
 
 logger = structlog.get_logger("rag-ingestion.qdrant_store")
 
+_DEPT_SLUGS = (
+    # Active / planned departments from config/departments.json
+    "cac", "risk", "legal", "hr", "it",
+    "ceo", "finance", "ib", "ic", "cio", "vcc", "comms",
+    # Legacy slugs preserved so existing data is not orphaned
+    "invest", "ops",
+)
+
 COLLECTIONS = [
-    # Per-department collections
-    *[f"{d}_docs" for d in ("cac", "risk", "legal", "invest", "ops", "hr", "it")],
-    *[f"{d}_chat" for d in ("cac", "risk", "legal", "invest", "ops", "hr", "it")],
-    *[f"{d}_knowledge" for d in ("cac", "risk", "legal", "invest", "ops", "hr", "it")],
-    # Shared
+    *[f"{d}_docs" for d in _DEPT_SLUGS],
+    *[f"{d}_chat" for d in _DEPT_SLUGS],
+    *[f"{d}_knowledge" for d in _DEPT_SLUGS],
     "shared_policies",
 ]
 

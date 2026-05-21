@@ -17,13 +17,33 @@ class Source(BaseModel):
     relevance_score: float
 
 
+class AttachedFile(BaseModel):
+    """A portal-uploaded file attached to this chat turn.
+
+    The orchestrator fetches it from `portal_base_url/api/paperclip/files/<id>`
+    using `auth_token` so the content can be injected into the LLM context.
+    """
+
+    id: str
+    name: str | None = None
+    mimetype: str | None = None
+    size: int | None = None
+
+
 class QueryRequest(BaseModel):
-    """Incoming query from a Slack user."""
+    """Incoming query from a Slack user or web channel."""
 
     query: str
     user_id: str
     channel: str
     thread_ts: str | None = None
+    # Gateway forwards the resolved dept slug so a single orchestrator image
+    # can serve multiple departments when deployed accordingly. When unset,
+    # the orchestrator uses settings.dept_id.
+    dept_id: str | None = None
+    files: list[AttachedFile] = []
+    auth_token: str | None = None
+    portal_base_url: str | None = None
 
 
 class QueryResponse(BaseModel):

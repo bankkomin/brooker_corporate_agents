@@ -34,11 +34,16 @@ class ApiClient {
     return response.json();
   }
 
-  async listProposals(status?: string): Promise<ProposalListResponse> {
-    const params = status ? `?status=${status}` : "";
-    const resp = await fetch(`${GATEWAY_URL}/api/proposals${params}`, {
-      headers: this.getHeaders(),
-    });
+  async listProposals(
+    status?: string,
+    dept?: string,
+  ): Promise<ProposalListResponse> {
+    const qs = new URLSearchParams();
+    if (status) qs.set("status", status);
+    if (dept) qs.set("dept", dept);
+    const tail = qs.toString();
+    const url = `${GATEWAY_URL}/api/proposals${tail ? `?${tail}` : ""}`;
+    const resp = await fetch(url, { headers: this.getHeaders() });
     return this.handleResponse(resp);
   }
 
@@ -94,17 +99,85 @@ class ApiClient {
     return this.handleResponse(resp);
   }
 
-  async listEscalations(): Promise<EscalationListResponse> {
-    const resp = await fetch(`${GATEWAY_URL}/api/escalations`, {
+  async listEscalations(dept?: string): Promise<EscalationListResponse> {
+    const qs = dept ? `?dept=${encodeURIComponent(dept)}` : "";
+    const resp = await fetch(`${GATEWAY_URL}/api/escalations${qs}`, {
       headers: this.getHeaders(),
     });
     return this.handleResponse(resp);
   }
 
-  async getAnalyticsSummary(): Promise<AnalyticsSummary> {
-    const resp = await fetch(`${GATEWAY_URL}/api/analytics/summary`, {
+  async getAnalyticsSummary(dept?: string): Promise<AnalyticsSummary> {
+    const qs = dept ? `?dept=${encodeURIComponent(dept)}` : "";
+    const resp = await fetch(`${GATEWAY_URL}/api/analytics/summary${qs}`, {
       headers: this.getHeaders(),
     });
+    return this.handleResponse(resp);
+  }
+
+  async listKnowledgeGaps(): Promise<{
+    gaps: Array<{
+      id: number;
+      dept_id: string;
+      agent_id: string;
+      query: string;
+      hit_count: number;
+      llm_self_report: string | null;
+      expected_doc_type: string | null;
+      created_at: string | null;
+      resolved_at: string | null;
+    }>;
+  }> {
+    const resp = await fetch(`${GATEWAY_URL}/api/admin/knowledge-gaps`, {
+      headers: this.getHeaders(),
+    });
+    return this.handleResponse(resp);
+  }
+
+  async resolveKnowledgeGap(
+    id: number,
+  ): Promise<{ id: number; status: string; resolved_by: string }> {
+    const resp = await fetch(
+      `${GATEWAY_URL}/api/admin/knowledge-gaps/${id}/resolve`,
+      { method: "POST", headers: this.getHeaders() },
+    );
+    return this.handleResponse(resp);
+  }
+
+  async listSkillProposals(
+    status: string = "hod_review",
+  ): Promise<{
+    proposals: Array<{
+      id: number;
+      dept_id: string;
+      agent_id: string;
+      skill_path: string;
+      trigger: string;
+      evidence: { count: number; avg_signal: number };
+      status: string;
+      proposed_diff: string | null;
+      created_at: string | null;
+    }>;
+  }> {
+    const qs = `?status=${encodeURIComponent(status)}`;
+    const resp = await fetch(`${GATEWAY_URL}/api/skill-proposals${qs}`, {
+      headers: this.getHeaders(),
+    });
+    return this.handleResponse(resp);
+  }
+
+  async decideSkillProposal(
+    id: number,
+    action: "approved" | "rejected",
+  ): Promise<{ id: number; status: string; decided_by: string }> {
+    const resp = await fetch(
+      `${GATEWAY_URL}/api/skill-proposals/${id}/decision`,
+      {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ action }),
+      },
+    );
     return this.handleResponse(resp);
   }
 

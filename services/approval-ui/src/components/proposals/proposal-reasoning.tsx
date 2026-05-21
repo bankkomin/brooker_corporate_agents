@@ -9,7 +9,8 @@ interface ProposalReasoningProps {
 
 export function ProposalReasoning({ proposal }: ProposalReasoningProps) {
   const agentColor = getDepartmentColor(proposal.dept);
-  const confidencePct = Math.round(proposal.confidence * 100);
+  const confidencePct =
+    proposal.confidence == null ? null : Math.round(proposal.confidence * 100);
 
   return (
     <div data-testid="proposal-reasoning" className="space-y-4">
@@ -19,26 +20,32 @@ export function ProposalReasoning({ proposal }: ProposalReasoningProps) {
           className="inline-block h-3 w-3 rounded-full shrink-0"
           style={{ backgroundColor: agentColor }}
         />
-        <span className="text-sm font-semibold">{proposal.agent}</span>
+        <span className="text-sm font-semibold">
+          {proposal.agent ?? "Unknown agent"}
+        </span>
       </div>
 
       {/* Confidence gauge */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Confidence</span>
-          <span className="font-medium">{confidencePct}%</span>
+          <span className="font-medium">
+            {confidencePct == null ? "—" : `${confidencePct}%`}
+          </span>
         </div>
         <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{
-              width: `${confidencePct}%`,
+              width: `${confidencePct ?? 0}%`,
               backgroundColor:
-                confidencePct >= 80
-                  ? "#16a34a"
-                  : confidencePct >= 50
-                    ? "#d97706"
-                    : "#dc2626",
+                confidencePct == null
+                  ? "#9ca3af"
+                  : confidencePct >= 80
+                    ? "#16a34a"
+                    : confidencePct >= 50
+                      ? "#d97706"
+                      : "#dc2626",
             }}
           />
         </div>
@@ -48,7 +55,7 @@ export function ProposalReasoning({ proposal }: ProposalReasoningProps) {
       <div className="space-y-1">
         <h4 className="text-sm font-semibold">Reasoning</h4>
         <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-          {proposal.reasoning}
+          {proposal.reasoning ?? "No reasoning provided."}
         </p>
       </div>
 

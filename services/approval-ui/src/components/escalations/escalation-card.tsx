@@ -47,10 +47,10 @@ const severityConfig = {
 
 type Severity = keyof typeof severityConfig;
 
-function getSeverityConfig(severity: string) {
+function getSeverityConfig(severity: string | null) {
   return (
     severityConfig[severity as Severity] ?? {
-      label: severity,
+      label: severity ?? "Unknown",
       className:
         "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
       borderClassName: "border-l-4 border-gray-400",
@@ -78,7 +78,9 @@ export function EscalationCard({ escalation }: EscalationCardProps) {
             >
               {sev.label}
             </span>
-            <span className="font-medium text-sm">{escalation.trigger_type}</span>
+            <span className="font-medium text-sm">
+              {escalation.trigger_type ?? "Untyped escalation"}
+            </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {escalation.resolved_at && (

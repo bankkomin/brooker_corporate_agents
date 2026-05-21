@@ -180,7 +180,7 @@ def validate_jwt(token: str, public_key: bytes | None = None) -> JWTClaims:
 async def resolve_agent_permissions(
     pool, employee_id: str | None, email: str | None, department_name: str = "cac",
 ) -> dict:
-    """Look up agent_access row for an employee.
+    """Look up an agent_access row for an employee in a single department.
 
     Tries employee_id first, falls back to email.
     Returns a dict of permissions or raises AuthError if no access.
@@ -217,6 +217,50 @@ async def resolve_agent_permissions(
     return dict(row)
 
 
+async def resolve_all_agent_permissions(
+    pool, employee_id: str | None, email: str | None,
+) -> dict[str, dict]:
+    """Fetch every active agent_access row for an employee.
+
+    Returns a mapping of `department_name -> permissions dict` so that a
+    single auth round-trip covers all departments the caller can act on.
+    Returns an empty dict (no AuthError) when the employee has no rows —
+    callers decide whether that's a 403 or just "no privileges anywhere."
+    """
+    if pool is None:
+        raise AuthError("CONFIG_ERROR", "Database pool not available", 500)
+
+    async with pool.acquire() as conn:
+        rows = []
+        if employee_id:
+            rows = await conn.fetch(
+                "SELECT department_name, can_query, can_approve, "
+                "       can_view_proposals, can_escalate "
+                "FROM agent_access "
+                "WHERE employee_id = $1 AND revoked_at IS NULL",
+                employee_id,
+            )
+
+        if not rows and email:
+            rows = await conn.fetch(
+                "SELECT department_name, can_query, can_approve, "
+                "       can_view_proposals, can_escalate "
+                "FROM agent_access "
+                "WHERE employee_email = $1 AND revoked_at IS NULL",
+                email,
+            )
+
+    out: dict[str, dict] = {}
+    for r in rows:
+        out[r["department_name"]] = {
+            "can_query": r["can_query"],
+            "can_approve": r["can_approve"],
+            "can_view_proposals": r["can_view_proposals"],
+            "can_escalate": r["can_escalate"],
+        }
+    return out
+
+
 def permissions_from_access(access: dict) -> list[str]:
     """Convert agent_access booleans to permission strings."""
     perms = []
@@ -237,7 +281,7 @@ def permissions_from_access(access: dict) -> list[str]:
 
 _DEPARTMENTS_PATH = os.environ.get(
     "DEPARTMENTS_JSON_PATH",
-    str(Path(__file__).resolve().parents[3] / "config" / "departments.json"),
+    "/app/config/departments.json",
 )
 
 
@@ -253,24 +297,50 @@ def _load_global_access_roles() -> dict[str, dict[str, list[str]]]:
         return {}
 
 
-def check_dept_access(claims: JWTClaims, resource_dept: str) -> None:
+def check_dept_access(
+    claims: JWTClaims,
+    resource_dept: str,
+    request: Request | None = None,
+    required_perm: str = "view_proposals",
+) -> None:
     """Assert that claims grant access to resource_dept.
 
-    Access is granted if:
-    1. claims.dept matches resource_dept (same department), OR
-    2. claims.role appears in globalAccess.roles and resource_dept is in canRead
-       (or canRead contains "*"), OR
-    3. Token is from Brooker (agent_access already checked upstream).
-    """
-    # Brooker tokens: agent_access was already verified by the middleware
-    if claims.source == "brooker":
-        return
+    For Brooker tokens, looks up the caller's per-dept permissions on
+    `request.state.agent_permissions_by_dept` (populated by the gateway
+    middleware) and requires `required_perm` to be present for the
+    requested department.
 
-    # Same department always passes
+    For CAC tokens, falls back to the legacy rule:
+        1. claims.dept matches resource_dept (same department), OR
+        2. claims.role appears in globalAccess.roles and resource_dept
+           is in canRead (or canRead contains "*").
+    """
+    if claims.source == "brooker":
+        perms_by_dept: dict[str, list[str]] = {}
+        if request is not None:
+            perms_by_dept = getattr(
+                request.state, "agent_permissions_by_dept", {},
+            ) or {}
+        dept_perms = perms_by_dept.get(resource_dept, [])
+        if required_perm in dept_perms:
+            return
+        logger.warning(
+            "dept_access_denied",
+            subject=claims.sub,
+            resource_dept=resource_dept,
+            required_perm=required_perm,
+            source="brooker",
+        )
+        raise AuthError(
+            "DEPT_MISMATCH",
+            f"No '{required_perm}' permission for department '{resource_dept}'",
+            status_code=403,
+        )
+
+    # CAC token path
     if claims.dept == resource_dept:
         return
 
-    # Check globalAccess roles from departments.json
     global_roles = _load_global_access_roles()
     role_config = global_roles.get(claims.role)
     if role_config is not None:

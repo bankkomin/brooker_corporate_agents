@@ -47,6 +47,14 @@ class BaseHRAgent:
             system_parts.append(f"\n--- AGENT MEMORY ---\n{memory}")
 
         system_prompt = "\n\n".join(system_parts)
+        # Supervisor routing: classify_intent already picked the HR sub-domain;
+        # the single HR agent acts as that backend sub-agent (route-to-relevant).
+        intent = state.get("intent")
+        if intent and intent not in ("general",):
+            system_prompt += (
+                f"\n\nThis query is routed to your **{intent}** sub-agent (backend). "
+                f"Answer with that sub-domain's focus, grounded in the skill and context."
+            )
 
         user_parts = []
         if context:

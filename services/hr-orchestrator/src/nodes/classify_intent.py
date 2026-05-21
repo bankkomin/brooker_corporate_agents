@@ -9,15 +9,15 @@ from ..tools.llm_client import LLMClient
 
 logger = structlog.get_logger("hr-orchestrator.classify")
 
-HR_INTENT_CATEGORIES = ["recruitment", "compensation", "compliance", "general"]
+HR_INTENT_CATEGORIES = ["talent", "compensation", "policy", "general"]
 
 SYSTEM_PROMPT = (
     "You are an intent classifier for a Human Resources AI system.\n"
     "Classify the following query into exactly one of these categories: "
-    "recruitment, compensation, compliance, general.\n"
-    "- recruitment: hiring, talent acquisition, job postings, interviews, onboarding\n"
+    "talent, compensation, policy, general.\n"
+    "- talent: hiring, recruitment, job postings, interviews, onboarding, succession\n"
     "- compensation: salaries, benefits, bonuses, pay bands, market benchmarking\n"
-    "- compliance: labor law, HR policy adherence, termination procedures, audits\n"
+    "- policy: HR policy, labor law compliance, termination procedures, audits\n"
     "- general: anything else HR-related\n"
     'Respond with JSON only: {"intent": "<category>", "confidence": <0.0-1.0>}\n'
     "Do not include any other text."

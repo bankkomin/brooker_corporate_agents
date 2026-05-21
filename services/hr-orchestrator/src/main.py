@@ -5,16 +5,17 @@ no staging proposals or Excel changes.
 """
 from __future__ import annotations
 
-from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv()
 
 import logging
+import os
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
+import httpx
 import structlog
 from fastapi import FastAPI, HTTPException
 
@@ -46,6 +47,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         host=settings.qdrant_host,
         port=settings.qdrant_rest_port,
     )
+
+    # HTTP embedder: calls rag-ingestion's /embed (Gemini under the hood today).
+    _embed_http = httpx.AsyncClient(timeout=15.0)
+    _embed_url = (
+        os.getenv("RAG_INGESTION_URL", "http://rag-ingestion:3004").rstrip("/")
+        + "/embed"
+    )
+
+    async def embed_fn(text: str) -> list[float]:
+        r = await _embed_http.post(_embed_url, json={"text": text})
+        r.raise_for_status()
+        return r.json()["vector"]
 
     # DB pool -- graceful degradation if Postgres unavailable
     db_pool = None
@@ -86,6 +99,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db_client=db_client,
         skills_loader=skills_loader,
         checkpointer=checkpointer,
+        embed_fn=embed_fn,
     )
 
     _state["llm_client"] = llm_client

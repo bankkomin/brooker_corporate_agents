@@ -2,9 +2,8 @@
 """rag-ingestion service — FastAPI app for document and message ingestion."""
 from __future__ import annotations
 
-from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv()
 
 import contextlib
 import hashlib
@@ -191,6 +190,43 @@ async def ingest_document(
         return IngestDocumentResponse(status="error", reason=str(exc))
 
 
+@app.post("/extract")
+async def extract_document(
+    file: UploadFile = File(...),  # noqa: B008
+    doc_type: str = Form(default=""),
+) -> dict:
+    """Chunk a file into text segments WITHOUT embedding or storing.
+
+    Used for transient context injection — e.g., portal-uploaded files
+    attached to a single chat turn that shouldn't be persisted.
+    """
+    content = await file.read()
+    suffix = Path(file.filename or "doc").suffix.lstrip(".")
+    inferred_type = doc_type or suffix or "pdf"
+
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=f".{inferred_type}",
+    ) as tmp:
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+
+    try:
+        chunker: DocumentChunker = app.state.chunker
+        chunks = await chunker.chunk_file(
+            tmp_path, doc_type=inferred_type, dept="transient",
+        )
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    return {
+        "filename": file.filename,
+        "doc_type": inferred_type,
+        "chunks": [
+            {"text": c.text, "metadata": c.metadata} for c in chunks
+        ],
+    }
+
+
 @app.post("/ingest/message", response_model=IngestMessageResponse)
 async def ingest_message(req: IngestMessageRequest) -> IngestMessageResponse:
     """Index a Slack message into cac_chat collection."""
@@ -208,6 +244,20 @@ async def ingest_message(req: IngestMessageRequest) -> IngestMessageResponse:
     except Exception as exc:
         logger.error("ingest_message.failed", error=str(exc))
         return IngestMessageResponse(indexed=False, message_id="")
+
+
+@app.post("/embed")
+async def embed(req: dict) -> dict:
+    """Embed a single string or a list of strings; returns vectors.
+
+    Body: {"text": "..."} or {"texts": ["...", "..."]}.
+    """
+    embedder: Embedder = app.state.embedder
+    if "text" in req:
+        vec = await embedder.embed_single(req["text"])
+        return {"vector": vec, "dim": len(vec)}
+    vecs = await embedder.embed_texts(req.get("texts", []))
+    return {"vectors": vecs, "dim": len(vecs[0]) if vecs else 0}
 
 
 @app.get("/health", response_model=HealthResponse)

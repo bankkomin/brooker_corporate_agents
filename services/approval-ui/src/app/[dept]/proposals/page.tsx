@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProposalCard } from "@/components/proposals/proposal-card";
 import { apiClient } from "@/lib/api-client";
@@ -9,6 +10,8 @@ import type { Proposal } from "@/types/proposal";
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
 export default function ProposalsPage() {
+  const params = useParams<{ dept: string }>();
+  const dept = params.dept;
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +23,7 @@ export default function ProposalsPage() {
       setError(null);
       try {
         const statusParam = filter === "all" ? undefined : filter;
-        const resp = await apiClient.listProposals(statusParam);
+        const resp = await apiClient.listProposals(statusParam, dept);
         setProposals(resp.proposals);
       } catch {
         setError("Failed to load proposals.");
@@ -29,7 +32,7 @@ export default function ProposalsPage() {
       }
     }
     load();
-  }, [filter]);
+  }, [filter, dept]);
 
   return (
     <div className="space-y-4">

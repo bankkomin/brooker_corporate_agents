@@ -5,14 +5,31 @@ for knowledge gap tracking.
 """
 from __future__ import annotations
 
+import re
+
 import structlog
 
 from ..tools.llm_client import LLMClient
+
+# Strip any [N] citation markers the model may emit even when told not to.
+_CITATION_RE = re.compile(r"\[\d+\]")
 
 try:
     from services.shared.knowledge_gaps import detect_self_report
 except ImportError:
     detect_self_report = None  # type: ignore[assignment]
+
+try:
+    from services.shared.citation_grounding import ground_citations, add_grounding_badges
+except ImportError:
+    ground_citations = None  # type: ignore[assignment]
+
+# Shown when an answer cites sources but none of them actually support its
+# claims — i.e. the model fabricated and attached citations that don't back it.
+_ABSTENTION_ANSWER = (
+    "I don't have reference material on this topic in my knowledge base yet. "
+    "Please share a relevant document or data source and I'll analyse it."
+)
 
 logger = structlog.get_logger("hr-orchestrator.synthesise")
 
@@ -49,6 +66,13 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient, db_conn=Non
     escalation_detail = state.get("escalation_detail")
     confidence_score = state.get("confidence_score", 0.0)
 
+    # Defence-in-depth: if grounding_gate already wrote a canned abstention
+    # answer, return it immediately without calling the LLM.
+    if not state.get("is_grounded", True):
+        canned = _CITATION_RE.sub("", state.get("answer", "")).strip()
+        logger.info("synthesise_abstention_passthrough", answer_preview=canned[:60])
+        return {"answer": canned, "confidence": "Low", "response": canned, "citations": []}
+
     # Build user prompt with all context
     parts: list[str] = []
 
@@ -80,6 +104,32 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient, db_conn=Non
         logger.error("synthesise_failed", error=str(exc))
         answer = "I encountered an error while processing your question. Please try again."
 
+    # Hard backstop: an answer that cites sources but verifies NONE of them is
+    # fabrication. Replace it with abstention rather than show false data.
+    if ground_citations is not None and state.get("sources"):
+        gsources = [
+            {
+                "id": str(i),
+                "text": s.get("text") or s.get("excerpt") or "",
+                "source": s.get("filename") or s.get("type") or f"src{i}",
+            }
+            for i, s in enumerate(state.get("sources", []), start=1)
+        ]
+        report = ground_citations(answer, gsources)
+        if report.total_citations > 0 and report.verified == 0:
+            logger.warning(
+                "synthesise_ungrounded_replaced",
+                citations=report.total_citations,
+                query_preview=state.get("query", "")[:80],
+            )
+            return {
+                "answer": _ABSTENTION_ANSWER,
+                "confidence": "Low",
+                "response": _ABSTENTION_ANSWER,
+                "citations": [],
+            }
+        answer = add_grounding_badges(answer, report)
+
     # Phase 2: detect self-report knowledge gaps
     if detect_self_report is not None and db_conn is not None:
         try:
@@ -94,6 +144,11 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient, db_conn=Non
             logger.warning("detect_self_report_failed", error=str(exc))
 
     confidence = _confidence_label(confidence_score)
+
+    # Defence-in-depth citation strip: if no sources were retrieved, remove any
+    # [N] markers the model still emitted.
+    if not state.get("sources"):
+        answer = _CITATION_RE.sub("", answer).strip()
 
     # Build citations list from sources for daily_log compatibility
     citations = []

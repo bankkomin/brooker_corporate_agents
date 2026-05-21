@@ -1,88 +1,96 @@
-"""LLM client using the Google GenAI SDK."""
+"""LLM client for the OpenAI-compatible vLLM/Qwen endpoint.
+
+Mirrors the request shape used in D:\\DGX_Test\\atlas_dispatcher.py:
+POST {base_url}/chat/completions with {model, messages, max_tokens,
+temperature, ...} and returns choices[0].message.content.
+"""
 from __future__ import annotations
 
 import time
+from typing import Any
 
+import httpx
 import structlog
-from google import genai
-from google.genai import types
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 logger = structlog.get_logger("hr-orchestrator.llm")
 
+_PASSTHROUGH_KEYS = (
+    "top_p",
+    "top_k",
+    "stop",
+    "tools",
+    "tool_choice",
+    "chat_template_kwargs",
+    "response_format",
+    "seed",
+    "preserve_thinking",
+)
+
 
 class LLMClient:
-    """Async client for Google Gemini via the google-genai SDK."""
+    """Async client for the Qwen vLLM server (OpenAI-compatible)."""
 
     def __init__(
-        self, base_url: str = "", model: str = "gemini-3.1-flash-lite-preview",
-        api_key: str = "", timeout: float = 180.0,
+        self,
+        base_url: str = "http://nginx:8080/v1",
+        model: str = "qwen-large",
+        api_key: str = "",
+        timeout: float = 180.0,
     ) -> None:
+        self._base_url = base_url.rstrip("/")
         self._model = model
-        self._client = genai.Client(api_key=api_key) if api_key else genai.Client()
+        self._api_key = api_key
+        headers = {"Content-Type": "application/json"}
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        self._http = httpx.AsyncClient(timeout=timeout, headers=headers)
 
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=1, max=10),
-        retry=retry_if_exception_type(Exception),
+        retry=retry_if_exception_type(
+            (httpx.TransportError, httpx.TimeoutException, httpx.HTTPStatusError)
+        ),
+        reraise=True,
     )
     async def chat(
         self,
         messages: list[dict[str, str]],
         temperature: float = 0.1,
         max_tokens: int = 2048,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> str:
-        """Send chat completion request and return the response text."""
+        """Send chat completion request and return the assistant text."""
         start = time.monotonic()
 
-        # Convert OpenAI-style messages to Gemini contents format
-        system_instruction = None
-        contents: list[types.Content] = []
+        body: dict[str, Any] = {
+            "model": kwargs.get("model", self._model),
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+        }
+        for k in _PASSTHROUGH_KEYS:
+            if k in kwargs:
+                body[k] = kwargs[k]
 
-        for msg in messages:
-            role = msg["role"]
-            text = msg["content"]
-            if role == "system":
-                system_instruction = text
-            else:
-                # Gemini uses "user" and "model" (not "assistant")
-                gemini_role = "model" if role == "assistant" else "user"
-                contents.append(
-                    types.Content(
-                        role=gemini_role,
-                        parts=[types.Part(text=text)],
-                    )
-                )
+        resp = await self._http.post(f"{self._base_url}/chat/completions", json=body)
+        resp.raise_for_status()
+        data = resp.json()
 
-        config = types.GenerateContentConfig(
-            temperature=temperature,
-            max_output_tokens=max_tokens,
-            system_instruction=system_instruction,
-        )
-
-        response = await self._client.aio.models.generate_content(
-            model=self._model,
-            contents=contents,
-            config=config,
-        )
+        message = data["choices"][0]["message"]
+        content = message.get("content") or ""
 
         elapsed_ms = (time.monotonic() - start) * 1000
-        content = response.text or ""
-        usage = response.usage_metadata
-        total_tokens = (
-            (usage.prompt_token_count or 0) + (usage.candidates_token_count or 0)
-            if usage else None
-        )
-
+        usage = data.get("usage") or {}
         logger.info(
             "llm_chat_complete",
-            model=self._model,
+            model=body["model"],
             elapsed_ms=round(elapsed_ms, 1),
-            tokens=total_tokens,
+            prompt_tokens=usage.get("prompt_tokens"),
+            completion_tokens=usage.get("completion_tokens"),
         )
         return content
 
     async def close(self) -> None:
-        """No persistent connection to close with genai SDK."""
-        pass
+        await self._http.aclose()

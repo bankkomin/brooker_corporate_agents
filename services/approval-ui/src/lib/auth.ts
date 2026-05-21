@@ -136,6 +136,16 @@ export async function loginWithCredentials(
   // Store the access token (same JWT secret, works with gateway)
   setToken(data.accessToken);
 
+  // Pull the dept from the JWT — portal-issued tokens carry `departmentSlug`.
+  // Fall back to "cac" only if neither the token nor the user payload carries one.
+  const decoded = decodeTokenPayload(data.accessToken);
+  const dept =
+    decoded?.dept ??
+    decoded?.departmentSlug ??
+    data.user.departmentSlug ??
+    data.user.dept ??
+    "cac";
+
   const user: SessionUser = {
     id: data.user.id,
     email: data.user.email,
@@ -143,7 +153,7 @@ export async function loginWithCredentials(
     lastName: data.user.lastName,
     role: data.user.role,
     permissions: derivePermissions(data.user.role),
-    dept: "cac",
+    dept,
   };
 
   setSessionUser(user);

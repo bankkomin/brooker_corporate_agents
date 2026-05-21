@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiClient } from "@/lib/api-client";
 
 interface KnowledgeGap {
   id: number;
@@ -10,7 +11,7 @@ interface KnowledgeGap {
   hit_count: number;
   llm_self_report: string | null;
   expected_doc_type: string | null;
-  created_at: string;
+  created_at: string | null;
   resolved_at: string | null;
 }
 
@@ -26,9 +27,7 @@ export default function KnowledgeGapsPage() {
 
   async function fetchGaps() {
     try {
-      const res = await fetch("/api/admin/knowledge-gaps");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await apiClient.listKnowledgeGaps();
       setGaps(data.gaps || []);
     } catch (e) {
       console.error("Failed to fetch gaps:", e);
@@ -39,11 +38,7 @@ export default function KnowledgeGapsPage() {
 
   async function markResolved(id: number) {
     try {
-      await fetch(`/api/admin/knowledge-gaps/${id}/resolve`, {
-        method: "POST",
-        headers: { "X-Requested-With": "XMLHttpRequest" },
-        credentials: "same-origin",
-      });
+      await apiClient.resolveKnowledgeGap(id);
       setGaps((prev) =>
         prev.map((g) =>
           g.id === id ? { ...g, resolved_at: new Date().toISOString() } : g
@@ -61,7 +56,11 @@ export default function KnowledgeGapsPage() {
       return g.dept_id === filter;
     })
     .sort((a, b) => {
-      if (sortBy === "created_at") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (sortBy === "created_at") {
+        const at = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return bt - at;
+      }
       if (sortBy === "dept_id") return a.dept_id.localeCompare(b.dept_id);
       return b.hit_count - a.hit_count;
     });
@@ -131,7 +130,9 @@ export default function KnowledgeGapsPage() {
                     {g.hit_count}
                   </span>
                 </td>
-                <td className="p-3 text-gray-500">{new Date(g.created_at).toLocaleDateString()}</td>
+                <td className="p-3 text-gray-500">
+                  {g.created_at ? new Date(g.created_at).toLocaleDateString() : "—"}
+                </td>
                 <td className="p-3 text-center">
                   {g.resolved_at ? (
                     <span className="text-green-600 text-xs">Resolved</span>

@@ -34,12 +34,18 @@ class IngestMessageRequest(BaseModel):
 # ── Outbound to cac-orchestrator ─────────────────────────────────────
 
 class QueryRequest(BaseModel):
-    """POST /query payload."""
+    """POST /query payload.
+
+    `dept_id` is REQUIRED by the multi-tenant read-only-orchestrator (it serves
+    many departments behind one /query). Without this field Pydantic v2 silently
+    dropped the kwarg clients.py passed, so read-only depts got a 400.
+    """
 
     query: str
     channel: str
     user_id: str
     thread_ts: str | None = None
+    dept_id: str | None = None
     context: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -54,18 +60,37 @@ class PostEscalationRequest(BaseModel):
 
 
 class Citation(BaseModel):
-    """Single citation in a QueryResponse."""
+    """Single citation in a QueryResponse.
 
-    source: str
-    excerpt: str
-    score: float
+    Tolerant of two upstream shapes:
+      - cac/hr-orchestrator: {type, filename, page, excerpt, relevance_score, ...}
+      - deck-writer / generic: {source, excerpt, score}
+    Aliases let us accept either without further translation.
+    """
+
+    model_config = {"populate_by_name": True}
+
+    # alias=filename lets us accept cac's Source dicts; default ""  keeps it tolerant.
+    source: str = Field(default="", alias="filename")
+    excerpt: str = ""
+    # alias=relevance_score accepts cac's float; default 0.0 keeps it tolerant.
+    score: float = Field(default=0.0, alias="relevance_score")
 
 
 class QueryResponse(BaseModel):
-    """Response from cac-orchestrator."""
+    """Response from cac-orchestrator / read-only-orchestrator / deck-writer."""
 
-    answer: str
-    citations: list[Citation] = Field(default_factory=list)
-    confidence: float = 0.0
+    model_config = {"populate_by_name": True}
+
+    answer: str = ""
+    # cac-orchestrator returns `sources`; older slack-bot code reads `citations`.
+    citations: list[Citation] = Field(default_factory=list, alias="sources")
+    # Categorical: "High" | "Medium" | "Low".
+    confidence: str = "Low"
     agent_id: str = ""
     error: str | None = None
+    # deck-writer / any artefact-producing service returns these so we can
+    # upload the file into the Slack thread alongside the text reply.
+    file_path: str | None = None
+    file_name: str | None = None
+    file_url: str | None = None

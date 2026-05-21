@@ -27,11 +27,35 @@ _ORCHESTRATOR_MAX_RETRIES = 3
 _ORCHESTRATOR_RETRY_DELAY = 2.0  # seconds, doubles each retry
 
 
+def _orchestrator_url_for(slug: str) -> str | None:
+    """Resolve the orchestrator base URL for a dept slug.
+
+    Looks up `<SLUG>_ORCHESTRATOR_URL` from env (uppercased). Falls back to
+    `CAC_ORCHESTRATOR_URL` when slug is "cac" or unset. Returns None when
+    a non-CAC slug has no env override — caller should 404 the request
+    rather than silently routing to CAC.
+    """
+    if not slug or slug == "cac":
+        return CAC_ORCHESTRATOR_URL
+    return os.getenv(f"{slug.upper()}_ORCHESTRATOR_URL")
+
+
+class FileRef(BaseModel):
+    """Reference to a portal-uploaded file attached to this chat turn."""
+
+    id: str
+    name: str | None = None
+    mimetype: str | None = None
+    size: int | None = None
+
+
 class ChatRequest(BaseModel):
     """Question from the website user."""
 
     message: str
     thread_id: str | None = None  # for conversation continuity
+    agent_slug: str | None = None  # target dept orchestrator; defaults to "cac"
+    files: list[FileRef] = []  # portal files attached to this turn
 
 
 class ChatResponse(BaseModel):
@@ -53,21 +77,52 @@ async def chat(request: Request, body: ChatRequest) -> JSONResponse:
     """
     claims = extract_claims(request)
 
-    # Check can_query permission
-    agent_perms = getattr(request.state, "agent_permissions", None)
+    # Resolve target orchestrator from the slug supplied by the portal.
+    target_slug = (body.agent_slug or "cac").lower()
+    orchestrator_url = _orchestrator_url_for(target_slug)
+    if orchestrator_url is None:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": f"No orchestrator configured for agent '{target_slug}'",
+                "code": "ORCHESTRATOR_NOT_CONFIGURED",
+            },
+        )
+
+    # Check can_query permission for the target dept.
+    # `agent_permissions` is the per-dept map set by brooker_token_middleware.
     if claims.source == "brooker":
-        if agent_perms is None or "query" not in agent_perms:
-            raise AuthError("NO_QUERY_ACCESS", "You do not have query access", 403)
+        agent_perms_map = getattr(request.state, "agent_permissions_by_dept", None)
+        # Backward-compat: tolerate the legacy flat list while middleware migrates.
+        flat_perms = getattr(request.state, "agent_permissions", None)
+        dept_perms: list[str] = []
+        if isinstance(agent_perms_map, dict):
+            dept_perms = list(agent_perms_map.get(target_slug, []))
+        elif isinstance(flat_perms, list) and target_slug == "cac":
+            dept_perms = list(flat_perms)
+        if "query" not in dept_perms:
+            raise AuthError(
+                "NO_QUERY_ACCESS",
+                f"You do not have query access for '{target_slug}'",
+                403,
+            )
 
     # Build orchestrator request
     user_id = claims.email or claims.sub
     thread_id = body.thread_id or f"web:{user_id}"
+
+    # The orchestrator needs the caller's bearer to fetch portal-served files.
+    raw_token = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
 
     orchestrator_payload = {
         "query": body.message,
         "user_id": user_id,
         "channel": "web",
         "thread_ts": thread_id,
+        "dept_id": target_slug,
+        "files": [f.model_dump() for f in body.files],
+        "auth_token": raw_token or None,
+        "portal_base_url": os.getenv("PORTAL_BASE_URL"),
     }
 
     last_exc: Exception | None = None
@@ -75,7 +130,7 @@ async def chat(request: Request, body: ChatRequest) -> JSONResponse:
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 resp = await client.post(
-                    f"{CAC_ORCHESTRATOR_URL}/query",
+                    f"{orchestrator_url}/query",
                     json=orchestrator_payload,
                 )
                 resp.raise_for_status()

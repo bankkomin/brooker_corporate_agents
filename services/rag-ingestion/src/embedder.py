@@ -1,6 +1,25 @@
 # services/rag-ingestion/src/embedder.py
-"""Async embedding wrapper — supports Gemini and vLLM backends."""
+"""Async embedding wrapper — supports Gemini, vLLM-compat HTTP, and a
+local sentence-transformer backend.
+
+Backends (selected by `EMBEDDER_TYPE` env var):
+  - "gemini"       : Google Gemini text-embedding-001 (cloud, rate-limited)
+  - "vllm"         : OpenAI-compat /embeddings endpoint. Use this with the
+                     host-native scripts/embed_server.py running on the
+                     host's RTX 4060 Ti (recommended — no Docker GPU
+                     passthrough needed). Default.
+  - "local_gemma"  : sentence-transformers running google/embeddinggemma-300m
+                     directly inside this container. Requires CUDA torch +
+                     Docker GPU passthrough — not the default.
+
+Default is `vllm` pointed at host.docker.internal:8765 (where the host
+embed server lives) to escape Gemini's free-tier rate-limit cascade during
+bulk ingest. 300M params, ~600 MB VRAM in FP16.
+"""
 from __future__ import annotations
+
+import asyncio
+import os
 
 import httpx
 import structlog
@@ -12,10 +31,11 @@ logger = structlog.get_logger("rag-ingestion.embedder")
 
 
 class Embedder:
-    """Async embedding client with pluggable backend (gemini or vllm)."""
+    """Async embedding client with pluggable backend."""
 
-    BATCH_SIZE = 32  # vLLM batch size
-    GEMINI_BATCH_SIZE = 100  # Gemini supports up to 2048 per request
+    BATCH_SIZE = 32           # vLLM batch size
+    GEMINI_BATCH_SIZE = 100   # Gemini supports up to 2048 per request
+    LOCAL_BATCH_SIZE = 64     # sentence-transformers GPU batch
 
     def __init__(self, settings: RAGSettings) -> None:
         self._backend = settings.embedder_type.lower()
@@ -29,6 +49,11 @@ class Embedder:
         self._gemini_model = settings.gemini_embed_model
         self._gemini_client = None
 
+        # Local (sentence-transformers) config
+        self._local_model_name = os.getenv("LOCAL_EMBED_MODEL", "google/embeddinggemma-300m")
+        self._local_device = os.getenv("LOCAL_EMBED_DEVICE", "auto")  # "auto" | "cuda" | "cpu"
+        self._local_model = None
+
         self._http: httpx.AsyncClient | None = None
 
     async def start(self) -> None:
@@ -37,15 +62,49 @@ class Embedder:
             api_key = self._settings.gemini_api_key
             self._gemini_client = genai.Client(api_key=api_key) if api_key else genai.Client()
             logger.info("embedder.started", backend="gemini", model=self._gemini_model)
+        elif self._backend == "local_gemma":
+            await self._start_local()
         else:
             self._http = httpx.AsyncClient(timeout=30.0)
             logger.info("embedder.started", backend="vllm", url=self._vllm_url)
+
+    async def _start_local(self) -> None:
+        """Load the sentence-transformers model. Slow once on cold start,
+        then in-memory. Runs in a thread so we don't block the event loop."""
+        from sentence_transformers import SentenceTransformer
+        import torch
+
+        if self._local_device == "auto":
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        else:
+            device = self._local_device
+        loop = asyncio.get_event_loop()
+        self._local_model = await loop.run_in_executor(
+            None,
+            lambda: SentenceTransformer(self._local_model_name, device=device),
+        )
+        vram_gb = None
+        if device == "cuda":
+            try:
+                vram_gb = round(
+                    torch.cuda.get_device_properties(0).total_memory / 1e9, 1
+                )
+            except Exception:
+                pass
+        logger.info(
+            "embedder.started",
+            backend="local_gemma",
+            model=self._local_model_name,
+            device=device,
+            vram_gb=vram_gb,
+        )
 
     async def close(self) -> None:
         if self._http:
             await self._http.aclose()
             self._http = None
         self._gemini_client = None
+        self._local_model = None
 
     # ── Public API ──────────────────────────────────────────────────
 
@@ -55,6 +114,8 @@ class Embedder:
             return []
         if self._backend == "gemini":
             return await self._embed_gemini(texts)
+        if self._backend == "local_gemma":
+            return await self._embed_local(texts)
         return await self._embed_vllm(texts)
 
     async def embed_single(self, text: str) -> list[float]:
@@ -73,11 +134,36 @@ class Embedder:
             if self._backend == "gemini":
                 vec = await self.embed_single("health")
                 return len(vec) > 0
+            if self._backend == "local_gemma":
+                return self._local_model is not None
             assert self._http is not None
             resp = await self._http.get(self._vllm_url.replace("/embeddings", "/models"))
             return resp.status_code == 200
         except Exception:
             return False
+
+    # ── Local sentence-transformer backend ──────────────────────────
+
+    async def _embed_local(self, texts: list[str]) -> list[list[float]]:
+        """Embed via sentence-transformers in-process (GPU or CPU).
+
+        Runs the blocking encode() in a thread so we don't stall the event loop.
+        """
+        if self._local_model is None:
+            raise RuntimeError("local embedder not started; call .start() first")
+        loop = asyncio.get_event_loop()
+
+        def _encode() -> list[list[float]]:
+            arr = self._local_model.encode(
+                texts,
+                normalize_embeddings=True,
+                show_progress_bar=False,
+                convert_to_numpy=True,
+                batch_size=self.LOCAL_BATCH_SIZE,
+            )
+            return arr.tolist()
+
+        return await loop.run_in_executor(None, _encode)
 
     # ── Gemini backend ──────────────────────────────────────────────
 

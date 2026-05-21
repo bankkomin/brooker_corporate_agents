@@ -26,6 +26,14 @@ class AgentState(TypedDict):
     sources: list[dict]
     context_text: str
 
+    # grounding_gate output — True means the turn has adequate source grounding
+    # (or is conversational) and should proceed normally; False triggers abstention.
+    is_grounded: bool
+
+    # Portal-attached files (pre-loaded by main.py before the graph runs).
+    # Kept separate from context_text so retrieve_context doesn't clobber it.
+    attached_files_text: str
+
     # agent output
     agent_response: str
     agent_name: str

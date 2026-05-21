@@ -7,9 +7,9 @@ export interface ApiError {
 export interface EscalationItem {
   id: number;
   created_at: string;
-  severity: string;
-  trigger_type: string;
-  detail: string;
+  severity: string | null;
+  trigger_type: string | null;
+  detail: string | null;
   dept: string;
   resolved_at: string | null;
 }
