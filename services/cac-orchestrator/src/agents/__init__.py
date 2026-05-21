@@ -1,18 +1,8 @@
-"""Specialist CAC agents."""
-from .alm import AlmAgent
+"""CAC agent package — single consolidated agent (Khao Yai retreat §2.8)."""
 from .base import BaseAgent
-from .capital import CapitalAgent
-from .cfo import CFOAgent
-from .covenant import CovenantAgent
-from .funding import FundingAgent
-from .liquidity import LiquidityAgent
+from .cac import CacAgent
 
 __all__ = [
     "BaseAgent",
-    "LiquidityAgent",
-    "CapitalAgent",
-    "AlmAgent",
-    "FundingAgent",
-    "CovenantAgent",
-    "CFOAgent",
+    "CacAgent",
 ]

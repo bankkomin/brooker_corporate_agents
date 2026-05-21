@@ -1,7 +1,7 @@
 import logging
 import re
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 log = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ def _archive_file(file_path: Path, mem_dir: Path, changes: dict):
 
     history_dir = mem_dir / "history"
     history_dir.mkdir(parents=True, exist_ok=True)
-    date_str = datetime.utcnow().strftime("%Y-%m-%d")
+    date_str = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
     archive_name = f"{date_str}-{file_path.name}"
     archive_path = history_dir / archive_name
 

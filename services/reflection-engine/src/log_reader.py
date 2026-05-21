@@ -1,7 +1,24 @@
+"""Parse daily-log markdown files written by services/shared/daily_log.py.
+
+Supports two header variants:
+  - Standard:  ## HH:MM · @USER · proposal: PROP_ID
+  - Legacy:    ## HH:MM · @USER · proposal: PROP_ID   (same)
+
+Field variants tolerated:
+  - Confidence: 0.91   (standard)
+  - Latency: 1234ms    (CEO orchestrator emits latency, not confidence)
+"""
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+
+_HEADER_RE = re.compile(
+    r"(\d{2}:\d{2})\s*[·•]\s*@(\S+)\s*[·•]\s*proposal:\s*(\S+)"
+)
+_FIELD_RE = re.compile(r"\*\*([^:*]+):\*\*\s*(.*)")
+_LATENCY_RE = re.compile(r"(\d+(?:\.\d+)?)\s*ms", re.IGNORECASE)
 
 
 @dataclass
@@ -16,42 +33,43 @@ class LogEntry:
     outcome: str = "pending"
 
 
-HEADER_RE = re.compile(
-    r"(\d{2}:\d{2})\s*·\s*@(\S+)\s*·\s*proposal:\s*(\S+)"
-)
-FIELD_RE = re.compile(r"\*\*(\w+):\*\*\s*(.*)")
+def parse_daily_log(path: Path) -> list[LogEntry]:
+    """Parse a daily-log markdown file into structured LogEntry objects.
 
-
-def parse_daily_log(path: Path) -> List[LogEntry]:
-    """Parse a daily-log markdown file into structured entries."""
+    Returns an empty list if the file is missing or empty.
+    Never raises — malformed blocks are silently skipped.
+    """
     if not path.exists():
         return []
 
     text = path.read_text(encoding="utf-8")
-    blocks = re.split(r"\n## ", text)
-    entries = []
+    # Split on section headers (## at start of line or after newline)
+    blocks = re.split(r"\n## ", "\n" + text)
+    entries: list[LogEntry] = []
 
     for block in blocks:
         block = block.strip()
         if not block:
             continue
 
-        header_match = HEADER_RE.search(block)
+        header_match = _HEADER_RE.search(block)
         if not header_match:
             continue
 
+        raw_proposal = header_match.group(3)
         entry = LogEntry(
             timestamp=header_match.group(1),
             user_id=header_match.group(2),
-            proposal_id=header_match.group(3) if header_match.group(3) != "none" else None,
+            proposal_id=raw_proposal if raw_proposal.lower() != "none" else None,
         )
 
-        for field_match in FIELD_RE.finditer(block):
-            key = field_match.group(1).lower()
+        for field_match in _FIELD_RE.finditer(block):
+            key = field_match.group(1).strip().lower()
             val = field_match.group(2).strip()
-            if key == "q":
+
+            if key in ("q", "query"):
                 entry.query = val
-            elif key == "a":
+            elif key in ("a", "answer", "response"):
                 entry.response = val
             elif key == "citations":
                 entry.citations = [c.strip() for c in val.split(",") if c.strip()]
@@ -59,6 +77,12 @@ def parse_daily_log(path: Path) -> List[LogEntry]:
                 try:
                     entry.confidence = float(val)
                 except ValueError:
+                    pass
+            elif key == "latency":
+                # CEO orchestrator emits "Latency: 1234ms" — convert to rough signal
+                lat_match = _LATENCY_RE.search(val)
+                if lat_match:
+                    # Not a real confidence; leave at 0 so memory promoter sees no signal
                     pass
             elif key == "outcome":
                 entry.outcome = val

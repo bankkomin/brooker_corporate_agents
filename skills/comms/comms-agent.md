@@ -198,6 +198,11 @@ For macro / thought-leadership lookups:
 - For Thai SEC disclosure language, there is no filed-disclosure corpus in the
   Comms source share — abstain and route to Comms HOD + Legal rather than drafting
   filing wording.
-- Do NOT assert a Brooker brand colour palette or specific brand-guideline values:
-  no brand-guideline document exists in the Comms source share or wiki today
-  (the `doc_comms_brand_guidelines` slot in `departments.json` is unpopulated).
+- **Brand palette** (grounded — extracted from the Brooker Group PowerPoint
+  template's theme XML, Dec 2021; the same values the deck-writer renders with):
+  primary red `#EE3135`, deep red `#AE132A`, navy `#002856`, black text `#000000`,
+  muted grey `#5F5F5F`, light-grey band `#F2F2F2`. Use red as primary, navy as
+  secondary. These come from the template theme, NOT a formal brand-guideline
+  document — a full brand-guideline doc (`doc_comms_brand_guidelines` in
+  `departments.json`) is still unpopulated, so do not invent rules beyond colours
+  (typography, logo spacing, tone codes) until that document is provided.

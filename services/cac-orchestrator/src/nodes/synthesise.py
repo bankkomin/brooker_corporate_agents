@@ -33,11 +33,6 @@ except ImportError:
     ground_citations = None
 
 try:
-    from services.shared.calibrated_confidence import compute_confidence
-except ImportError:
-    compute_confidence = None
-
-try:
     from services.shared.chain_of_thought import classify_complexity, build_cot_prompt, parse_cot_response
 except ImportError:
     classify_complexity = None
@@ -89,7 +84,12 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient,
     escalation_detail = state.get("escalation_detail")
     staging_proposal_id = state.get("staging_proposal_id")
     validation_warnings = state.get("validation_warnings", [])
-    confidence_score = state.get("confidence_score", 0.0)
+    # Prefer the calibrated score computed by calibrate_confidence (audit bug #3):
+    # that value already drove the staging gate, so this label is consistent.
+    confidence_score: float = state.get(
+        "calibrated_confidence_score",
+        state.get("confidence_score", 0.0),
+    )
 
     # Defence-in-depth: if grounding_gate already set a canned abstention answer,
     # return it immediately without calling the LLM.  Also strip any [N] markers
@@ -167,9 +167,8 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient,
 
     # retrieve_context writes the key `sources` (not `retrieved_sources`) and
     # each source uses {filename, page, excerpt, relevance_score, type, ...}.
-    # ground_citations expects {id, text, source} keyed by 1-based position,
-    # and compute_confidence wants a chunks list + top similarity. Normalize
-    # once so both downstream helpers can do their job.
+    # ground_citations expects {id, text, source} keyed by 1-based position.
+    # Normalize once so the grounding helper can do its job.
     raw_sources = state.get("sources", []) or []
     grounding_sources: list[dict] = []
     top_sim = 0.0
@@ -213,21 +212,9 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient,
     if not grounding_sources and not attached_files_text:
         answer = _CITATION_RE.sub("", answer).strip()
 
-    # Calibrated confidence (replaces LLM self-reported score). The composite
-    # numeric score is the only thing we propagate; label is recomputed below
-    # from threshold buckets (was previously assigned-then-overwritten via
-    # conf.label, audit bug #11).
-    if compute_confidence is not None:
-        proposed = state.get("proposed_value")
-        conf = compute_confidence(
-            retrieved_chunks=grounding_sources,
-            top_similarity=top_sim,
-            answer_text=answer,
-            proposed_value=proposed,
-            citation_accuracy=citation_accuracy,
-        )
-        confidence_score = conf.composite
-
+    # confidence_score already holds the pre-calibrated value read at the top of
+    # this function (audit bug #3).  We no longer recompute here so that the
+    # label displayed to the user matches the score that drove the staging gate.
     confidence = _confidence_label(confidence_score)
     has_proposal = staging_proposal_id is not None
 

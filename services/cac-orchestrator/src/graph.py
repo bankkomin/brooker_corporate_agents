@@ -18,6 +18,7 @@ try:
 except ImportError:
     log_interaction_node = None
 
+from .nodes.calibrate_confidence import calibrate_confidence
 from .nodes.classify_intent import classify_intent
 from .nodes.escalation_check import escalation_check
 from .nodes.excel_navigator import excel_navigator
@@ -50,7 +51,10 @@ def _make_should_validate(threshold: float):
 
     def _should_validate(state: dict) -> str:
         """Route: if confidence >= threshold, validate; otherwise skip to synthesise."""
-        score = state.get("confidence_score", 0.0)
+        # Prefer calibrated score (audit bug #3); fall back to raw agent score.
+        score: float = state.get(
+            "calibrated_confidence_score", state.get("confidence_score", 0.0)
+        )
         if score >= threshold and state.get("proposed_value"):
             return "validate_proposal"
         return "synthesise"
@@ -145,6 +149,7 @@ def build_graph(
         "excel_navigator",
         partial(excel_navigator, schema_path=cfg.excel_schema_path),
     )
+    graph.add_node("calibrate_confidence", calibrate_confidence)
     graph.add_node(
         "validate_proposal",
         partial(validate_proposal, llm_client=llm_client, db_client=db_client),
@@ -217,9 +222,13 @@ def build_graph(
     graph.add_edge("escalation_check", "notify_escalation")
     graph.add_edge("notify_escalation", "excel_navigator")
 
+    # Calibrate confidence before the staging gate so both the gate decision and
+    # the displayed label use the same pre-computed value (audit bug #3).
+    graph.add_edge("excel_navigator", "calibrate_confidence")
+
     # Conditional: validate if confident enough
     graph.add_conditional_edges(
-        "excel_navigator",
+        "calibrate_confidence",
         _make_should_validate(cfg.confidence_threshold),
         {
             "validate_proposal": "validate_proposal",

@@ -105,7 +105,12 @@ async def escalation_check(state: dict, *, rules_path: str) -> dict:
                 try:
                     numbers.append(float(n.group()))
                 except ValueError:
-                    pass
+                    # _NUMBER_RE only matches digit sequences so float() should
+                    # never fail in practice; log at debug so failures surface.
+                    logger.debug(
+                        "escalation_number_parse_failed",
+                        token=n.group(),
+                    )
 
         for num in numbers:
             # Skip the threshold itself reappearing — agent often quotes it

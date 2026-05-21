@@ -35,7 +35,12 @@ async def staging_writer(
 
     Returns {"staging_proposal_id": str | None}.
     """
-    confidence_score = state.get("confidence_score", 0.0)
+    # Use the pre-computed calibrated score (audit bug #3): staging gate and
+    # the displayed confidence label must derive from the same number.
+    confidence_score: float = state.get(
+        "calibrated_confidence_score",
+        state.get("confidence_score", 0.0),
+    )
 
     if confidence_score < confidence_threshold:
         logger.info(

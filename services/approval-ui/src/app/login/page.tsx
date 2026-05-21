@@ -27,8 +27,8 @@ export default function LoginPage() {
     try {
       const user = await loginWithCredentials(email, password);
       router.push(`/${user.dept}`);
-    } catch (err: any) {
-      setError(err.message || "Login failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
     }

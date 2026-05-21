@@ -26,9 +26,9 @@ export default function DepartmentHomePage() {
       setError(null);
       try {
         const [summaryData, proposalsData, escalationsData] = await Promise.all([
-          apiClient.getAnalyticsSummary(),
-          apiClient.listProposals("pending"),
-          apiClient.listEscalations(),
+          apiClient.getAnalyticsSummary(dept),
+          apiClient.listProposals("pending", dept),
+          apiClient.listEscalations(dept),
         ]);
         setSummary(summaryData);
         setProposals(proposalsData.proposals.slice(0, 5));
@@ -43,7 +43,7 @@ export default function DepartmentHomePage() {
       }
     }
     load();
-  }, []);
+  }, [dept]);
 
   if (loading) {
     return (

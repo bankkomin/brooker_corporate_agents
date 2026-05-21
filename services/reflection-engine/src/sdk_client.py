@@ -1,12 +1,17 @@
+"""LLM client for the reflection engine.
+
+Uses vLLM via OpenAI-compatible API (langchain-openai).
+Degrades gracefully: returns empty update dicts on any LLM failure.
+"""
 import asyncio
 import json
-import logging
 
+import structlog
 from langchain_openai import ChatOpenAI
 
 from .config import settings
 
-log = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
 
 REFLECTION_PROMPT = """You are a reflection agent for the {dept_id} department's {agent_id} agent.
 Analyze yesterday's interactions and approval decisions, then determine what should be updated
@@ -36,18 +41,20 @@ Output a JSON object with exactly these keys:
     {{"section": "section_name", "content": "new content to add or replace"}}
   ],
   "skill_proposals": [
-    {{"skill_path": "skills/dept/skill.md", "trigger": "description of pattern", "evidence": {{"count": N, "avg_signal": 0.X}}}}
+    {{"skill_path": "skills/dept/skill.md", "trigger": "description of pattern", "evidence": {{"count": 5, "avg_signal": 0.3}}}}
   ]
 }}
 
 Rules:
-- Only promote facts you are highly confident about
+- Only promote facts you are highly confident about (observed >= 3 times)
 - memory_md_updates: lessons learned, recurring corrections, key decisions
 - user_md_updates: per-user/committee facts (names, preferences, recurring concerns) — high confidence only
-- skill_proposals: only if >= 5 same-shape corrections with avg signal_strength < 0.5
+- skill_proposals: only if >= {min_pattern_count} same-shape corrections with avg signal_strength < {signal_threshold}
 - Be conservative — fewer updates is better than noisy updates
 - Return empty arrays if nothing warrants an update
 """
+
+_EMPTY_RESPONSE: dict = {"memory_md_updates": [], "user_md_updates": [], "skill_proposals": []}
 
 
 async def run_reflection_llm(
@@ -59,11 +66,14 @@ async def run_reflection_llm(
     current_memory: str,
     current_user: str,
 ) -> dict:
-    """Call LLM to produce reflection output."""
+    """Call LLM to produce reflection output.
+
+    Returns empty update dict on LLM unavailability or parse failure.
+    """
     llm = ChatOpenAI(
-        base_url=settings.LLM_BASE_URL,
-        model=settings.LLM_MODEL,
-        api_key="not-needed",
+        base_url=settings.llm_base_url,
+        model=settings.llm_model,
+        api_key="not-needed",  # noqa: S106 — vLLM local, no real auth
         temperature=0.1,
     )
 
@@ -75,26 +85,44 @@ async def run_reflection_llm(
         gaps=gaps,
         current_memory=current_memory,
         current_user=current_user,
+        min_pattern_count=settings.MIN_PATTERN_COUNT,
+        signal_threshold=settings.SIGNAL_THRESHOLD,
     )
 
     for attempt in range(3):
-        response = await llm.ainvoke(prompt)
-        content = response.content.strip()
-        # Extract JSON from markdown code block if present
-        if "```json" in content:
-            content = content.split("```json")[1].split("```")[0].strip()
-        elif "```" in content:
-            content = content.split("```")[1].split("```")[0].strip()
-
         try:
+            response = await llm.ainvoke(prompt)
+            content: str = response.content.strip()
+
+            # Strip markdown code fences if present
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+
             result = json.loads(content)
             if all(k in result for k in ("memory_md_updates", "user_md_updates", "skill_proposals")):
+                log.info(
+                    "reflection_llm_ok",
+                    dept=dept_id,
+                    agent=agent_id,
+                    attempt=attempt + 1,
+                    memory_updates=len(result["memory_md_updates"]),
+                    skill_proposals=len(result["skill_proposals"]),
+                )
                 return result
-            log.warning("Attempt %d: missing keys in LLM response", attempt + 1)
+
+            log.warning("reflection_llm_missing_keys", attempt=attempt + 1, dept=dept_id, agent=agent_id)
+
         except json.JSONDecodeError:
-            log.warning("Attempt %d: failed to parse LLM JSON response", attempt + 1)
+            log.warning("reflection_llm_json_parse_error", attempt=attempt + 1, dept=dept_id, agent=agent_id)
+        except Exception:
+            log.exception("reflection_llm_error", attempt=attempt + 1, dept=dept_id, agent=agent_id)
+            # LLM unavailable — return empty rather than crashing
+            return _EMPTY_RESPONSE
 
         if attempt < 2:
-            await asyncio.sleep(2 ** attempt)
+            await asyncio.sleep(2**attempt)
 
-    return {"memory_md_updates": [], "user_md_updates": [], "skill_proposals": []}
+    log.error("reflection_llm_exhausted_retries", dept=dept_id, agent=agent_id)
+    return _EMPTY_RESPONSE

@@ -55,6 +55,10 @@ class AgentState(TypedDict):
     # staging_writer output
     staging_proposal_id: str | None
 
+    # calibrate_confidence output — computed ONCE before the staging gate so
+    # staging_writer and synthesise both use the same value (audit bug #3).
+    calibrated_confidence_score: float
+
     # synthesise output
     answer: str
     confidence: str
