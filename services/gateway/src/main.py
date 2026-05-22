@@ -44,9 +44,9 @@ from services.gateway.src.memory import router as memory_router
 from services.gateway.src.proposals import router as proposals_router
 from services.gateway.src.reports import router as reports_router
 from services.gateway.src.skill_proposals import router as skill_proposals_router
+from services.gateway.src.slack_proxy import router as slack_proxy_router
 from services.gateway.src.uploads import router as uploads_router
 from services.gateway.src.venture_monitor import router as vm_router
-from services.gateway.src.slack_proxy import router as slack_proxy_router
 
 logger = structlog.get_logger(__name__)
 

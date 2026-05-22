@@ -172,8 +172,11 @@ async def summary(req: QueryRequest) -> dict:
         raise HTTPException(503, "orchestrator components not ready")
 
     # Use the graph's retrieve_context helper directly.
+    import os as _os
+
+    import httpx as _httpx
+
     from .nodes.retrieve_context import retrieve_context
-    import httpx as _httpx, os as _os
     _embed_url = (_os.getenv("RAG_INGESTION_URL", "http://rag-ingestion:3004").rstrip("/") + "/embed")
     async def _embed(text: str) -> list[float]:
         async with _httpx.AsyncClient(timeout=15.0) as c:
@@ -402,9 +405,11 @@ async def monthly_cfo_report() -> dict:
         "limit breaches recommendations CFO"
     )
 
-    from .nodes.retrieve_context import retrieve_context
-    import httpx as _httpx
     import os as _os
+
+    import httpx as _httpx
+
+    from .nodes.retrieve_context import retrieve_context
 
     _embed_url = (
         _os.getenv("RAG_INGESTION_URL", "http://rag-ingestion:3004").rstrip("/")

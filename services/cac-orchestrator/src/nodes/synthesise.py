@@ -204,9 +204,6 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient,
             )
             return {"answer": _ABSTENTION_ANSWER, "confidence": "Low"}
         answer = add_grounding_badges(answer, grounding_report)
-        citation_accuracy = grounding_report.accuracy
-    else:
-        citation_accuracy = 1.0
 
     # Defence-in-depth citation strip: if no sources passed the relevance bar and
     # the user sent no attachments, remove any [N] markers the model still emitted.

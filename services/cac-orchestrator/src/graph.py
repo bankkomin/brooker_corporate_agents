@@ -8,6 +8,7 @@ import structlog
 from langgraph.graph import END, StateGraph
 
 from .agents.cac import CacAgent
+
 try:
     from services.shared.load_memory import load_memory_node
 except ImportError:
