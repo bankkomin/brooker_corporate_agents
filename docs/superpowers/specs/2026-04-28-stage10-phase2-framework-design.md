@@ -460,6 +460,11 @@ permissions:
 ---
 ```
 
+> **Extension (Stage 11):** SKILL.md frontmatter also accepts an optional `shared_skills`
+> list — cluster skill paths whose *bodies* are concatenated into the agent prompt by
+> `SkillsLoader`. Shared skills are content-only: their `permissions` block is never
+> merged. See `docs/superpowers/specs/2026-04-28-stage11-finance-design.md` §2.
+
 Loaded by SkillsLoader at boot. Orchestrator runtime-enforces:
 
 - `read_only` skill cannot reach staging_writer node

@@ -1,8 +1,9 @@
 """Test that all SKILL.md files parse valid YAML frontmatter."""
 import re
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SKILL_DIR = ROOT / "skills"

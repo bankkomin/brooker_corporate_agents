@@ -1,4 +1,3 @@
-from pathlib import Path
 
 from src.log_reader import parse_daily_log
 

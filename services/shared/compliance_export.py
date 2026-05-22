@@ -169,7 +169,7 @@ def _export_json(entries: list[AuditEntry]) -> str:
 
 def _export_csv(entries: list[AuditEntry]) -> str:
     output = io.StringIO()
-    writer = csv.writer(output)
+    writer = csv.writer(output, lineterminator="\n")
     writer.writerow(["timestamp", "dept_id", "event_type", "actor", "summary"])
     for e in entries:
         writer.writerow([e.timestamp, e.dept_id, e.event_type, e.actor, e.summary])

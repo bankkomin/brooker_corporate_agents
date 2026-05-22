@@ -1,6 +1,8 @@
 """API endpoint for cross-department query routing."""
 import logging
+
 from fastapi import APIRouter, HTTPException, Request
+
 from .auth import AuthError, extract_claims
 from .rate_limit import limiter
 
@@ -15,7 +17,7 @@ async def cross_dept_query(request: Request):
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     body = await request.json()
     query = body.get("query", "")
@@ -37,7 +39,7 @@ async def cross_dept_query(request: Request):
 
         return result
     except ImportError:
-        raise HTTPException(501, "Cross-department router not available")
+        raise HTTPException(501, "Cross-department router not available") from None
 
 
 @router.post("/detect")
@@ -45,9 +47,9 @@ async def cross_dept_query(request: Request):
 async def detect_dept(request: Request):
     """Detect which departments a query is relevant to (without executing)."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     body = await request.json()
     query = body.get("query", "")
@@ -57,4 +59,4 @@ async def detect_dept(request: Request):
         departments = detect_departments(query)
         return {"query": query, "departments": departments}
     except ImportError:
-        raise HTTPException(501, "Cross-department router not available")
+        raise HTTPException(501, "Cross-department router not available") from None

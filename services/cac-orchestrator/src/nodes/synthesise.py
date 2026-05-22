@@ -28,12 +28,16 @@ except ImportError:
     detect_self_report = None  # type: ignore[assignment]
 
 try:
-    from services.shared.citation_grounding import ground_citations, add_grounding_badges
+    from services.shared.citation_grounding import add_grounding_badges, ground_citations
 except ImportError:
     ground_citations = None
 
 try:
-    from services.shared.chain_of_thought import classify_complexity, build_cot_prompt, parse_cot_response
+    from services.shared.chain_of_thought import (
+        build_cot_prompt,
+        classify_complexity,
+        parse_cot_response,
+    )
 except ImportError:
     classify_complexity = None
     build_cot_prompt = None  # type: ignore[assignment]

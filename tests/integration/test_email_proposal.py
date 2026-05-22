@@ -11,9 +11,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-
 from services.email_notifier.src.main import app
-
 
 # ---------------------------------------------------------------------------
 # Helpers

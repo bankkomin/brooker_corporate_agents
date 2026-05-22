@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -111,11 +110,11 @@ async def test_send_email_with_retry_succeeds_on_second_attempt() -> None:
 
     assert mock_send.await_count == 2
 
-    # First update: retrying with retry_count=1
+    # First update: interim status after failure (DB CHECK allows 'pending', not 'retrying')
     retrying_call = call(
         pool,
         7,
-        status="retrying",
+        status="pending",
         error=str(smtp_error),
         retry_count=1,
     )

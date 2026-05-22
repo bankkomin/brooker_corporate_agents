@@ -1,7 +1,6 @@
 """Tests for nlq_engine module."""
-import pytest
 
-from services.shared.nlq_engine import parse_nlq, NLQResult
+from services.shared.nlq_engine import NLQResult, parse_nlq
 
 
 class TestMetricLookup:

@@ -3,11 +3,11 @@ title: "The Brooker Vessel — Narrative Machine Framework"
 type: "concept"
 department: "ceo"
 sources: ["BOD Khao Yai Retreat Pack 2026.docx"]
-related: ["brooker-worldview-2026", "corporation-2-0", "2026-02-21-equity-story-rerating"]
+related: ["brooker-worldview-2026", "corporation-2-0", "2026-02-21-equity-story-rerating", "three-engine-model"]
 created: "2026-05-17"
-updated: "2026-05-17"
+updated: "2026-05-22"
 confidence: "high"
-coverage: "medium"
+coverage: "high"
 tags: ["ceo", "concept", "branding", "narrative", "vessel", "content"]
 ---
 
@@ -46,6 +46,48 @@ repository) → **Distribution** (Brand + Content) → **Monetization** (Product
 Research feeds insights → reach → lead magnets → product pilots → revenue → case studies →
 proof → higher-ticket VCC mandates.
 
+## The Signature Theses
+
+The retreat pack frames the firm's core "Signature Ideas" as the intellectual assets the
+Vessel distributes. Seven refined thesis examples were drafted:
+
+1. **"Capital, Intelligence, and Coordination are becoming programmable."** Institutions
+   that redesign themselves around this reality will dominate the next economic era.
+2. **"The Cost of Intelligence Is Collapsing Faster Than the Cost of Capital."** Agentic
+   AI drives the marginal cost of expertise toward zero — a productivity shock comparable
+   to electricity or the internet.
+3. **"Digital assets as corporate treasury: governance, accounting, and risk controls
+   that boards can accept."** The modern balance sheet is an active technology stack, not
+   passive storage.
+4. **"Tokenization for the global marketplace: who it's for, what's legal, how to
+   structure."** The power of tokenization is programmable coordination at scale, not just
+   fractional ownership.
+5. **"Govern by Force → Govern by Law → Govern by Code."** Regulation is evolving toward
+   machine-enforced compliance embedded in code and infrastructure.
+6. **"Liquidity Is the New Infrastructure Layer of the Economy."** Liquidity networks, not
+   physical infrastructure, determine competitive advantage between firms and nations.
+7. **"Distribution Is Becoming More Valuable Than Production."** When creation costs
+   approach zero, control of distribution channels becomes the primary economic moat.
+
+## The 12-Week Installation Plan
+
+| Phase | Weeks | Focus |
+|-------|-------|-------|
+| Phase 1 | 1–2 | Defining the Vessel & Signature Ideas — the Brooker Thesis Map (one-page, the Signature Ideas) and the Offer Ladder |
+| Phase 2 | 3–6 | Building the "Idea Museum" & Content OS — an internal knowledge repository; the "Write 1 Idea 10 Ways" discipline |
+| Phase 3 | 7–12 | Productizing into Systems — converting attention into scalable revenue via "Systemized Offers" *(subject to compliance)* |
+
+## The Four System Products
+
+Phase 3 productizes the theses into four systemized offers:
+
+| # | System Product | Value proposition |
+|---|----------------|-------------------|
+| 1 | Programmable Settlement & Stablecoin Rails | Near-zero settlement latency; tighter FX spreads vs. traditional banking corridors |
+| 2 | The Virtual Employee Bench (Scale Engine) | Agentic-AI "virtual employees" let Thai corporates scale Compliance/IR/Research without linear headcount growth |
+| 3 | Business Model Digitization & Tokenized Loyalty | Modernise legacy models via tokenization / liquid loyalty rewards — stagnant customer bases become high-velocity ecosystems |
+| 4 | Institutional Yield-as-a-Service (VCC Integration) | "Plug-and-play" access to the VCC Yield Fund strategies through a compliant, regulated vessel |
+
 ## Governance — Preventing Multi-Interest Chaos
 
 | Rule | Description |
@@ -64,14 +106,17 @@ toward an "Institutional Innovation Machine" narrative.
 
 ## Related Concepts
 
-- [[brooker-worldview-2026]] — the Signature Theses the Vessel distributes
+- [[brooker-worldview-2026]] — the broader worldview the Signature Theses distil
+- [[corporation-2-0]] — the organisational form the Vessel produces
 - [[2026-02-21-equity-story-rerating]] — the investor-facing output
+- [[three-engine-model]] — the System Products feed Engine 1 (VCC) and Engine 2 (Advisory)
 
 ## Source References
 
-- `BOD Khao Yai Retreat Pack 2026.docx` — Session 6
+- `BOD Khao Yai Retreat Pack 2026.docx` — Session 6 ("Branding & The Narrative Machine")
 
 ## Agent Notes
 
 When assessing a new branding, content, or product idea, apply the Attachment Rule and the
-90-day Hard Kill criteria.
+90-day Hard Kill criteria. Every new initiative must map to one of the seven Signature
+Theses.

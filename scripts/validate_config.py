@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Validate config/departments.json + config/document_inventory.json against schemas + cross-references."""
-import argparse, json, sys
+import argparse
+import json
+import sys
 from pathlib import Path
 
 try:
-    from jsonschema import validate, ValidationError
+    from jsonschema import ValidationError, validate
 except ImportError:
     print("ERROR: jsonschema not installed. Run: pip install jsonschema", file=sys.stderr)
     sys.exit(2)

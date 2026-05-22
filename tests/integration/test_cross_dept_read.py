@@ -4,8 +4,9 @@ Tests verify config-level cross-read rules are correctly defined.
 Full Qdrant tests require running infrastructure.
 """
 import json
-import pytest
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 

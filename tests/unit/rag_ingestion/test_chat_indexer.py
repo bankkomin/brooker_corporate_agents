@@ -133,7 +133,7 @@ class TestIndexMessage:
         )
         call_args = mock_store.upsert_chunks.call_args
         metadata = call_args.kwargs["metadatas"][0]
-        assert metadata["dept"] == "CAC"
+        assert metadata["dept"] == "cac"
 
     async def test_upsert_uses_chat_collection(
         self, indexer: ChatIndexer, mock_store: AsyncMock

@@ -2,14 +2,16 @@
 """rag-ingestion service — FastAPI app for document and message ingestion."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 import contextlib
 import hashlib
 import os
 import tempfile
-from pathlib import Path
 
 import httpx
 import structlog

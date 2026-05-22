@@ -1,6 +1,7 @@
 """Tests for wiki-compiler WikiLinter."""
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -120,7 +121,7 @@ class TestCheckStale:
         write_article(
             dept_dir / "concepts" / "lcr.md",
             title="LCR",
-            updated="2026-04-07",  # today's date in test context
+            updated=date.today().isoformat(),  # always today, never stale
         )
 
         linter = make_linter(tmp_path)

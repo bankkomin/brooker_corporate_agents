@@ -67,7 +67,7 @@ class TestOrchestratorClient:
         result = await client.query(
             query="What is the LCR?",
             user_id="U123",
-            channel_id="C123",
+            channel="C123",
         )
         assert "still being set up" in result.answer.lower() or "not yet" in result.answer.lower()
         http.post.assert_not_called()
@@ -92,7 +92,7 @@ class TestOrchestratorClient:
         result = await client.query(
             query="What is the LCR?",
             user_id="U123",
-            channel_id="C123",
+            channel="C123",
         )
         assert "135%" in result.answer
         http.post.assert_called_once()
@@ -106,6 +106,6 @@ class TestOrchestratorClient:
 
         client = OrchestratorClient(http=http, base_url="http://orch:3001", enabled=True)
         result = await client.query(
-            query="test", user_id="U1", channel_id="C1",
+            query="test", user_id="U1", channel="C1",
         )
         assert result.error is not None

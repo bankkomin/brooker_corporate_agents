@@ -22,10 +22,8 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from services.rag_ingestion.src.chunker import TextChunk
 from services.rag_ingestion.src.vault_watcher import VaultWatcher
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

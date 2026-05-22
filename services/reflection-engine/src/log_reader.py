@@ -10,6 +10,7 @@ Field variants tolerated:
 """
 from __future__ import annotations
 
+import contextlib
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -74,10 +75,8 @@ def parse_daily_log(path: Path) -> list[LogEntry]:
             elif key == "citations":
                 entry.citations = [c.strip() for c in val.split(",") if c.strip()]
             elif key == "confidence":
-                try:
+                with contextlib.suppress(ValueError):
                     entry.confidence = float(val)
-                except ValueError:
-                    pass
             elif key == "latency":
                 # CEO orchestrator emits "Latency: 1234ms" — convert to rough signal
                 lat_match = _LATENCY_RE.search(val)

@@ -1,4 +1,3 @@
-from pathlib import Path
 
 from src.promoter import promote_memory
 

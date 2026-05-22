@@ -6,6 +6,7 @@ permissions (can_query) and proxies the request to cac-orchestrator.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 
 import httpx
@@ -144,10 +145,8 @@ async def chat(request: Request, body: ChatRequest) -> JSONResponse:
             )
         except httpx.HTTPStatusError as exc:
             detail = ""
-            try:
+            with contextlib.suppress(Exception):
                 detail = exc.response.text[:500]
-            except Exception:
-                pass
             logger.error(
                 "orchestrator_error",
                 status=exc.response.status_code,

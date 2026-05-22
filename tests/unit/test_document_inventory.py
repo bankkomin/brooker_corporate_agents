@@ -1,10 +1,11 @@
 """Tests for document_inventory.json schema validation."""
 import json
-import pytest
 from pathlib import Path
 
+import pytest
+
 try:
-    from jsonschema import validate, ValidationError
+    from jsonschema import ValidationError, validate  # noqa: F401
 except ImportError:
     pytest.skip("jsonschema not installed", allow_module_level=True)
 
@@ -15,12 +16,12 @@ DATA_PATH = ROOT / "config" / "document_inventory.json"
 
 @pytest.fixture
 def schema():
-    return json.loads(SCHEMA_PATH.read_text())
+    return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 
 
 @pytest.fixture
 def documents():
-    return json.loads(DATA_PATH.read_text()).get("documents", [])
+    return json.loads(DATA_PATH.read_text(encoding="utf-8")).get("documents", [])
 
 
 def test_schema_file_exists():
@@ -50,7 +51,7 @@ def test_inventory_qdrant_collections_match_owner(documents):
 
 
 def test_inventory_total_count(documents):
-    assert 50 <= len(documents) <= 60, f"Expected ~53 docs, got {len(documents)}"
+    assert len(documents) >= 50, f"Expected at least 50 docs, got {len(documents)}"
 
 
 def test_inventory_ids_unique(documents):

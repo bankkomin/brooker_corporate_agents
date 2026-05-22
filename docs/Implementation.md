@@ -402,6 +402,8 @@ Phase 2 scales the system from 2 live departments (CAC, HR) to 11 by introducing
 
 ## Stage 11 — Finance Department 📋 (planned, scaffolded 2026-04-28)
 
+**Framework extension:** shared investment-cluster skill set + `shared_skills` loader mechanism — see `docs/superpowers/plans/2026-05-18-shared-investment-cluster-skill-set.md`.
+
 First write-capable Phase 2 dept; stress-tests cross-dept read enforcement. CFO Agent + 3 specialists (reporting, treasury, MD&A). Cross-read INTO Finance from CAC, IC, Risk, CIO. Service port 3010.
 
 **Posture:** write · **Cross-read targets (live):** Finance is read INTO by others · **Existing scaffold:** ❌ none · **Dependencies:** Stage 10

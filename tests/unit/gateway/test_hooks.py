@@ -9,12 +9,10 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from services.gateway.src.hooks import (
-    _post_fire_and_forget,
     on_proposal_approved,
     on_proposal_rejected,
 )
 from services.gateway.src.main import app
-
 
 # ---------------------------------------------------------------------------
 # Helpers shared across hook unit tests
@@ -95,8 +93,6 @@ class TestOnProposalApproved:
     @pytest.mark.asyncio
     async def test_on_proposal_approved_calls_sync_back_and_email(self) -> None:
         """Approval hook fires two POSTs: sync-back + email-notifier."""
-        posted_calls: list[tuple[str, dict]] = []
-
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()

@@ -3,7 +3,6 @@
 These tests verify the SQL migration file is syntactically valid.
 Full DB tests require a running Postgres instance.
 """
-import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]

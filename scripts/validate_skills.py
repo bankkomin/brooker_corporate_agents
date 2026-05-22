@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Validate SKILL.md frontmatter (permissions, output_types) and cross-refs."""
-import argparse, json, sys, re
+import argparse
+import json
+import re
+import sys
 from pathlib import Path
 
 try:
@@ -17,16 +20,19 @@ KNOWN_OUTPUT_TYPES = {"text", "table", "checklist", "decision_tree", "calculatio
 def main():
     ap = argparse.ArgumentParser(description="Validate SKILL.md frontmatter and cross-references")
     ap.add_argument("--skill-dir", default=str(ROOT / "skills"))
-    ap.add_argument("--inventory", default=str(ROOT / "config" / "document_inventory.json"))
+    ap.add_argument("--departments", default=str(ROOT / "config" / "departments.json"))
     args = ap.parse_args()
 
-    inv_path = Path(args.inventory)
-    if inv_path.exists():
-        inv = json.loads(inv_path.read_text()).get("documents", [])
-        known_collections = {d["qdrantCollection"] for d in inv} | {"shared_policies"}
+    dept_path = Path(args.departments)
+    if dept_path.exists():
+        depts = json.loads(dept_path.read_text(encoding="utf-8")).get("departments", {})
+        known_collections = {"shared_policies"}
+        for d in depts.values():
+            known_collections.update(d.get("dataAccess", {}).get("qdrantCollections", []))
     else:
         known_collections = set()
-        print(f"WARN: inventory not found at {inv_path}, skipping collection cross-ref", file=sys.stderr)
+        print(f"WARN: departments config not found at {dept_path}, "
+              f"skipping collection cross-ref", file=sys.stderr)
 
     errors = []
     checked = 0
@@ -49,7 +55,25 @@ def main():
             continue
 
         checked += 1
+
+        # shared_skills references must resolve to existing skill files
+        for ref in fm.get("shared_skills") or []:
+            ref_path = skill_dir / f"{ref}.md"
+            if not ref_path.exists():
+                errors.append(f"{f.relative_to(skill_dir)}: shared_skills entry "
+                              f"'{ref}' does not resolve to a file under {skill_dir}")
+
         perms = fm.get("permissions")
+
+        # investment-cluster skills must be content-only (read_only, no outbound)
+        if "investment-cluster" in f.parts:
+            if not isinstance(perms, dict) or perms.get("mode") != "read_only":
+                errors.append(f"{f.relative_to(skill_dir)}: investment-cluster skills "
+                              f"must declare permissions.mode 'read_only'")
+            if isinstance(perms, dict) and perms.get("outbound_apis"):
+                errors.append(f"{f.relative_to(skill_dir)}: investment-cluster skills "
+                              f"must not declare outbound_apis (found non-empty list)")
+
         if perms is None:
             continue  # old-format skill without permissions block — skip until migration
 
@@ -62,7 +86,7 @@ def main():
                 for col in perms.get("read_collections", []):
                     if col not in known_collections:
                         errors.append(f"{f.relative_to(skill_dir)}: read_collections '{col}' "
-                                      f"not in document_inventory")
+                                      f"not a known Qdrant collection")
 
         for ot in fm.get("output_types", ["text"]):
             if ot not in KNOWN_OUTPUT_TYPES:

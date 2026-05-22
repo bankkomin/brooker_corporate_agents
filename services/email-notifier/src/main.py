@@ -1,15 +1,17 @@
 """Email-notifier service — JWT generation + SMTP sending."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 import json
 import os
 import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 import asyncpg
 import structlog

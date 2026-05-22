@@ -1,8 +1,11 @@
 """FastAPI application for CAC Orchestrator."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 import logging
 import os
@@ -15,8 +18,9 @@ import structlog
 from fastapi import FastAPI, HTTPException
 
 try:
-    from services.shared.metrics_middleware import PrometheusMiddleware
     from prometheus_client import make_asgi_app as make_metrics_app
+
+    from services.shared.metrics_middleware import PrometheusMiddleware
 except ImportError:
     PrometheusMiddleware = None
     make_metrics_app = None

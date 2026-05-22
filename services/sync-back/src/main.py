@@ -12,8 +12,11 @@ Data zone contract (enforced here and in openpyxl_writer):
                /data/archive/  (Zone 4 — permanent audit trail + final workbook)
   NEVER writes to /data/mirror/.
 """
+from pathlib import Path
+
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
