@@ -1,5 +1,6 @@
 from services.shared.citation_grounding import ground_citations
 
+
 def test_correct_citation():
     answer = "The LCR is 118.5% [1] which is above the minimum."
     sources = [{"text": "Current LCR ratio: 118.5%, above regulatory minimum of 100%"}]

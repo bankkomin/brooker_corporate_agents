@@ -4,11 +4,11 @@ agent: ic-chair-agent
 dept: ic
 version: 2.0
 permissions:
-  mode: read_only_with_staging_drafts
+  mode: read_only
   data_zones: [1, 2]
   outbound_apis: []
-  read_collections: [ic_docs, ic_chat, ic_knowledge, shared_policies, finance_docs, cio_docs, vcc_docs, legal_docs, cac_docs, cac_knowledge]
-output_types: [text, table, meeting_brief, draft_docx, draft_pptx, draft_md]
+  read_collections: [ic_docs, ic_chat, ic_knowledge, shared_policies, finance_docs, cio_docs, vcc_docs, legal_docs]
+output_types: [text, table]
 supersedes: ic-orchestrator
 generation_contract: config/templates/ic/meeting-templates.json
 output_directory: /data/staging/pending/ic/

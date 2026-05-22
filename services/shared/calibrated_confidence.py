@@ -71,10 +71,7 @@ def compute_confidence(
     citation_score = citation_accuracy
 
     # 4. History score: how often are similar proposals approved?
-    if historical_approval_rate is not None:
-        history_score = historical_approval_rate
-    else:
-        history_score = 0.5  # unknown
+    history_score = historical_approval_rate if historical_approval_rate is not None else 0.5
 
     # Weighted composite
     weights = {

@@ -20,7 +20,6 @@ from httpx import ASGITransport, AsyncClient
 from services.gateway.src.auth import JWTClaims
 from services.gateway.src.main import app
 
-
 # ---------------------------------------------------------------------------
 # Fixtures & helpers (mirror the pattern from test_approval_flow.py)
 # ---------------------------------------------------------------------------

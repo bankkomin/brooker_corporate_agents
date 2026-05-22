@@ -15,9 +15,9 @@ router = APIRouter(prefix="/api/skill-proposals", tags=["skill-proposals"])
 async def list_proposals(request: Request, status: str = "hod_review"):
     """List skill proposals filtered by status. Requires authentication."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     db = request.app.state.db_pool
     async with db.acquire() as conn:
@@ -54,7 +54,7 @@ async def decide_proposal(proposal_id: int, request: Request):
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     if "approve" not in claims.permissions and claims.role not in ("admin", "ceo", "hod"):
         raise HTTPException(status_code=403, detail="Approve permission required")

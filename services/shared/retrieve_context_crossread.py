@@ -43,7 +43,7 @@ async def retrieve_context_with_crossread(
                 data = _json.loads(cfg_path.read_text())
                 depts = data.get("departments", {})
                 if isinstance(depts, dict):
-                    all_dept_ids = [k for k in depts.keys() if k != dept_id]
+                    all_dept_ids = [k for k in depts if k != dept_id]
                 else:
                     all_dept_ids = [d["dept_id"] for d in depts if d.get("dept_id") != dept_id]
                 cross_collections = [f"{d}_docs" for d in all_dept_ids]

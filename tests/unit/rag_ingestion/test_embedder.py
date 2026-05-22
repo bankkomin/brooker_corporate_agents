@@ -61,7 +61,7 @@ class TestEmbedderInit:
     def test_url_constructed_correctly(self, settings: MagicMock) -> None:
         """URL must end with /embeddings, not double-slash."""
         e = Embedder(settings)
-        assert e._url == "http://localhost:8002/v1/embeddings"
+        assert e._vllm_url == "http://localhost:8002/v1/embeddings"
 
     def test_url_strips_trailing_slash(self) -> None:
         """Trailing slash on vllm_embed_url must be removed before appending /embeddings."""
@@ -69,7 +69,7 @@ class TestEmbedderInit:
         s.vllm_embed_url = "http://localhost:8002/v1/"
         s.vllm_embed_model = "qwen-embed"
         e = Embedder(s)
-        assert e._url == "http://localhost:8002/v1/embeddings"
+        assert e._vllm_url == "http://localhost:8002/v1/embeddings"
 
     def test_http_client_initially_none(self, embedder: Embedder) -> None:
         assert embedder._http is None

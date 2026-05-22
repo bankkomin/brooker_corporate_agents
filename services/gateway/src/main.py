@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -18,31 +20,31 @@ from slowapi.errors import RateLimitExceeded
 from services.gateway.src.rate_limit import limiter
 
 try:
-    from services.shared.metrics_middleware import PrometheusMiddleware
     from prometheus_client import make_asgi_app as make_metrics_app
+
+    from services.shared.metrics_middleware import PrometheusMiddleware
 except ImportError:
     PrometheusMiddleware = None
     make_metrics_app = None
 
+from services.gateway.src.admin import router as admin_router
 from services.gateway.src.analytics import router as analytics_router
-from services.gateway.src.chat import router as chat_router
 from services.gateway.src.auth import (
     AuthError,
-    extract_claims,
-    resolve_agent_permissions,
     permissions_from_access,
+    resolve_agent_permissions,
     validate_jwt,
 )
+from services.gateway.src.chat import router as chat_router
+from services.gateway.src.compliance import router as compliance_router
+from services.gateway.src.cross_dept import router as cross_dept_router
 from services.gateway.src.errors import auth_error_handler
 from services.gateway.src.escalations import router as escalations_router
-from services.gateway.src.proposals import router as proposals_router
-from services.gateway.src.uploads import router as uploads_router
-from services.gateway.src.skill_proposals import router as skill_proposals_router
-from services.gateway.src.admin import router as admin_router
 from services.gateway.src.memory import router as memory_router
-from services.gateway.src.compliance import router as compliance_router
+from services.gateway.src.proposals import router as proposals_router
 from services.gateway.src.reports import router as reports_router
-from services.gateway.src.cross_dept import router as cross_dept_router
+from services.gateway.src.skill_proposals import router as skill_proposals_router
+from services.gateway.src.uploads import router as uploads_router
 from services.gateway.src.venture_monitor import router as vm_router
 
 logger = structlog.get_logger(__name__)

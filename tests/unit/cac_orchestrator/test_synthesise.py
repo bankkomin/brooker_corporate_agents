@@ -1,10 +1,27 @@
 """Unit tests for synthesise_response node."""
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from services.cac_orchestrator.src.nodes.synthesise import synthesise_response
+
+# Patch out Phase-2 shared-library integrations so unit tests are isolated.
+# compute_confidence: patched to None so the node uses the raw confidence_score from state.
+# classify_complexity: patched to always return "simple" so CoT prompt is never substituted.
+_SYNTHESISE_MODULE = "services.cac_orchestrator.src.nodes.synthesise"
+
+
+@pytest.fixture(autouse=True)
+def patch_phase2():
+    """Disable Phase-2 optional integrations for all tests in this module."""
+    with (
+        patch(f"{_SYNTHESISE_MODULE}.compute_confidence", None),
+        patch(f"{_SYNTHESISE_MODULE}.classify_complexity", None),
+        patch(f"{_SYNTHESISE_MODULE}.ground_citations", None),
+        patch(f"{_SYNTHESISE_MODULE}.detect_self_report", None),
+    ):
+        yield
 
 
 @pytest.fixture
@@ -73,5 +90,5 @@ async def test_llm_error_returns_safe_message(llm_client: AsyncMock) -> None:
     llm_client.chat.side_effect = RuntimeError("vLLM unavailable")
     result = await synthesise_response(_base_state(), llm_client=llm_client)
     assert "error" in result["answer"].lower() or "try again" in result["answer"].lower()
-    # confidence label is still computed from score
+    # confidence label is still computed from score (compute_confidence is patched to None)
     assert result["confidence"] == "High"

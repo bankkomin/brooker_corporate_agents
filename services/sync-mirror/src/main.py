@@ -1,6 +1,5 @@
 """sync-mirror service — APScheduler loop + FastAPI health endpoint."""
 
-import asyncio
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -15,8 +14,8 @@ from fastapi.responses import JSONResponse
 from .config import settings
 
 try:
+    from services.shared.ms_graph_client import GraphConfig, MSGraphClient
     from services.shared.sharepoint_connector import SharePointConnector
-    from services.shared.ms_graph_client import MSGraphClient, GraphConfig
 except ImportError:
     SharePointConnector = None
 

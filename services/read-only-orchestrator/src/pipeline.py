@@ -1,5 +1,4 @@
 """Simplified read-only query pipeline: embed → search → format → synthesise → log."""
-import json
 import logging
 import time
 from pathlib import Path

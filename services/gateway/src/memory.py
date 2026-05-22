@@ -15,9 +15,9 @@ router = APIRouter(prefix="/api/memory", tags=["memory"])
 async def get_memory(dept_id: str, agent_id: str, request: Request):
     """Get current memory state for an agent."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     from services.shared.human_memory import get_memory as _get_memory
 
@@ -44,7 +44,7 @@ async def add_entry(dept_id: str, agent_id: str, file_type: str, request: Reques
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     body = await request.json()
     from services.shared.human_memory import MemoryEntry, add_memory_entry
@@ -70,9 +70,9 @@ async def remove_section(
 ):
     """Remove a section from memory."""
     try:
-        claims = extract_claims(request)
+        extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     from services.shared.human_memory import remove_memory_section
 

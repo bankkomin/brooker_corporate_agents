@@ -1,8 +1,9 @@
 """FastAPI middleware for Prometheus metrics."""
 import time
+
+from prometheus_client import Counter, Histogram
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from prometheus_client import Counter, Histogram
 
 REQUEST_COUNT = Counter(
     "http_requests_total",

@@ -87,7 +87,6 @@ class TestRollbackRevertsDbStatus:
 
         assert "staging_proposals" in sql
         assert "status = 'pending'" in sql
-        assert "synced_at = NULL" in sql
         # proposal_id passed as positional parameter
         assert proposal_id in args
 

@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import List
 
 import asyncpg
 
@@ -14,7 +13,7 @@ async def detect_skill_improvement_patterns(
     dept_id: str,
     threshold_count: int | None = None,
     signal_max: float | None = None,
-) -> List[dict]:
+) -> list[dict]:
     """Detect skills with repeated low-signal corrections.
 
     Returns list of skill proposals when:

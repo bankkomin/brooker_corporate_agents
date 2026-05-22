@@ -84,7 +84,7 @@ async def test_detects_contradiction_with_recent(
     )
     await validate_proposal(_base_state(), llm_client=llm_client, db_client=db_client)
     call_args = llm_client.chat.call_args
-    prompt_text = call_args[0][0][0]["content"]  # system message content
+    prompt_text = call_args[0][0][1]["content"]  # user message content
     assert "Recent proposals" in prompt_text
 
 
@@ -169,7 +169,7 @@ async def test_history_section_included_in_prompt(
     )
     await validate_proposal(_base_state(), llm_client=llm_client, db_client=db_client)
     call_args = llm_client.chat.call_args
-    prompt_text = call_args[0][0][0]["content"]
+    prompt_text = call_args[0][0][1]["content"]  # user message content
     assert "3.4" in prompt_text  # the recent proposed value must appear
 
 

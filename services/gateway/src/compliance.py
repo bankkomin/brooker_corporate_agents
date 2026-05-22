@@ -26,7 +26,7 @@ async def export_audit(
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     if claims.role not in _ADMIN_ROLES:
         raise HTTPException(403, "Compliance/admin role required")
@@ -53,7 +53,7 @@ async def compliance_summary(dept_id: str, quarter: str, request: Request):
     try:
         claims = extract_claims(request)
     except AuthError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
 
     if claims.role not in _ADMIN_ROLES:
         raise HTTPException(403, "Compliance/admin role required")

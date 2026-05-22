@@ -6,15 +6,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
-import services.cac_orchestrator.src.nodes.staging_writer as staging_writer_module
 from services.cac_orchestrator.src.nodes.staging_writer import staging_writer
-
-
-@pytest.fixture(autouse=True)
-def reset_counter() -> None:
-    """Reset the module-level counter before each test to get predictable IDs."""
-    import itertools
-    staging_writer_module._counter = itertools.count(1)
 
 
 @pytest.fixture
@@ -57,8 +49,8 @@ async def test_writes_valid_manifest_json(tmp_path: Path, db_client: AsyncMock) 
 
 async def test_manifest_has_all_prd_fields(tmp_path: Path, db_client: AsyncMock) -> None:
     """All 16 ManifestProposal fields are present in the written JSON."""
-    await staging_writer(_base_state(), db_client=db_client, staging_path=str(tmp_path))
-    proposal_id = "chg_0001"
+    result = await staging_writer(_base_state(), db_client=db_client, staging_path=str(tmp_path))
+    proposal_id = result["staging_proposal_id"]
     manifest_file = tmp_path / "pending" / proposal_id / "manifest.json"
     data = json.loads(manifest_file.read_text())
     required_fields = [
@@ -72,8 +64,9 @@ async def test_manifest_has_all_prd_fields(tmp_path: Path, db_client: AsyncMock)
 
 async def test_creates_directory_structure(tmp_path: Path, db_client: AsyncMock) -> None:
     """The pending/{id}/ directory is created."""
-    await staging_writer(_base_state(), db_client=db_client, staging_path=str(tmp_path))
-    proposal_dir = tmp_path / "pending" / "chg_0001"
+    result = await staging_writer(_base_state(), db_client=db_client, staging_path=str(tmp_path))
+    proposal_id = result["staging_proposal_id"]
+    proposal_dir = tmp_path / "pending" / proposal_id
     assert proposal_dir.is_dir()
 
 
@@ -98,14 +91,14 @@ async def test_skips_when_no_proposed_value(tmp_path: Path, db_client: AsyncMock
 
 
 async def test_proposal_id_format(tmp_path: Path, db_client: AsyncMock) -> None:
-    """proposal_id starts with 'chg_' and has a 4-digit zero-padded number."""
+    """proposal_id starts with 'chg_' and has an 8-char hex suffix."""
     result = await staging_writer(_base_state(), db_client=db_client, staging_path=str(tmp_path))
     pid = result["staging_proposal_id"]
     assert pid is not None
     assert pid.startswith("chg_")
     suffix = pid[4:]
-    assert len(suffix) == 4
-    assert suffix.isdigit()
+    assert len(suffix) == 8
+    assert all(c in "0123456789abcdef" for c in suffix)
 
 
 async def test_handles_directory_creation_failure(tmp_path: Path, db_client: AsyncMock) -> None:

@@ -12,6 +12,7 @@ from .agents.capital import CapitalAgent
 from .agents.cfo import CFOAgent
 from .agents.funding import FundingAgent
 from .agents.liquidity import LiquidityAgent
+
 try:
     from services.shared.load_memory import load_memory_node
 except ImportError:

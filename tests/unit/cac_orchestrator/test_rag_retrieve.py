@@ -90,12 +90,19 @@ async def test_retrieve_formats_context_text(rag_client: AsyncMock) -> None:
 
 
 async def test_retrieve_uses_embed_fn(rag_client: AsyncMock) -> None:
-    """When embed_fn is provided it is called with the query."""
+    """When embed_fn is provided it is called with the query string.
+
+    The Phase-2 crossread path may call embed_fn in addition to the fallback
+    path, so we assert it was called at least once with the right argument.
+    """
     embed_fn = AsyncMock(return_value=[0.1] * 384)
     rag_client.search.return_value = []
     state = {"query": "covenant ratio"}
     await retrieve_context(state, rag_client=rag_client, embed_fn=embed_fn)
-    embed_fn.assert_awaited_once_with("covenant ratio")
+    assert embed_fn.await_count >= 1
+    # Every call must use the correct query string
+    for call in embed_fn.await_args_list:
+        assert call.args[0] == "covenant ratio"
 
 
 async def test_retrieve_zero_vector_fallback(rag_client: AsyncMock) -> None:

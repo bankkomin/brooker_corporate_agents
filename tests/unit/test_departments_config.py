@@ -1,10 +1,11 @@
 """Tests for departments.json schema validation and Phase 2 fields."""
 import json
-import pytest
 from pathlib import Path
 
+import pytest
+
 try:
-    from jsonschema import validate, ValidationError
+    from jsonschema import ValidationError, validate  # noqa: F401
 except ImportError:
     pytest.skip("jsonschema not installed", allow_module_level=True)
 

@@ -6,6 +6,7 @@ permissions (can_query) and proxies the request to cac-orchestrator.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 
 import httpx
@@ -55,9 +56,8 @@ async def chat(request: Request, body: ChatRequest) -> JSONResponse:
 
     # Check can_query permission
     agent_perms = getattr(request.state, "agent_permissions", None)
-    if claims.source == "brooker":
-        if agent_perms is None or "query" not in agent_perms:
-            raise AuthError("NO_QUERY_ACCESS", "You do not have query access", 403)
+    if claims.source == "brooker" and (agent_perms is None or "query" not in agent_perms):
+        raise AuthError("NO_QUERY_ACCESS", "You do not have query access", 403)
 
     # Build orchestrator request
     user_id = claims.email or claims.sub
@@ -89,10 +89,8 @@ async def chat(request: Request, body: ChatRequest) -> JSONResponse:
             )
         except httpx.HTTPStatusError as exc:
             detail = ""
-            try:
+            with contextlib.suppress(Exception):
                 detail = exc.response.text[:500]
-            except Exception:
-                pass
             logger.error(
                 "orchestrator_error",
                 status=exc.response.status_code,

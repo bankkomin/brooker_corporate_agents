@@ -1,7 +1,7 @@
+import contextlib
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
 
 
 @dataclass
@@ -22,7 +22,7 @@ HEADER_RE = re.compile(
 FIELD_RE = re.compile(r"\*\*(\w+):\*\*\s*(.*)")
 
 
-def parse_daily_log(path: Path) -> List[LogEntry]:
+def parse_daily_log(path: Path) -> list[LogEntry]:
     """Parse a daily-log markdown file into structured entries."""
     if not path.exists():
         return []
@@ -56,10 +56,8 @@ def parse_daily_log(path: Path) -> List[LogEntry]:
             elif key == "citations":
                 entry.citations = [c.strip() for c in val.split(",") if c.strip()]
             elif key == "confidence":
-                try:
+                with contextlib.suppress(ValueError):
                     entry.confidence = float(val)
-                except ValueError:
-                    pass
             elif key == "outcome":
                 entry.outcome = val
 

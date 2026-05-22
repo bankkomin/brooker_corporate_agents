@@ -1,8 +1,8 @@
 """Post-generation citation grounding — verify LLM citations match actual sources."""
 import logging
 import re
-from difflib import SequenceMatcher
 from dataclasses import dataclass, field
+from difflib import SequenceMatcher
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def ground_citations(
         if "id" in src:
             source_map[src["id"]] = src.get("text", "")
 
-    for match in matches:
+    for i, match in enumerate(matches):
         ref_num = match.group(1)
         source_text = source_map.get(ref_num, "")
 
@@ -73,13 +73,20 @@ def ground_citations(
             report.unverified += 1
             continue
 
-        # Extract the claim — text around the citation (sentence containing it)
+        # Extract the claim — text between the previous citation (or sentence start)
+        # and the current citation marker, to avoid spilling into adjacent claims.
         pos = match.start()
-        # Find sentence boundaries
-        start = max(0, answer.rfind('.', 0, pos) + 1)
-        end = answer.find('.', pos)
-        if end == -1:
-            end = len(answer)
+        # Left boundary: end of previous citation, or start of sentence ('. ' boundary)
+        if i > 0:
+            prev_end = matches[i - 1].end()
+            # Also check for a '. ' sentence boundary between prev citation and here
+            sent_boundary = answer.rfind('. ', prev_end, pos)
+            start = (sent_boundary + 2) if sent_boundary != -1 else prev_end
+        else:
+            boundary_before = answer.rfind('. ', 0, pos)
+            start = (boundary_before + 2) if boundary_before != -1 else 0
+        # Right boundary: include up to and including the citation marker
+        end = match.end()
         claim = answer[start:end].strip()
         # Remove citation markers from claim for comparison
         claim_clean = citation_pattern.sub('', claim).strip()

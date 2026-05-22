@@ -1,5 +1,10 @@
 import pytest
-from services.shared.permission_enforcement import ensure_can_write, validate_collections, PermissionError
+
+from services.shared.permission_enforcement import (
+    PermissionError,
+    ensure_can_write,
+    validate_collections,
+)
 
 
 def test_read_only_skill_blocks_staging_writer():

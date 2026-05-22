@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
+
 from services.shared.knowledge_gaps import detect_self_report
 
 

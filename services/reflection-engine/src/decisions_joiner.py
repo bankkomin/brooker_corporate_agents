@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass
-from typing import List
 
 import asyncpg
 
@@ -17,7 +16,7 @@ class EnrichedDecision:
     edited_value: str | None = None
 
 
-async def get_recent_decisions(db_pool: asyncpg.Pool, dept_id: str, days: int = 1) -> List[EnrichedDecision]:
+async def get_recent_decisions(db_pool: asyncpg.Pool, dept_id: str, days: int = 1) -> list[EnrichedDecision]:
     """Fetch recent approval decisions with computed signal_strength for a department."""
     async with db_pool.acquire() as conn:
         rows = await conn.fetch(

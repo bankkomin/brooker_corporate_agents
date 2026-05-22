@@ -10,7 +10,8 @@ import structlog
 from .config import RAGSettings
 
 try:
-    from services.shared.table_chunker import chunk_document as table_aware_chunk, chunk_excel_sheet
+    from services.shared.table_chunker import chunk_document as table_aware_chunk
+    from services.shared.table_chunker import chunk_excel_sheet
 except ImportError:
     table_aware_chunk = None
     chunk_excel_sheet = None
@@ -163,7 +164,7 @@ class DocumentChunker:
                     structured_rows,
                     sheet_name=sheet_name,
                     source=str(path),
-                    max_chunk_size=self._chunk_size,
+                    max_rows_per_chunk=self._chunk_size,
                 )
                 for c in excel_chunks:
                     sections.append({

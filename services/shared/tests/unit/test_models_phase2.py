@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+
 from services.shared.models_phase2 import SkillMeta, SkillPermissions
 
 
@@ -34,3 +35,26 @@ def test_default_output_types():
         )
     )
     assert s.output_types == ["text"]
+
+
+def test_skillmeta_shared_skills_defaults_empty():
+    meta = SkillMeta(
+        name="reporting-agent", agent="reporting-agent", dept="finance",
+        permissions=SkillPermissions(
+            mode="write_via_staging", data_zones=[1, 2],
+            outbound_apis=[], read_collections=["finance_docs"],
+        ),
+    )
+    assert meta.shared_skills == []
+
+
+def test_skillmeta_shared_skills_accepts_paths():
+    meta = SkillMeta(
+        name="reporting-agent", agent="reporting-agent", dept="finance",
+        permissions=SkillPermissions(
+            mode="write_via_staging", data_zones=[1, 2],
+            outbound_apis=[], read_collections=["finance_docs"],
+        ),
+        shared_skills=["shared/investment-cluster/valuation-methodology"],
+    )
+    assert meta.shared_skills == ["shared/investment-cluster/valuation-methodology"]

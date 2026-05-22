@@ -27,6 +27,7 @@ async def _run_all_live_depts(db_pool):
     """Run reflection for every live department."""
     import json
     from pathlib import Path
+
     from .engine import run_dept_reflection
 
     config_path = Path("/app/config/departments.json")
