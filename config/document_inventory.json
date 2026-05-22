@@ -230,6 +230,21 @@
       "crossReadAccess": []
     },
     {
+      "id": "doc_ib_superseed_portfolio_brief",
+      "title": "SuperSeed Fund III — Portfolio Brief for Brooker Group",
+      "ownerDept": "ib",
+      "tier": "narrative",
+      "vaultPath": "obsidian-vault/ib/meeting-notes/2026-05-08-superseed-fund-iii-brooker-briefing.md",
+      "qdrantCollection": "ib_docs",
+      "ingestSource": "file://O:/brooker_database/ib/SuperSeed_Brooker_Portfolio_Brief.pdf",
+      "frequency": "on_demand",
+      "crossReadAccess": [
+        "ceo",
+        "ic",
+        "vcc"
+      ]
+    },
+    {
       "id": "doc_hr_hr_policy",
       "title": "HR Policy",
       "ownerDept": "hr",
