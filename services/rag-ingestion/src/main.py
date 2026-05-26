@@ -14,6 +14,7 @@ import os
 import tempfile
 from pathlib import Path
 
+import asyncpg
 import httpx
 import structlog
 from fastapi import FastAPI, File, Form, UploadFile
@@ -31,6 +32,7 @@ from .models import (
     IngestMessageResponse,
 )
 from .qdrant_store import COLLECTIONS, QdrantStore
+from .synthesis_tracker import record_mentions
 
 logger = structlog.get_logger("rag-ingestion")
 
@@ -88,11 +90,23 @@ async def lifespan(app: FastAPI):
     app.state.chunker = chunker
     app.state.chat_indexer = chat_indexer
 
+    # Postgres pool for B4 entity-mention recording. Created lazily so the
+    # ingest endpoints work even if Postgres is briefly unreachable at startup.
+    try:
+        app.state.pg_pool = await asyncpg.create_pool(
+            settings.postgres_dsn, min_size=1, max_size=3,
+        )
+    except Exception as exc:
+        logger.warning("rag-ingestion.startup.pg_pool_unavailable", error=str(exc))
+        app.state.pg_pool = None
+
     logger.info("rag-ingestion.startup", port=3004)
     yield
 
     await embedder.close()
     await store.close()
+    if getattr(app.state, "pg_pool", None) is not None:
+        await app.state.pg_pool.close()
     logger.info("rag-ingestion.shutdown")
 
 
@@ -161,6 +175,23 @@ async def ingest_document(
                 metadatas=metadatas,
             )
 
+            # B4: record entity mentions for the synthesis tracker. Best-effort —
+            # never block ingestion on Postgres availability.
+            if getattr(app.state, "pg_pool", None) is not None:
+                try:
+                    chunk_dicts = [
+                        {"id": str(meta.get("chunk_id", "")), "text": t}
+                        for t, meta in zip(texts, metadatas)
+                    ]
+                    await record_mentions(
+                        app.state.pg_pool,
+                        chunks=chunk_dicts,
+                        source_doc=file.filename or "unknown",
+                        dept=dept.lower(),
+                    )
+                except Exception as exc:
+                    logger.warning("synthesis_tracker.record_failed", error=str(exc))
+
             # Notify wiki-compiler (fire-and-forget)
             try:
                 async with httpx.AsyncClient() as client:
@@ -223,6 +254,49 @@ async def health() -> HealthResponse:
 
     status = "healthy" if (qdrant_ok and embed_ok) else "degraded"
     return HealthResponse(status=status, qdrant=qdrant_ok, embedder=embed_ok)
+
+
+@app.post("/synthesis/scan")
+async def synthesis_scan() -> dict:
+    """B4 — Manually trigger a synthesis scan: find candidates above
+    per-dept thresholds, draft concept notes via LLM, write staging
+    manifests. Intended for an external scheduler (cron / paperclip) to
+    call nightly; safe to invoke ad-hoc.
+
+    No-op (returns counts=0) when Postgres is unavailable, when no
+    candidates exist, or when the LLM client is not configured.
+    """
+    from langchain_openai import ChatOpenAI
+
+    from .synthesis_proposer import scan_and_propose
+
+    pool = getattr(app.state, "pg_pool", None)
+    if pool is None:
+        return {"status": "skipped", "reason": "no_postgres_pool", "candidates": 0}
+
+    # Build a single LLM callable. Keep the import inside the endpoint so
+    # the lazy import path matches the rest of the project; if the langchain
+    # dep is missing, the failure surfaces here rather than at boot.
+    llm_url = os.getenv("LLM_BASE_URL", "http://nginx:8080/v1")
+    llm_model = os.getenv("LLM_MODEL", "qwen-122b")
+    llm_api_key = os.getenv("LLM_API_KEY", "not-needed")
+    chat = ChatOpenAI(base_url=llm_url, model=llm_model, api_key=llm_api_key, temperature=0.1)
+
+    async def _llm(prompt: str) -> str:
+        resp = await chat.ainvoke(prompt)
+        return getattr(resp, "content", "") or ""
+
+    result = await scan_and_propose(
+        pool=pool,
+        embedder=app.state.embedder,
+        store=app.state.store,
+        staging_path=os.getenv("STAGING_PATH", "/data/staging"),
+        llm=_llm,
+        thresholds_path=os.getenv(
+            "SYNTHESIS_THRESHOLDS_PATH", "/app/config/synthesis_thresholds.json",
+        ),
+    )
+    return {"status": "ok", **result}
 
 
 @app.get("/collections", response_model=CollectionsResponse)
