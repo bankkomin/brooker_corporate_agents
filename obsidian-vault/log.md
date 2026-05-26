@@ -33,3 +33,5 @@ Previously root index listed only cac, hr, shared. New entry surfaces all live d
 
 ## [2026-05-26] structure | `[[skills/shared/vault-health-check]]` skill spec added.
 Complements per-dept `[[skills/shared/wiki-maintenance]]` with vault-wide rollup + cross-dept checks (broken skill links, duplicate entity names across depts, inter-dept wikilink resolution).
+
+## [2026-05-26] health-check | 0 critical, 9 warning, 5 info across 18 depts. Report: health-reports/2026-05-26.md

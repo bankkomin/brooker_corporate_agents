@@ -1,8 +1,10 @@
 import logging
+from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .config import settings
+from .vault_health_check import run_and_persist as run_vault_health_check
 
 log = logging.getLogger(__name__)
 
@@ -18,9 +20,31 @@ def start_scheduler(db_pool) -> AsyncIOScheduler:
         id="nightly_reflection",
         replace_existing=True,
     )
-    scheduler.start()
     log.info("Reflection scheduler started: %02d:%02d daily", settings.REFLECTION_CRON_HOUR, settings.REFLECTION_CRON_MINUTE)
+    if settings.VAULT_HEALTH_CHECK_ENABLED:
+        scheduler.add_job(
+            _run_vault_health_check_job,
+            "cron",
+            hour=settings.VAULT_HEALTH_CHECK_CRON_HOUR,
+            minute=settings.VAULT_HEALTH_CHECK_CRON_MINUTE,
+            id="vault_health_check",
+            replace_existing=True,
+        )
+        log.info(
+            "Vault health check scheduled: %02d:%02d daily",
+            settings.VAULT_HEALTH_CHECK_CRON_HOUR,
+            settings.VAULT_HEALTH_CHECK_CRON_MINUTE,
+        )
+    scheduler.start()
     return scheduler
+
+
+async def _run_vault_health_check_job() -> None:
+    """Wraps run_vault_health_check with exception isolation."""
+    try:
+        await run_vault_health_check(Path(settings.VAULT_ROOT))
+    except Exception:
+        log.exception("Vault health check failed")
 
 
 async def _run_all_live_depts(db_pool):

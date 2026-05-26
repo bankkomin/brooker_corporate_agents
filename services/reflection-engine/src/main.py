@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import asyncpg
 from fastapi import FastAPI
@@ -30,3 +31,20 @@ async def trigger_reflection(dept_id: str, dry_run: bool = False):
     from .engine import run_dept_reflection
     result = await run_dept_reflection(dept_id, app.state.db_pool, dry_run=dry_run)
     return result
+
+
+@app.post("/vault-health-check")
+async def trigger_vault_health_check():
+    """Manually trigger the vault-wide health check (also runs nightly per scheduler)."""
+    from .vault_health_check import run_and_persist
+    report = await run_and_persist(Path(settings.VAULT_ROOT))
+    return {
+        "status": "ok",
+        "run_date": report.run_date.isoformat(),
+        "critical": report.critical_count,
+        "warning": report.warning_count,
+        "info": report.info_count,
+        "depts_scanned": report.depts_scanned,
+        "notes_scanned": report.notes_scanned,
+        "report_path": f"health-reports/{report.run_date.isoformat()}.md",
+    }
