@@ -64,7 +64,8 @@ N/A — this agent does not read or write Excel files.
 5. **Duplicate entity names across departments** — collect all `entities/*.md` filenames across depts; if the same base name appears in multiple depts (e.g. `bicl.md` in both `finance/entities/` and `ceo/entities/`), surface as info for a human to decide whether to canonicalize.
 6. **Decisions past `review_date`** — for any decision article whose frontmatter `review_date` is in the past, surface as info.
 7. **Empty scaffolded folders** — count `daily-logs/` and `_memory/` directories that contain only `.gitkeep`. Info-level rollup; not actionable by this agent.
-8. **Per-dept lint rollup** — sum critical / warning / info counts across all `{dept}/lint-report.md` files; reference the per-dept report for detail.
+8. **Stale recency markers** — scan article bodies for inline markers of the form `(as of YYYY-MM, <source-token>)` (per `[[templates/concept]]` convention). Any marker with a `YYYY-MM` older than 12 months from today is reported info-level. Required in `research/`, `regulations/`, `macro/` per [[CLAUDE.md|repo conventions]] — surface absence only if the dept-level lint report doesn't already cover it.
+9. **Per-dept lint rollup** — sum critical / warning / info counts across all `{dept}/lint-report.md` files; reference the per-dept report for detail.
 
 ## Escalation Triggers
 
@@ -104,6 +105,7 @@ scope: vault
 ## Info
 - **duplicate-entity-name** `bicl.md` appears in: finance/entities/, ceo/entities/
 - **stale-decision** `cac/decisions/2026-01-15-foo.md` — review_date 2026-04-15 is in the past
+- **stale-claim** `regulations/concepts/audit-committee.md` — marker `(as of 2024-03, sec.or.th)` is 26 months old
 - **empty-scaffold** 18 `daily-logs/` directories contain only `.gitkeep` (0 daily notes)
 ```
 

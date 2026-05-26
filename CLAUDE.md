@@ -128,6 +128,10 @@ Week 8: UAT + Go-Live
 ## SKILL.md Format (PRD Section 11)
 Every agent skill file must have: Mandate, Tone & Style, Domain Knowledge, Retrieval Instructions, Staging Proposal Rules, Excel Navigation, Escalation Triggers, Output Format, Hard Rules.
 
+## Wiki Conventions
+
+**Recency markers** — Load-bearing factual claims in `obsidian-vault/research/`, `obsidian-vault/regulations/`, `obsidian-vault/macro/` concept articles carry an inline `(as of YYYY-MM, <source-token>)` marker so staleness is visible per-claim, not just per-note. Full spec and source-token formats in `obsidian-vault/templates/concept.md` (Recency Markers section). The `vault-health-check` skill reports markers older than 12 months as info-level findings.
+
 ## Staging Proposal Manifest Schema
 ```json
 {
