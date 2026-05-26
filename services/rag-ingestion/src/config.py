@@ -48,6 +48,11 @@ class RAGSettings(BaseSettings):
     # Mirror
     mirror_path: str = "/data/mirror"
 
+    # Orchestrator event endpoints (B3 meeting fan-out)
+    cac_orchestrator_url: str = "http://cac-orchestrator:3001"
+    meeting_event_emit_enabled: bool = True
+    meeting_event_timeout_seconds: float = 5.0
+
     # Logging
     log_level: str = "INFO"
 

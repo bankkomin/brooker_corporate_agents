@@ -608,3 +608,88 @@ class TestStartStop:
             assert watcher._loop is not None
         finally:
             await watcher.stop()
+
+
+# ---------------------------------------------------------------------------
+# B3 meeting-note event emission
+# ---------------------------------------------------------------------------
+
+
+class TestMeetingNoteEvents:
+    def test_is_meeting_note_recognizes_dept_meeting_path(self, watcher: VaultWatcher) -> None:
+        watcher._vault_path = "/vault"
+        assert watcher._is_meeting_note("/vault/cac/meeting-notes/2026-05-26-alco.md")
+        assert watcher._is_meeting_note("/vault/finance/meeting-notes/2026-05-26-x.md")
+
+    def test_is_meeting_note_rejects_non_meeting_paths(self, watcher: VaultWatcher) -> None:
+        watcher._vault_path = "/vault"
+        assert not watcher._is_meeting_note("/vault/cac/concepts/lcr.md")
+        assert not watcher._is_meeting_note("/vault/cac/decisions/2026-05-26-x.md")
+        assert not watcher._is_meeting_note("/vault/index.md")
+        assert not watcher._is_meeting_note("/outside/cac/meeting-notes/x.md")
+
+    @pytest.mark.asyncio
+    async def test_emit_meeting_event_posts_to_orchestrator(self, watcher: VaultWatcher) -> None:
+        watcher._vault_path = "/vault"
+        watcher._orchestrator_url = "http://cac-orch:3001"
+        captured = {}
+
+        class _MockResponse:
+            status_code = 200
+            text = "ok"
+
+        async def _post(self, url, json=None, **kw):
+            captured["url"] = url
+            captured["payload"] = json
+            return _MockResponse()
+
+        with patch("httpx.AsyncClient.post", new=_post):
+            await watcher._emit_meeting_event(
+                path_str="/vault/cac/meeting-notes/2026-05-26-alco.md",
+                file_hash="abc" + "0" * 61,
+                size_bytes=1024,
+                dept="cac",
+            )
+        assert captured["url"] == "http://cac-orch:3001/events/meeting_note_landed"
+        assert captured["payload"] == {
+            "vault_path": "cac/meeting-notes/2026-05-26-alco.md",
+            "dept": "cac",
+            "sha256": "abc" + "0" * 61,
+            "size_bytes": 1024,
+        }
+
+    @pytest.mark.asyncio
+    async def test_emit_meeting_event_disabled_short_circuits(self, watcher: VaultWatcher) -> None:
+        watcher._meeting_event_enabled = False
+        watcher._vault_path = "/vault"
+        called = []
+
+        async def _fail(*a, **kw):
+            called.append("called")
+            raise AssertionError("should not be called when disabled")
+
+        with patch("httpx.AsyncClient.post", new=_fail):
+            await watcher._emit_meeting_event(
+                path_str="/vault/cac/meeting-notes/x.md",
+                file_hash="a", size_bytes=1, dept="cac",
+            )
+        assert called == []
+
+    @pytest.mark.asyncio
+    async def test_emit_meeting_event_swallows_http_failure(self, watcher: VaultWatcher) -> None:
+        watcher._vault_path = "/vault"
+
+        async def _boom(*a, **kw):
+            raise httpx_RequestError("connection refused")
+
+        # Import locally so we don't pollute module scope
+        import httpx as httpx_mod
+        global httpx_RequestError
+        httpx_RequestError = httpx_mod.RequestError
+
+        with patch("httpx.AsyncClient.post", new=_boom):
+            # Must NOT raise — ingestion can't be blocked by orchestrator outages
+            await watcher._emit_meeting_event(
+                path_str="/vault/cac/meeting-notes/x.md",
+                file_hash="a", size_bytes=1, dept="cac",
+            )
