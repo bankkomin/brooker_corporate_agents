@@ -271,3 +271,39 @@ HOD approves selectively; sync-back writes approved files
 - Whether the fan-out node uses LangGraph's `Send` or spawns separate Task tool agents (B3 — implementation detail).
 
 A follow-up task-by-task plan (matching the format of `2026-05-18-shared-investment-cluster-skill-set.md`) should be written per-bucket, after these open questions are resolved and the relevant service code has been re-audited.
+
+---
+
+## Appendix: Audit findings (2026-05-26)
+
+Re-audited the relevant services after writing this spec to confirm the buckets are buildable as designed. Updates the "Open questions" sections above.
+
+### reflection-engine — fully built, perfect home for vault health-check
+- `services/reflection-engine/` is **production-ready**, not scaffolding. APScheduler is wired in `scheduler.py`; `engine.py` already iterates depts from `config/departments.json` and reads/writes vault per-dept.
+- Adding a vault-health-check module took ~400 lines + 26 tests stacked cleanly on the existing scheduler (`vault_health_check` job registered alongside `nightly_reflection`). Committed in this branch.
+- For B5: reflection-engine **already does** memory promotion (`promoter.py` writes `_memory/{agent_id}/memory.md`). The `_memory/` semantics question (Q3) is partially answered — `_memory/` is per-agent session state, distinct from `concepts/` which is department-shared knowledge. B5 extension should write new memory entries that promote into existing per-agent memory files, NOT into a new `_memory/{topic}.md` schema.
+
+### cac-orchestrator — graph is linear, fan-out can be added cleanly
+- Confirmed: `services/cac-orchestrator/src/graph.py:120-250` is strictly sequential — all specialist agents converge into `escalation_check` at line 209-212. No existing fan-out.
+- staging_writer is **fully functional** at `services/cac-orchestrator/src/nodes/staging_writer.py:27-111`. Signature `async def staging_writer(state, *, db_client, staging_path, confidence_threshold=0.85) -> dict`. Writes `manifest.json` to `{staging_path}/pending/{proposal_id}/` (line 84-89) and logs to Postgres (line 96-108). Matches the CLAUDE.md contract exactly.
+- For B3 event transport (Q1 above): `services/rag-ingestion/src/vault_watcher.py:25-273` already runs `watchdog` with debounced async dispatch. **Recommendation:** extend vault_watcher to POST a `meeting_note_landed` event to the orchestrator's existing FastAPI; no new infrastructure. The orchestrator's current request/response shape can be extended with a `/events/meeting_note_landed` handler that triggers the fan-out subgraph.
+- For B3 fan-out implementation (Q4): LangGraph's `Send` API is the right choice — `graph.py` already uses `add_conditional_edges` (e.g. `_route_to_agent`, `_make_should_validate`), so the fan-out follows the existing pattern.
+
+### rag-ingestion — chunker is metadata-flexible, B4 is plug-in
+- Chunker (`services/rag-ingestion/src/chunker.py:32-210`) does **not currently extract entities** — confirmed gap. But metadata attachment at line 73-106 is open-ended, and qdrant_store.py line 71-74 stores whatever metadata is provided.
+- Postgres has `ingested_documents` for dedup but **no per-entity table** (`migrations/001_initial_schema.sql:76-90`). A new `entity_mentions` table is greenfield work.
+- For B4 (Q1): the "entity extraction quality" question stands. Recommendation: pilot with a lightweight NER (spaCy `en_core_web_sm` or similar) on a 1-week ingestion sample before scaling. Low precision early on is fine if the threshold gates synthesis proposals at N≥3 distinct source docs.
+- For B4 (Q2): per-dept thresholds in `config/synthesis_thresholds.json` is still the right call. Suggested defaults: regulations=2, finance=2, ic=3, research=4, macro=4.
+- For B4 (Q3): canonicalization deterministic kebab-case slug after stopword removal is sufficient for v1; collisions across capitalization variants ("Audit Committee" / "audit committee") rare and surfacable via the duplicate-entity health check.
+- For B4 (Q4): "add to `sources:` + flag for human review" — confirmed the right call. Auto-rewriting body content violates the data-zone rule's spirit even within Zone 2 staging.
+
+### Updated sequencing recommendation
+
+1. **B3 still first** — staging_writer is ready, vault_watcher event pattern is proven, LangGraph fan-out fits the existing graph idioms. Estimate stands at 2-3 days.
+2. **B4 next** — needs new Postgres table + NER pilot. Estimate revises slightly upward to 4-5 days because the NER quality pilot (1 week of sample data) needs to land before threshold tuning.
+3. **B5 unblocked enough to proceed** — `_memory/` semantics resolved (per-agent session state, extends existing promoter.py). Estimate stands at 3-5 days. Recommend doing B3+B4 first so reflection-engine has session data to learn from.
+
+### Remaining open questions (still need answers)
+- B4: per-dept threshold defaults — needs a product call to ratify the regulations=2 / research=4 suggestion above.
+- B3 cadence: confirm meeting-note fan-out is OK to run on monthly committees only, not daily standups (the 150K-token-per-meeting budget assumption).
+- All three: should staging manifests carry a `proposal_source: vault_automation` flag so approval-UI can filter / batch them differently from agent-generated manifests?
