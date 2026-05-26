@@ -37,8 +37,9 @@ Run the batch extractor (converts docx/pdf/xlsx/pptx → markdown):
 ```
 python scripts/extract_sources.py {dept}
 ```
-Output lands in `.source-extracts/{dept}/` (gitignored). For any file the script cannot
-handle, fall back to the `anthropic-skills:pdf` / `:docx` / `:xlsx` / `:pptx` skills.
+Output lands in `.source-extracts/brooker_database/{dept}/` (gitignored). For any file the
+script cannot handle, fall back to the `anthropic-skills:pdf` / `:docx` / `:xlsx` /
+`:pptx` skills.
 Read the extracted markdown — do not author articles from filenames alone.
 
 ### 3. Classify content into article types
