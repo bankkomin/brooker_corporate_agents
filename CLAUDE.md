@@ -136,7 +136,11 @@ Every agent skill file must have: Mandate, Tone & Style, Domain Knowledge, Retri
 
 **TL;DR for Agents** *(required for new content notes)* — Every concept and decision note opens with a 3-line machine-readable preamble: `Retrieved by:` (skill wikilinks), `Answers:` (one quoted question, ≤ 12 words), `Key facts:` (1-2 sentences). Lets retrieving agents judge relevance and grab load-bearing facts without scanning the whole note. Full format spec in `obsidian-vault/templates/concept.md` (TL;DR for Agents section). Backfill is lazy — apply when editing existing notes.
 
-## Staging Proposal Manifest Schema
+## Staging Proposal Manifest Schemas
+
+Two manifest types flow through `/data/staging/pending/`. Both require human approval via approval-ui before sync-back applies them.
+
+**Excel cell change** (`services/cac-orchestrator/src/models.py:ManifestProposal`) — agent-driven proposals to update ALCO_Tracker.xlsx cells:
 ```json
 {
   "id": "chg_XXXX",
@@ -152,6 +156,27 @@ Every agent skill file must have: Mandate, Tone & Style, Domain Knowledge, Retri
   "status": "pending"
 }
 ```
+
+**Vault file write** (`services/shared/vault_staging.py:VaultStagingManifest`) — used by B3 meeting fan-out, B4 auto-synthesis, B5 daily-log drafter:
+```json
+{
+  "id": "chg_XXXX",
+  "agent": "meeting-extractor-entities | synthesis-proposer | reflection-engine.daily_log_drafter",
+  "proposal_source": "vault_automation",
+  "dept": "cac",
+  "target_vault_path": "cac/entities/bicl.md",
+  "operation": "create | update | append",
+  "draft_content": "---\ntype: entity\n---\n# BICL\n...",
+  "extracted_from": "cac/meeting-notes/2026-05-26-alco-monthly.md",
+  "source_run_id": "meetfan_abc12345",
+  "synthesis_evidence": {"entity": "audit-committee", "source_count": 4, "threshold_used": 3},
+  "confidence": 0.82,
+  "reasoning": "...",
+  "status": "pending"
+}
+```
+
+Both manifests are written to `{staging}/pending/{id}/manifest.json`. Vault manifests additionally write the draft markdown to `{staging}/pending/{id}/draft.md` for direct approval-ui rendering. `source_run_id` groups multiple manifests from a single fan-out so HOD review can batch them.
 
 ## Git Workflow
 - Feature branches off main
