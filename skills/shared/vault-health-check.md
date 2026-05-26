@@ -65,7 +65,8 @@ N/A — this agent does not read or write Excel files.
 6. **Decisions past `review_date`** — for any decision article whose frontmatter `review_date` is in the past, surface as info.
 7. **Empty scaffolded folders** — count `daily-logs/` and `_memory/` directories that contain only `.gitkeep`. Info-level rollup; not actionable by this agent.
 8. **Stale recency markers** — scan article bodies for inline markers of the form `(as of YYYY-MM, <source-token>)` (per `[[templates/concept]]` convention). Any marker with a `YYYY-MM` older than 12 months from today is reported info-level. Required in `research/`, `regulations/`, `macro/` per [[CLAUDE.md|repo conventions]] — surface absence only if the dept-level lint report doesn't already cover it.
-9. **Per-dept lint rollup** — sum critical / warning / info counts across all `{dept}/lint-report.md` files; reference the per-dept report for detail.
+9. **Missing TL;DR for Agents** — for every concept and decision note (`type: concept` or `type: decision` in frontmatter), verify the article body contains a `## TL;DR for Agents` section. Info-level for backfill candidates; surfacing the count helps track lazy-backfill progress (per the convention in [[CLAUDE.md]]).
+10. **Per-dept lint rollup** — sum critical / warning / info counts across all `{dept}/lint-report.md` files; reference the per-dept report for detail.
 
 ## Escalation Triggers
 
@@ -106,6 +107,7 @@ scope: vault
 - **duplicate-entity-name** `bicl.md` appears in: finance/entities/, ceo/entities/
 - **stale-decision** `cac/decisions/2026-01-15-foo.md` — review_date 2026-04-15 is in the past
 - **stale-claim** `regulations/concepts/audit-committee.md` — marker `(as of 2024-03, sec.or.th)` is 26 months old
+- **missing-tldr** 412 of 587 concept/decision notes have no `## TL;DR for Agents` section (lazy backfill in progress)
 - **empty-scaffold** 18 `daily-logs/` directories contain only `.gitkeep` (0 daily notes)
 ```
 

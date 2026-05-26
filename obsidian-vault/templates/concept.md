@@ -6,12 +6,19 @@ sources: []
 related: []
 created: ""
 updated: ""
+event_date: ""
 confidence: ""
 coverage: ""
 tags: []
 ---
 
 # {{title}}
+
+## TL;DR for Agents
+
+**Retrieved by:** [[skills/<dept>/<skill-name>]]
+**Answers:** "One-line question this note resolves."
+**Key facts:** 1-2 sentences with the most load-bearing facts (use recency markers if values can drift).
 
 ## Summary
 
@@ -43,6 +50,32 @@ Business or regulatory significance for the department.
 
 - Source 1
 - Source 2
+
+## Bi-Temporal Dates (optional)
+
+Most concepts are timeless and only need `created` / `updated`. For concepts where the underlying fact has its own date — a regulatory rule's effective date, a market regime's start, a counterparty's onboarding — fill in frontmatter `event_date: YYYY-MM-DD`.
+
+This separates **when the fact became true** (event_date) from **when we documented it** (created/updated), so audits can answer "what did we believe as of X?" instead of just "what did we write down."
+
+Use for: `regulations/concepts/` (rule effective dates), `macro/concepts/` (regime shifts), `finance/entities/` (instrument issue/maturity dates). Leave blank elsewhere.
+
+## TL;DR for Agents (convention)
+
+The 3-line preamble at the top of every concept note is machine-readable. It tells retrieving agents whether this note is relevant and gives them the load-bearing facts without scanning the whole article.
+
+**Format:**
+- `**Retrieved by:**` one or more `[[skills/<dept>/<skill>]]` wikilinks naming the skills that should cite this note
+- `**Answers:**` one quoted question this note resolves (≤ 12 words)
+- `**Key facts:**` 1-2 sentences naming the most decision-relevant facts; use recency markers (see below) for values that drift
+
+**When to skip:** purely definitional concepts where the title is self-explanatory and there are no load-bearing facts. Otherwise required.
+
+**Example (a regulations concept):**
+```
+**Retrieved by:** [[skills/cac/capital-allocation]], [[skills/ic/portfolio]]
+**Answers:** "What is the Thai 40% Investment-Company rule cap?"
+**Key facts:** A SET-listed parent must hold ≤ 40% of total assets in Investment-Company classifiable assets (as of 2026-01, sec.or.th). A 3-month post-IPO grace period applies.
+```
 
 ## Recency Markers
 

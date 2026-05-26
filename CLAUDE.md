@@ -132,6 +132,10 @@ Every agent skill file must have: Mandate, Tone & Style, Domain Knowledge, Retri
 
 **Recency markers** — Load-bearing factual claims in `obsidian-vault/research/`, `obsidian-vault/regulations/`, `obsidian-vault/macro/` concept articles carry an inline `(as of YYYY-MM, <source-token>)` marker so staleness is visible per-claim, not just per-note. Full spec and source-token formats in `obsidian-vault/templates/concept.md` (Recency Markers section). The `vault-health-check` skill reports markers older than 12 months as info-level findings.
 
+**Bi-temporal `event_date`** *(optional)* — Concept and decision frontmatter accept an optional `event_date: YYYY-MM-DD` separate from `created`/`updated` (concept) or `date` (decision). Use when the underlying fact has its own date that matters for audit — regulatory rule effective dates, loan signing dates, instrument issuance — so we can reason about "what did we believe as of X" instead of just "what did we write down." Leave blank when the doc-level dates are sufficient.
+
+**TL;DR for Agents** *(required for new content notes)* — Every concept and decision note opens with a 3-line machine-readable preamble: `Retrieved by:` (skill wikilinks), `Answers:` (one quoted question, ≤ 12 words), `Key facts:` (1-2 sentences). Lets retrieving agents judge relevance and grab load-bearing facts without scanning the whole note. Full format spec in `obsidian-vault/templates/concept.md` (TL;DR for Agents section). Backfill is lazy — apply when editing existing notes.
+
 ## Staging Proposal Manifest Schema
 ```json
 {
