@@ -14,7 +14,6 @@ Cross-department knowledge, policies, and escalation protocols available to all 
 - [[skills/shared/rag-retrieval|RAG Retrieval]] — How agents search documents and chat history
 - [[skills/shared/excel-navigation|Excel Navigation]] — How agents find cells in ALCO Tracker
 - [[skills/shared/escalation-protocol|Escalation Protocol]] — Breach detection and notification tiers
-- [[skills/shared/chat-ingestion|Chat Ingestion]] — How Slack messages become searchable
 - [[skills/shared/citation-format|Citation Format]] — Source attribution standards
 
 ## Policies

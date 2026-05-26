@@ -11,7 +11,7 @@ Operations department knowledge base. Concepts, decisions, meeting notes, and en
 
 ## Agent Skills
 
-- [[skills/ops/|Operations Skills]] — Operations department agent skills
+- `skills/ops/` — Operations department agent skills *(planned — Phase 2)*
 
 ## Sections
 

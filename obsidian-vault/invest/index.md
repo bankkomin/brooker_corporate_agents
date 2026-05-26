@@ -11,7 +11,7 @@ Investment Committee knowledge base. Concepts, decisions, meeting notes, and ent
 
 ## Agent Skills
 
-- [[skills/invest/|Investment Skills]] — Investment Committee agent skills
+- `skills/invest/` — Investment Committee agent skills *(planned — Phase 2)*
 
 ## Sections
 

@@ -11,7 +11,7 @@ Capital Allocation & ALCO Committee knowledge base. Concepts, decisions, meeting
 
 ## Agent Skills
 
-- [[skills/cac/cfo-agent|CFO Agent]] — Committee chair, orchestrates all CAC analysis
+- [[skills/shared/cfo-agent|CFO Agent]] — Committee chair, orchestrates all CAC analysis *(deprecation stub — canonical path `skills/finance/cfo-agent` lands with Phase 2 finance stage)*
 - [[skills/cac/liquidity-analysis|Liquidity Analysis]] — LCR, NSFR, cash position monitoring
 - [[skills/cac/capital-allocation|Capital Allocation]] — RWA, CAR, dividend policy
 - [[skills/cac/covenant-monitoring|Covenant Monitoring]] — Debt covenant compliance tracking

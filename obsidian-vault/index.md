@@ -21,12 +21,11 @@ Welcome to the corporate knowledge base. This vault is the human-readable source
 - [[skills/shared/rag-retrieval|RAG Retrieval]] — How agents search documents and chat history
 - [[skills/shared/excel-navigation|Excel Navigation]] — How agents find cells in ALCO Tracker
 - [[skills/shared/escalation-protocol|Escalation Protocol]] — Breach detection and notification tiers
-- [[skills/shared/chat-ingestion|Chat Ingestion]] — How Slack messages become searchable
 - [[skills/shared/citation-format|Citation Format]] — Source attribution standards
 
 ### CAC Committee Skills
 
-- [[skills/cac/cfo-agent|CFO Agent]] — Committee chair, orchestrates all CAC analysis
+- [[skills/shared/cfo-agent|CFO Agent]] — Committee chair, orchestrates all CAC analysis *(deprecation stub — canonical path `skills/finance/cfo-agent` lands with Phase 2 finance stage)*
 - [[skills/cac/liquidity-analysis|Liquidity Analysis]] — LCR, NSFR, cash position monitoring
 - [[skills/cac/capital-allocation|Capital Allocation]] — RWA, CAR, dividend policy
 - [[skills/cac/covenant-monitoring|Covenant Monitoring]] — Debt covenant compliance tracking
@@ -35,7 +34,7 @@ Welcome to the corporate knowledge base. This vault is the human-readable source
 
 ### HR Skills
 
-- [[skills/hr/|HR Skills]] — HR department agent skills
+- `skills/hr/` — HR department agent skills *(planned — Phase 2)*
 
 ## Templates
 

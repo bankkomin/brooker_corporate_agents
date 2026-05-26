@@ -11,7 +11,7 @@ Risk Committee knowledge base. Concepts, decisions, meeting notes, and entities 
 
 ## Agent Skills
 
-- [[skills/risk/|Risk Skills]] — Risk department agent skills
+- `skills/risk/` — Risk department agent skills *(planned — Phase 2)*
 
 ## Sections
 

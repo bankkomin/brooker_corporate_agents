@@ -31,7 +31,7 @@ Why this decision was made. Links to supporting [[skills/]] or [[policies/]].
 - Name · Role · Date
 
 ## Related Skills
-- [[skills/cac/cfo-agent]]
+- [[skills/cac/liquidity-analysis]]
 - [[skills/cac/covenant-monitoring]]
 
 ## Review Date

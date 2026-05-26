@@ -11,7 +11,7 @@ Information Technology department knowledge base. Concepts, decisions, meeting n
 
 ## Agent Skills
 
-- [[skills/it/|IT Skills]] — IT department agent skills
+- `skills/it/` — IT department agent skills *(planned — Phase 2)*
 
 ## Sections
 
