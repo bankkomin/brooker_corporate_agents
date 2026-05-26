@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     VAULT_HEALTH_CHECK_CRON_HOUR: int = 3
     VAULT_HEALTH_CHECK_CRON_MINUTE: int = 0
     VAULT_HEALTH_CHECK_ENABLED: bool = True
+    STAGING_PATH: str = "/data/staging"
+    DAILY_LOG_DRAFTING_ENABLED: bool = True
 
     model_config = {"env_prefix": "REFLECTION_", "env_file": ".env"}
 
