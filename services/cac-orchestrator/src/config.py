@@ -49,6 +49,8 @@ class OrchestratorSettings(BaseSettings):
 
     # Vault
     vault_root: str = "/vault/cac"
+    vault_root_absolute: str = "/vault"  # parent of all dept folders, used by meeting-fanout
+    meeting_fanout_enabled: bool = True
 
     # Departments config
     departments_config_path: str = "/app/config/departments.json"
