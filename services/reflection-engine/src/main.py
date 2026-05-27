@@ -33,6 +33,20 @@ async def trigger_reflection(dept_id: str, dry_run: bool = False):
     return result
 
 
+@app.post("/synthesis-scan")
+async def trigger_synthesis_scan_endpoint():
+    """Manually fire the same POST that the nightly synthesis-scan cron does.
+
+    Returns the rag-ingestion response (candidates / proposed / proposal_ids)
+    or a failure payload if the call could not complete.
+    """
+    from .synthesis_scan_trigger import trigger_synthesis_scan
+    return await trigger_synthesis_scan(
+        rag_ingestion_url=settings.RAG_INGESTION_URL,
+        timeout_seconds=settings.SYNTHESIS_SCAN_TIMEOUT,
+    )
+
+
 @app.post("/vault-health-check")
 async def trigger_vault_health_check():
     """Manually trigger the vault-wide health check (also runs nightly per scheduler)."""

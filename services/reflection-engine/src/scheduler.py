@@ -4,6 +4,7 @@ from pathlib import Path
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .config import settings
+from .synthesis_scan_trigger import trigger_synthesis_scan
 from .vault_health_check import run_and_persist as run_vault_health_check
 
 log = logging.getLogger(__name__)
@@ -35,6 +36,21 @@ def start_scheduler(db_pool) -> AsyncIOScheduler:
             settings.VAULT_HEALTH_CHECK_CRON_HOUR,
             settings.VAULT_HEALTH_CHECK_CRON_MINUTE,
         )
+    if settings.SYNTHESIS_SCAN_ENABLED:
+        scheduler.add_job(
+            _run_synthesis_scan_job,
+            "cron",
+            hour=settings.SYNTHESIS_SCAN_CRON_HOUR,
+            minute=settings.SYNTHESIS_SCAN_CRON_MINUTE,
+            id="nightly_synthesis_scan",
+            replace_existing=True,
+        )
+        log.info(
+            "Synthesis scan scheduled: %02d:%02d daily -> %s",
+            settings.SYNTHESIS_SCAN_CRON_HOUR,
+            settings.SYNTHESIS_SCAN_CRON_MINUTE,
+            settings.RAG_INGESTION_URL,
+        )
     scheduler.start()
     return scheduler
 
@@ -45,6 +61,17 @@ async def _run_vault_health_check_job() -> None:
         await run_vault_health_check(Path(settings.VAULT_ROOT))
     except Exception:
         log.exception("Vault health check failed")
+
+
+async def _run_synthesis_scan_job() -> None:
+    """Wraps trigger_synthesis_scan with exception isolation."""
+    try:
+        await trigger_synthesis_scan(
+            rag_ingestion_url=settings.RAG_INGESTION_URL,
+            timeout_seconds=settings.SYNTHESIS_SCAN_TIMEOUT,
+        )
+    except Exception:
+        log.exception("Synthesis scan trigger failed")
 
 
 async def _run_all_live_depts(db_pool):
