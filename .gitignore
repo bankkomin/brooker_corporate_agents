@@ -204,3 +204,30 @@ core
 core.*
 *.stackdump
 *.pid
+
+# --- Confidential corporate corpus (transfer via scp, never via git) -----
+# The Obsidian vault IS the corporate knowledge base: real BTC holdings,
+# loan terms (PN.35 USD 39.02M), board minutes, IC decisions, custodial
+# arrangements, director identities. Treat as production data — distribute
+# out-of-band (scp / rsync / encrypted bundle), not via this repo.
+obsidian-vault/
+
+# --- Office reference files containing REAL portfolio / financial data ---
+# IC-dashboard-reference.xlsx has live Feb 2026 positions with MTM, share
+# counts, gain/loss percentages. CAC reference docs likely similar.
+# Sanitised placeholder-only templates under config/templates/office/ stay
+# tracked (they have no real data).
+config/templates/cac/CAC_Monthly_CFO_Report.docx
+config/templates/cac/CAC_Monthly_Data_Pack.xlsx
+config/templates/ic/IC-dashboard-reference.xlsx
+config/templates/ic/IC-meeting-deck-reference.pptx
+config/templates/ic/IC-meeting-minutes-reference.docx
+
+# --- DB migration with PII seed (real employee emails) -------------------
+# 008_agent_access.sql contains hardcoded INSERT VALUES with real emails.
+# Schema migration still needed in production — replace with a non-tracked
+# seed script or env-driven loader before re-enabling git tracking.
+migrations/008_agent_access.sql
+
+# --- Per-agent session memory (may reference internal architecture) ------
+.claude/agent-memory/
