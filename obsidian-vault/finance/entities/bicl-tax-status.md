@@ -15,6 +15,12 @@ tags: ["finance", "entity", "bicl", "tax", "fatca", "w-8ben-e"]
 
 # BICL Tax Status — W-8BEN-E / FATCA Classification
 
+## Quick-answer aliases (for retrieval)
+
+- **Q: What is BICL's FATCA classification?** A: **Active Non-Financial Foreign Entity (Active NFFE)** — established by the signed IRS Form W-8BEN-E (Rev. October 2021).
+- **Q: What FATCA form did BICL sign?** A: **IRS Form W-8BEN-E (Rev. October 2021)** classifying BICL as Active NFFE.
+- **Q: Is BICL a Financial Institution under FATCA?** A: No — BICL is classified as a **Non-Financial Foreign Entity (NFFE), Active** category, not as an FFI.
+
 ## Overview
 
 The signed IRS Form **W-8BEN-E (Rev. October 2021)** establishes

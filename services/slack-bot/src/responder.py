@@ -14,6 +14,30 @@ logger = structlog.get_logger("slack-bot.responder")
 _FILE_FETCH_TIMEOUT = 30.0
 
 
+# Slack section text has a hard 3000-char limit; stay safely under it.
+_SECTION_LIMIT = 2900
+# Slack allows max 50 blocks per message; reserve a few for citations/confidence.
+_MAX_TEXT_BLOCKS = 45
+
+
+def _split_for_blocks(text: str, limit: int = _SECTION_LIMIT) -> list[str]:
+    """Split text into <=limit chunks on line boundaries (markdown-friendly)."""
+    chunks: list[str] = []
+    cur = ""
+    for line in text.split("\n"):
+        while len(line) > limit:  # a single over-long line: hard-split it
+            chunks.append(line[:limit])
+            line = line[limit:]
+        if cur and len(cur) + len(line) + 1 > limit:
+            chunks.append(cur)
+            cur = line
+        else:
+            cur = f"{cur}\n{line}" if cur else line
+    if cur:
+        chunks.append(cur)
+    return chunks
+
+
 def format_response(response: QueryResponse) -> tuple[str, list[dict] | None]:
     """Build Block Kit blocks from a QueryResponse.
 
@@ -24,11 +48,15 @@ def format_response(response: QueryResponse) -> tuple[str, list[dict] | None]:
 
     fallback = response.answer
 
+    # Long answers (e.g. a full CAC report) exceed Slack's 3000-char/section
+    # limit, so split across multiple section blocks.
+    parts = _split_for_blocks(response.answer)
+    if len(parts) > _MAX_TEXT_BLOCKS:
+        parts = parts[:_MAX_TEXT_BLOCKS]
+        parts[-1] += "\n\n_…truncated. Full report available via the data pack._"
     blocks: list[dict] = [
-        {
-            "type": "section",
-            "text": {"type": "mrkdwn", "text": response.answer},
-        }
+        {"type": "section", "text": {"type": "mrkdwn", "text": part}}
+        for part in parts
     ]
 
     if response.citations:

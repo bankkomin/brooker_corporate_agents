@@ -45,13 +45,15 @@ class TestDownloadAndForwardFile:
 
     @pytest.mark.asyncio
     async def test_unsupported_filetype_skipped(self) -> None:
+        # png is now a valid IMAGE_TYPE and routes to MinIO — use a genuinely
+        # unsupported type (exe) to test the skip path.
         from services.slack_bot.src.file_handler import download_and_forward_file
         from services.slack_bot.src.models import SlackFileInfo
 
         f = SlackFileInfo(
-            id="F999", name="image.png", mimetype="image/png",
-            url_private_download="https://files.slack.com/image.png",
-            size=100, filetype="png",
+            id="F999", name="malware.exe", mimetype="application/octet-stream",
+            url_private_download="https://files.slack.com/malware.exe",
+            size=100, filetype="exe",
         )
         result = await download_and_forward_file(
             file_info=f,

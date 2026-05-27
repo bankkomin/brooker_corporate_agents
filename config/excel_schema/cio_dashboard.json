@@ -1,0 +1,85 @@
+{
+  "filename": "CIO_Dashboard.xlsx",
+  "description": "CIO Portfolio Dashboard — asset-class ratios + Investment Company classification rolls. Pattern follows Dashboard Feb2026.xlsx (per skills/cio/cio-agent.md). Cell coordinates here are PROVISIONAL until the canonical CIO_Dashboard.xlsx is registered.",
+  "tabs": [
+    {
+      "name": "Apr 26",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "Equity Securities ratio",
+          "columns": {"B": "Asset Class", "C": "Ceiling", "D": "Current ratio", "E": "MoM delta"}
+        },
+        {
+          "row": 5,
+          "label": "Fixed Income ratio",
+          "columns": {"B": "Asset Class", "C": "Ceiling", "D": "Current ratio", "E": "MoM delta"}
+        },
+        {
+          "row": 6,
+          "label": "Structured Loan ratio",
+          "columns": {"B": "Asset Class", "C": "Ceiling", "D": "Current ratio", "E": "MoM delta"}
+        },
+        {
+          "row": 7,
+          "label": "Digital Asset Treasury ratio",
+          "columns": {"B": "Asset Class", "C": "Ceiling 50%", "D": "Current ratio", "E": "Breach flag"}
+        },
+        {
+          "row": 8,
+          "label": "Investment Company / Total Assets",
+          "columns": {"B": "Metric", "C": "Cap 40% (Jun 2026)", "D": "Current ratio", "E": "Status"}
+        }
+      ],
+      "agent_targets": ["D4", "D5", "D6", "D7", "D8", "E7", "E8"],
+      "notes": "D7 (DAT) and D8 (40% rule) are the two highest-priority cells for staging. Currently in breach per the dashboard."
+    },
+    {
+      "name": "Coin Book",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "BTC units",
+          "columns": {"B": "Token", "C": "Units held", "D": "Cost basis USD", "E": "Current MTM USD"}
+        },
+        {
+          "row": 5,
+          "label": "BNB units",
+          "columns": {"B": "Token", "C": "Units held", "D": "Cost basis USD", "E": "Current MTM USD"}
+        }
+      ],
+      "agent_targets": ["C4", "C5", "E4", "E5"],
+      "notes": "Anchor stack: BTC=164.6554, BNB~43,065. Updates require coin-weekly-report reconciliation."
+    },
+    {
+      "name": "Custodian Fees",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "Hex Trust tier 1 ($0-10M)",
+          "columns": {"B": "AUC tier", "C": "bps rate", "D": "Active waiver?"}
+        },
+        {
+          "row": 5,
+          "label": "Hex Trust tier 2 ($10-50M)",
+          "columns": {"B": "AUC tier", "C": "bps rate", "D": "Active waiver?"}
+        },
+        {
+          "row": 6,
+          "label": "Hex Trust tier 3 ($50-100M)",
+          "columns": {"B": "AUC tier", "C": "bps rate", "D": "Active waiver?"}
+        },
+        {
+          "row": 7,
+          "label": "Hex Trust tier 4 ($100M+)",
+          "columns": {"B": "AUC tier", "C": "bps rate", "D": "Active waiver?"}
+        }
+      ],
+      "agent_targets": ["C4", "C5", "C6", "C7", "D4", "D5", "D6", "D7"],
+      "notes": "Defaults per skills/cio: 8 / 6 / 4 / 2 bps. Update only after Hex Trust invoice reconciliation."
+    }
+  ]
+}

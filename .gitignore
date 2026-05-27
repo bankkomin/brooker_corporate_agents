@@ -105,3 +105,102 @@ secrets/*.pem
 obsidian-vault/*/_memory/*/memory.md
 obsidian-vault/*/_memory/*/user.md
 obsidian-vault/*/_memory/*/history/
+
+# ============================================================================
+# STRICT SECURITY HARDENING  (deny-by-default for secrets & corporate data)
+# ============================================================================
+
+# --- Secrets, credentials & private keys --------------------------------
+# Every .env variant is ignored; only documented examples may be committed.
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.env
+# Private keys / certs / keystores (any extension, anywhere)
+*.pem
+*.key
+*.keystore
+*.jks
+*.pkcs12
+*.pfx
+*.p12
+*.cer
+*.crt
+*.der
+*.csr
+*.asc
+*.gpg
+*.pgp
+# SSH / known credential filenames
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.ppk
+.ssh/
+.netrc
+.npmrc
+.pypirc
+.htpasswd
+# Cloud / service-account credential files
+credentials.json
+client_secret*.json
+service-account*.json
+service_account*.json
+*-credentials.json
+gha-creds-*.json
+.aws/
+.azure/
+.gcloud/
+gcloud-*.json
+*.kubeconfig
+kubeconfig
+# Generic token/secret dumps
+*.token
+*token.json
+secrets.*
+*.secret
+*.secrets
+# Whole secrets/ dir — only the placeholder survives (see secrets/.gitignore)
+secrets/*
+!secrets/.gitkeep
+
+# --- Corporate data zones (PRD data-safety rule: NEVER commit) -----------
+/data/
+mirror_data/
+staging_data/
+archive_data/
+# Per-service runtime data dir (rag-ingestion's local vector store).
+# NOTE: scoped to this path on purpose — a broad services/**/data/ would
+# wrongly catch source routes like approval-ui's src/app/[dept]/data/.
+services/rag-ingestion/data/
+# Vector stores / embeddings (corporate documents live here)
+**/qdrant_local/
+**/qdrant_storage/
+qdrant_data/
+chroma_data/
+*.sqlite
+*.sqlite3
+*.duckdb
+# Object / DB stores & dumps
+minio_data/
+postgres_data/
+pgdata/
+*.dump
+*.sql.gz
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+# --- Worktrees / clones / scratch ---------------------------------------
+.clone/
+.claude/worktrees/
+*.tmp
+*.temp
+core
+core.*
+*.stackdump
+*.pid

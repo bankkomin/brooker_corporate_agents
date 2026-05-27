@@ -9,6 +9,7 @@ from slack_bolt.async_app import AsyncApp
 
 from .clients import OrchestratorClient, RAGIngestionClient
 from .file_handler import download_and_forward_file
+from .image_intent import ImagePlacementSpec, extract_image_placement
 from .models import SlackFileInfo
 from .responder import post_error_to_thread, reply_in_thread
 
@@ -86,7 +87,7 @@ def register_event_handlers(
         await ack()
         asyncio.create_task(
             _safe_process(
-                _process_mention(event, client, rag_client, orch_client)
+                _process_mention(event, client, rag_client, orch_client, bot_token)
             ),
             name="query_orchestrator",
         )
@@ -147,11 +148,88 @@ async def _process_file(
         logger.error("events.file_ingest_failed", file_id=file_id, error=str(exc))
 
 
+async def _collect_image_uploads(
+    event: dict,
+    bot_token: str,
+    rag_client: RAGIngestionClient,
+    channel_id: str,
+) -> list[dict]:
+    """Download any image attachments from the event and upload them to MinIO.
+
+    Iterates over ``event["files"]`` (present when a user attaches files to an
+    @mention). Documents are forwarded to rag-ingestion as a side-effect; only
+    image results (status == "uploaded_image") are returned for deck embedding.
+
+    MinIO failures per file are caught and logged — they do NOT abort the whole
+    request.  Other file types (pdf, xlsx, …) are forwarded to rag-ingestion
+    but are not included in the returned list.
+    """
+    raw_files: list[dict] = event.get("files") or []
+    if not raw_files:
+        return []
+
+    image_uploads: list[dict] = []
+
+    for file_obj in raw_files:
+        file_id: str = file_obj.get("id", "")
+        try:
+            file_info = SlackFileInfo(
+                id=file_id,
+                name=file_obj.get("name", ""),
+                mimetype=file_obj.get("mimetype", ""),
+                url_private_download=file_obj.get("url_private_download", ""),
+                size=file_obj.get("size", 0),
+                filetype=file_obj.get("filetype", ""),
+            )
+        except Exception as exc:
+            logger.warning(
+                "events.file_info_parse_error",
+                file_id=file_id,
+                error=str(exc),
+            )
+            continue
+
+        try:
+            result = await download_and_forward_file(
+                file_info=file_info,
+                channel_id=channel_id,
+                bot_token=bot_token,
+                rag_client=rag_client,
+            )
+        except Exception as exc:
+            # MinIO down, network failure, etc. — log and skip this image.
+            logger.error(
+                "events.file_upload_failed",
+                file_id=file_id,
+                filename=file_info.name,
+                error=str(exc),
+            )
+            continue
+
+        if result.get("status") == "uploaded_image":
+            image_uploads.append(
+                {
+                    "minio_key": result["minio_key"],
+                    "filename": result["filename"],
+                    "file_id": result["file_id"],
+                    "channel_id": channel_id,
+                }
+            )
+            logger.info(
+                "events.image_collected",
+                file_id=file_id,
+                minio_key=result["minio_key"],
+            )
+
+    return image_uploads
+
+
 async def _process_mention(
     event: dict,
     client,
     rag_client: RAGIngestionClient,
     orch_client: OrchestratorClient,
+    bot_token: str = "",
 ) -> None:
     """Parse @mention query, index question, query orchestrator, reply in thread."""
     channel = event.get("channel", "")
@@ -180,18 +258,99 @@ async def _process_mention(
     # answered by the Risk agent without needing a [risk] prefix.
     channel_dept = await _resolve_channel_dept(client, channel)
 
+    # ------------------------------------------------------------------
+    # Collect image uploads attached to this @mention (if any).
+    # We do this regardless of intent so documents always get indexed too.
+    # ------------------------------------------------------------------
+    image_uploads: list[dict] = []
+    if event.get("files") and bot_token:
+        image_uploads = await _collect_image_uploads(
+            event=event,
+            bot_token=bot_token,
+            rag_client=rag_client,
+            channel_id=channel,
+        )
+
+    # ------------------------------------------------------------------
+    # Determine intent so we know whether to run the image extractor.
+    # We mirror the routing logic from OrchestratorClient._parse_dept so
+    # we can decide *here* before the client call.  The client will still
+    # do its own routing internally.
+    # ------------------------------------------------------------------
+    images_spec: list[ImagePlacementSpec] = []
+    if image_uploads:
+        # Peek at the intent: explicit [dept] prefix or LLM classification.
+        dept_hint = _extract_explicit_dept(query)
+        is_artefact = dept_hint in ("deck", "report") or (
+            dept_hint is None
+            and await _intent_is_artefact(orch_client, query)
+        )
+        if is_artefact:
+            artefact_kind = "report" if dept_hint == "report" else "deck"
+            try:
+                images_spec = await extract_image_placement(
+                    message_text=query,
+                    image_uploads=image_uploads,
+                    artefact_kind=artefact_kind,
+                )
+                logger.info(
+                    "events.image_placement_extracted",
+                    n_specs=len(images_spec),
+                    artefact_kind=artefact_kind,
+                )
+            except Exception as exc:
+                # Extractor failure must never kill the whole request.
+                logger.error(
+                    "events.image_placement_failed",
+                    error=str(exc),
+                    fallback="no_images",
+                )
+                images_spec = []
+
     result = await orch_client.query(
         query=query,
         user_id=user_id,
         channel=channel,
         thread_ts=thread_ts,
         channel_dept=channel_dept,
+        images=images_spec,
     )
 
     if result.error:
         await post_error_to_thread(client, channel, thread_ts, RuntimeError(result.error))
     else:
         await reply_in_thread(client, channel, thread_ts, result)
+
+
+# ---------------------------------------------------------------------------
+# Intent-peek helpers (used only by _process_mention to decide image routing)
+# ---------------------------------------------------------------------------
+
+_EXPLICIT_DEPT_RE = re.compile(r"^\s*\[([a-z]+)\]\s*", re.IGNORECASE)
+_ARTEFACT_DEPTS = frozenset({"deck", "report"})
+
+
+def _extract_explicit_dept(query: str) -> str | None:
+    """Return the [dept] prefix value if present and it's an artefact dept."""
+    m = _EXPLICIT_DEPT_RE.match(query)
+    if m:
+        d = m.group(1).lower()
+        if d in _ARTEFACT_DEPTS:
+            return d
+    return None
+
+
+async def _intent_is_artefact(orch_client: OrchestratorClient, query: str) -> bool:
+    """Ask the intent router if this message is a deck request.
+
+    Returns False on any error — we'd rather skip image embedding than crash.
+    """
+    try:
+        intent = await orch_client._intent_router.classify(query)
+        return intent.name == "deck"
+    except Exception as exc:
+        logger.warning("events.intent_peek_failed", error=str(exc))
+        return False
 
 
 def _strip_mention(text: str) -> str:

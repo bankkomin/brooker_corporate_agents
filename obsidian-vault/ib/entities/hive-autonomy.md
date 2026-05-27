@@ -17,6 +17,14 @@ tags: ["ib", "entity", "portfolio-company", "physical-ai", "autonomy", "logistic
 
 # Hive Autonomy
 
+## Quick-answer aliases
+
+- Hive Autonomy payback period: 7 months
+- The payback period for Hive Autonomy's fleet-autonomy solution is 7 months
+- Hive Autonomy 7-month payback on fleet-autonomy deployment
+- How long does Hive Autonomy take to pay back? Answer: 7 months
+- Hive Autonomy operator efficiency: 10 operators reduced to 1 (10:1 ratio)
+
 ## Overview
 
 Hive Autonomy is a [[superseed-fund-iii|SuperSeed Fund III]] portfolio company in

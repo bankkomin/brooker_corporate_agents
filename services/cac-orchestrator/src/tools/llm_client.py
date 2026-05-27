@@ -6,6 +6,8 @@ temperature, ...} and returns choices[0].message.content.
 """
 from __future__ import annotations
 
+import asyncio
+import os
 import time
 from typing import Any
 
@@ -14,6 +16,12 @@ import structlog
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 logger = structlog.get_logger("cac-orchestrator.llm")
+
+# The DGX runs a single Qwen Spark that fails beyond a few concurrent sequences.
+# Cap concurrent calls per process; extra calls await a free slot (no reject).
+# Shared across every LLMClient instance in this process.
+LLM_MAX_CONCURRENCY = int(os.getenv("LLM_MAX_CONCURRENCY", "4"))
+_DGX_SEMAPHORE = asyncio.Semaphore(LLM_MAX_CONCURRENCY)
 
 _PASSTHROUGH_KEYS = (
     "top_p",
@@ -74,9 +82,10 @@ class LLMClient:
             if k in kwargs:
                 body[k] = kwargs[k]
 
-        resp = await self._http.post(f"{self._base_url}/chat/completions", json=body)
-        resp.raise_for_status()
-        data = resp.json()
+        async with _DGX_SEMAPHORE:
+            resp = await self._http.post(f"{self._base_url}/chat/completions", json=body)
+            resp.raise_for_status()
+            data = resp.json()
 
         message = data["choices"][0]["message"]
         content = message.get("content") or ""

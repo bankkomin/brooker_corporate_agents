@@ -31,11 +31,39 @@ logger = structlog.get_logger("cac-orchestrator.grounding_gate")
 _DEFAULT_MIN_RELEVANCE: float = 0.50
 _MIN_RELEVANCE: float = float(os.getenv("RAG_MIN_RELEVANCE", str(_DEFAULT_MIN_RELEVANCE)))
 
-# Canned abstention message shown when no grounding exists.
+_URL_RE = re.compile(r"https?://\S+")
+_SHAREPOINT_RE = re.compile(r"sharepoint\.com|1drv\.ms|onedrive", re.I)
+
+# Generic fallback only (used if abstain() builder errors out).
 _ABSTENTION_ANSWER = (
     "I don't have reference material on this topic in my knowledge base yet. "
     "Please share a relevant document or data source and I'll analyse it."
 )
+
+
+def abstain(query: str) -> str:
+    """Context-aware abstain for the CAC chat path.
+
+    Does not contradict the user when they JUST shared a link, names what the
+    CAC agent is actually grounded in, and routes Data-Pack-style SharePoint
+    links to the report path that can actually open them.
+    """
+    q = query or ""
+    has_url = bool(_URL_RE.search(q))
+    is_share = bool(_SHAREPOINT_RE.search(q))
+    base = ("I don't have an answer for that in the CAC agent's ingested records "
+            "(cac_docs, cac_knowledge, cross-reads from finance/risk/cio/ceo).")
+    if is_share:
+        return (f"{base} I can see the SharePoint/OneDrive link you shared, but the "
+                f"chat path can't open external files. To turn this Data Pack into "
+                f"the CAC Meeting Report .docx, rephrase as \"produce CAC report "
+                f"from this link\" — the report pipeline reads the workbook directly.")
+    if has_url:
+        return (f"{base} The link in your message isn't a source I can fetch from "
+                f"this chat path — upload the file directly to this channel and "
+                f"I'll ingest it.")
+    return (f"{base} Share the relevant document (PDF / Word / Excel) directly in "
+            f"this channel and I'll ingest and analyse it.")
 
 # Patterns that identify conversational / meta queries that should always reply.
 # Checked against the lowercased, stripped query.
@@ -93,7 +121,28 @@ async def grounding_gate(state: dict) -> dict:
 
     if _is_conversational(query):
         logger.info("grounding_gate_pass", reason="conversational")
-        return {"is_grounded": True}
+        # Mark this turn so synthesise knows the answer comes from the SKILL
+        # mandate (not retrieved sources). Without this, the post-LLM citation
+        # backstop verifies the LLM's [N] markers against retrieval noise and
+        # wrongly replaces legitimate capability/greeting answers with abstain.
+        return {"is_grounded": True, "is_capability_bypass": True}
+
+    # SharePoint/OneDrive link in the query: the chat path can NOT open it
+    # (only the cac-report pipeline calls MS Graph). Short-circuit even if RAG
+    # found weakly-related chunks — otherwise the synthesiser produces a
+    # confidently-cited but irrelevant answer that pretends to read the file.
+    if _SHAREPOINT_RE.search(query or ""):
+        logger.warning("grounding_gate_blocked", reason="external_share_link",
+                       query_preview=query[:80])
+        return {
+            "is_grounded": False,
+            "answer": abstain(query),
+            "confidence": "Low",
+            "proposed_value": None,
+            "proposed_cell": None,
+            "proposed_tab": None,
+            "staging_proposal_id": None,
+        }
 
     grounded = _has_grounded_source(sources, _MIN_RELEVANCE) or bool(attached.strip())
 
@@ -115,7 +164,7 @@ async def grounding_gate(state: dict) -> dict:
     return {
         "is_grounded": False,
         # Pre-populate answer so synthesise's LLM call is skipped (see synthesise.py).
-        "answer": _ABSTENTION_ANSWER,
+        "answer": abstain(query),
         "confidence": "Low",
         # Ensure no proposal bleed-through from a previous turn in the thread.
         "proposed_value": None,

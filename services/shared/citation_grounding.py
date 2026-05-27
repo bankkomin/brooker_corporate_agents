@@ -91,17 +91,38 @@ def ground_citations(
         # Remove citation markers from claim for comparison
         claim_clean = citation_pattern.sub('', claim).strip()
 
-        # Compare claim against source
-        similarity = SequenceMatcher(None, claim_clean.lower(), source_text.lower()).ratio()
+        # Strip markdown so **bold** / *italic* / `code` / # headers don't
+        # break tokenisation. Without this, claim "USD **39,023,179.25**" splits
+        # into ["USD", "**39,023,179.25**"] and never matches source token
+        # "39,023,179.25" — the backstop wrongly rejects an exact-match claim.
+        md_strip = lambda s: re.sub(r'[*_`#]+', '', s)
+        claim_norm = md_strip(claim_clean).lower()
+        source_norm = md_strip(source_text).lower()
 
-        # Also check if key phrases from the claim appear in the source
-        claim_words = set(claim_clean.lower().split())
-        source_words = set(source_text.lower().split())
-        word_overlap = len(claim_words & source_words) / max(len(claim_words), 1)
-
-        # Combined score
-        combined = (similarity + word_overlap) / 2
-        verified = combined >= threshold
+        # FAST-PATH: factual-claim verification by content tokens.
+        # Extract numbers (≥2 chars) and proper nouns (Capitalized ≥3 chars).
+        # If ALL content tokens in the claim appear in the source, the claim is
+        # grounded — this handles "PN.35 principal is USD 39,023,179.25" cleanly
+        # where the fact tokens are present verbatim. STRICT version: requires
+        # all tokens (numeric + proper noun) to match. Avoids the false positives
+        # of a proper-noun-majority rule.
+        content_tokens = re.findall(
+            r'\b[\d][\d.,]{1,}\b|\b[A-Z][A-Za-z]{2,}\b', claim_clean
+        )
+        if content_tokens and all(t.lower() in source_norm for t in content_tokens):
+            similarity = 1.0
+            word_overlap = 1.0
+            combined = 1.0
+            verified = True
+        else:
+            # Fall back to fuzzy similarity + word-overlap (existing behaviour),
+            # but on markdown-stripped strings so tokens align correctly.
+            similarity = SequenceMatcher(None, claim_norm, source_norm).ratio()
+            claim_words = set(claim_norm.split())
+            source_words = set(source_norm.split())
+            word_overlap = len(claim_words & source_words) / max(len(claim_words), 1)
+            combined = (similarity + word_overlap) / 2
+            verified = combined >= threshold
 
         result = GroundingResult(
             citation_ref=f"[{ref_num}]",

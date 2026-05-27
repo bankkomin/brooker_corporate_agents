@@ -5,7 +5,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+for _p in Path(__file__).resolve().parents:
+    if (_p / ".env").exists():
+        load_dotenv(_p / ".env")
+        break
 
 import logging
 import os
@@ -487,6 +490,51 @@ async def monthly_cfo_report() -> dict:
             for s in sources
         ],
     }
+
+
+@app.get("/report/cac-meeting")
+async def cac_meeting_report(share_url: str | None = None) -> dict:
+    """Produce the CAC committee meeting report FIRST DRAFT from the live Excel
+    Online data pack (MS Graph). Figures are read straight from the workbook;
+    the LLM only writes grounded narrative. Limit breaches are computed in code.
+
+    The Excel Online link is taken from the `share_url` query param (e.g. pasted
+    in the Slack `[cac-report] <link>` command). If omitted, falls back to the
+    CAC_DATA_PACK_SHARE_URL env default. MS_GRAPH_* credentials are required.
+
+    Returns {"report": "<markdown>", "breaches": [...], "month": "...", "source": "..."}.
+    """
+    import os as _os
+    from datetime import date
+
+    llm_client = _state.get("llm_client")
+    if llm_client is None:
+        raise HTTPException(503, "orchestrator components not ready")
+
+    share_url = (share_url or _os.getenv("CAC_DATA_PACK_SHARE_URL", "")).strip()
+    if not share_url:
+        raise HTTPException(
+            422,
+            "No Excel Online link given. Paste a SharePoint/OneDrive share link "
+            "after the command (e.g. `[cac-report] https://...`) or set "
+            "CAC_DATA_PACK_SHARE_URL.",
+        )
+    if not share_url.lower().startswith(("http://", "https://")):
+        raise HTTPException(422, f"Not a valid share link: {share_url[:80]!r}")
+
+    try:
+        from services.shared.ms_graph_excel import GraphExcel
+        gx = GraphExcel.from_env()
+        workbook = await gx.read_workbook_by_share_url(share_url)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("cac_meeting_report.excel_read_failed", error=str(exc))
+        raise HTTPException(502, f"Could not read the Excel Online data pack: {exc}")
+
+    from .cac_meeting_report import build_report
+    month = date.today().strftime("%B %Y")
+    result = await build_report(workbook, llm_client, month, source_url=share_url)
+    logger.info("cac_meeting_report.done", month=month, breaches=len(result.get("breaches", [])))
+    return result
 
 
 @app.get("/health")

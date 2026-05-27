@@ -48,3 +48,45 @@ class CollectionInfo(BaseModel):
 
 class CollectionsResponse(BaseModel):
     collections: list[CollectionInfo]
+
+
+# ── /reingest-vault models ────────────────────────────────────────────────────
+
+class ReIngestVaultRequest(BaseModel):
+    dept: str = Field(..., description="Department slug — must be a key in obsidian_watch.json")
+    subdirs: list[str] | None = Field(
+        default=None,
+        description="Optional sub-directories to restrict the walk (e.g. ['entities', 'concepts']). "
+                    "If omitted, all configured subdirs for the dept are walked.",
+    )
+    delete_stale: bool = Field(
+        default=False,
+        description="If true, delete all existing chunks for this dept before ingesting.",
+    )
+    dry_run: bool = Field(
+        default=False,
+        description="If true, walk the tree and return the file list without touching Qdrant.",
+    )
+
+
+class FileIngestResult(BaseModel):
+    name: str = Field(..., description="Vault-relative file path")
+    collection: str
+    doc_type: str
+    chunks: int = Field(default=0)
+    status: str = Field(default="ok", description="ok | skipped | error")
+    error: str = Field(default="")
+
+
+class ReIngestVaultResult(BaseModel):
+    dept: str
+    files_processed: int
+    chunks_created: int
+    chunks_updated: int = 0
+    chunks_deleted: int = 0
+    collections_affected: list[str]
+    duration_seconds: float
+    errors: list[str]
+    dry_run: bool = False
+    # Only populated on dry_run=True
+    files_found: list[str] = Field(default_factory=list)

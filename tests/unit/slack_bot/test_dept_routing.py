@@ -1,56 +1,7 @@
 """Unit tests for slack-bot channel routing, QueryRequest dept_id, and intent fast-paths."""
 from __future__ import annotations
 
-import importlib
-import sys
-import types
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
-
 import pytest
-
-
-# ---------------------------------------------------------------------------
-# Stub heavy deps not in the unit-test venv so the slack-bot modules import.
-# Must run before any service import.
-# ---------------------------------------------------------------------------
-
-def _stub_slack_deps() -> None:
-    """Inject minimal stubs for slack_bolt and local sibling modules."""
-    if "slack_bolt" not in sys.modules:
-        bolt = types.ModuleType("slack_bolt")
-        async_app_mod = types.ModuleType("slack_bolt.async_app")
-
-        class _AsyncApp:
-            def __init__(self, *a, **kw): pass
-            def event(self, *a, **kw):
-                def decorator(fn): return fn
-                return decorator
-
-        async_app_mod.AsyncApp = _AsyncApp
-        bolt.async_app = async_app_mod
-        sys.modules["slack_bolt"] = bolt
-        sys.modules["slack_bolt.async_app"] = async_app_mod
-
-    # Stub out the sibling modules that events.py imports.
-    _svc = Path(__file__).resolve().parents[4] / "services" / "slack-bot" / "src"
-    pkg = "services.slack_bot.src"
-    for sub in ("clients", "file_handler", "responder"):
-        mod_name = f"{pkg}.{sub}"
-        if mod_name not in sys.modules:
-            m = types.ModuleType(mod_name)
-            if sub == "clients":
-                m.OrchestratorClient = MagicMock  # type: ignore[attr-defined]
-                m.RAGIngestionClient = MagicMock  # type: ignore[attr-defined]
-            elif sub == "file_handler":
-                m.download_and_forward_file = AsyncMock()  # type: ignore[attr-defined]
-            elif sub == "responder":
-                m.post_error_to_thread = AsyncMock()  # type: ignore[attr-defined]
-                m.reply_in_thread = AsyncMock()  # type: ignore[attr-defined]
-            sys.modules[mod_name] = m
-
-
-_stub_slack_deps()
 
 
 # ---------------------------------------------------------------------------

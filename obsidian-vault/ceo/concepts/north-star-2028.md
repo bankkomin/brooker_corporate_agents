@@ -13,6 +13,14 @@ tags: ["ceo", "concept", "strategy", "targets", "north-star", "okr"]
 
 # North Star 2026–2028 — Quantitative Targets
 
+## Quick-answer aliases (for retrieval)
+
+- **Q: What is the North Star 2028 recurring income target?** A: **THB 500M annually**, independent of asset-price appreciation.
+- **Q: What is the institutional AUM North Star target?** A: **USD 600M** (~THB 19bn) across the VCC platform.
+- **Q: What is the North Star balance-sheet / treasury target?** A: **THB 4bn** (from ~THB 1bn).
+- **Q: What is the North Star leverage / D/E target?** A: **D/E below 0.5x**.
+- **Q: What is the North Star market-narrative target?** A: Earnings multiple on fees (not a discount to NAV).
+
 ## Summary
 
 The North Star defines Brooker Group as Southeast Asia's "Institutional Innovation

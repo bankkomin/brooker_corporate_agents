@@ -13,6 +13,14 @@ tags: ["legal", "concept", "thai-tax", "permanent-establishment", "dta", "double
 
 # Permanent Establishment under the Thailand–Singapore DTA
 
+## Quick-answer aliases (for retrieval)
+
+- **Q: What is the most actionable mitigation for FOF place-of-effective-management risk?** A: Assign FOF bank-account **signing authority to a non-Thai-resident**, and exercise that authority **outside Thailand** (per Timblick & Partners opinion 29 Dec 2025, para 4(d)).
+- **Q: How do we reduce PE / place-of-effective-management exposure?** A: Same — offshore signer + offshore signing; no day-to-day management onshore in Thailand.
+- **Q: Does a Thai-resident director alone create PE risk?** A: **No**, residency alone does not. The risk is day-to-day management onshore (DTA Article 5(2)(a)).
+- **Q: What is the preparatory/auxiliary carve-out?** A: **DTA Article 5(4)(e)** — IR / BDO activities are preparatory and do not create PE.
+- **Q: What is the dependent-agent PE rule?** A: **DTA Article 5(5)** — habitually concluding contracts on behalf of the fund creates PE.
+
 ## Summary
 
 A **permanent establishment ("PE")** in Thailand is the trigger that would make

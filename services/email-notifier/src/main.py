@@ -5,7 +5,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+for _p in Path(__file__).resolve().parents:
+    if (_p / ".env").exists():
+        load_dotenv(_p / ".env")
+        break
 
 import json
 import os

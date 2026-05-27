@@ -9,6 +9,7 @@ report run, etc.).
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import re
@@ -20,6 +21,10 @@ import httpx
 import structlog
 
 logger = structlog.get_logger("slack-bot.intent_router")
+
+# Cap concurrent calls to the shared DGX Spark (fails beyond a few concurrent).
+LLM_MAX_CONCURRENCY = int(os.getenv("LLM_MAX_CONCURRENCY", "4"))
+_DGX_SEMAPHORE = asyncio.Semaphore(LLM_MAX_CONCURRENCY)
 
 IntentName = Literal["deck", "chat"]
 
@@ -46,7 +51,7 @@ _SYSTEM_PROMPT = (
 # Saves the latency hit on the obvious cases (greetings, plain questions).
 _DECK_VERB = re.compile(
     r"\b(generate|create|make|write|draft|build|compose|prepare|put together|"
-    r"give me|produce)\b[^?]{0,80}\b(deck|slides?|presentation|pptx|pitch)\b",
+    r"give me|produce)\b[^?]{0,80}\b(deck|slides?|presentation|pptx|ppt|powerpoint|pitch)\b",
     re.IGNORECASE,
 )
 # Message that STARTS with a deck noun ("deck about X", "slides on Y",
@@ -54,7 +59,7 @@ _DECK_VERB = re.compile(
 # `\s+\S` requires actual content after the noun so a bare "deck" or
 # "what is a deck" doesn't match.
 _DECK_NOUN_LEAD = re.compile(
-    r"^\s*(?:a\s+)?(?:pitch\s+)?(?:deck|slides?|presentation|pptx|slide\s+deck)"
+    r"^\s*(?:a\s+)?(?:pitch\s+)?(?:deck|slides?|presentation|pptx|ppt|powerpoint|slide\s+deck)"
     r"\s+(?:about|on|for|covering|comparing|featuring|with|that|to|of)\b",
     re.IGNORECASE,
 )
@@ -116,9 +121,10 @@ class IntentRouter:
         }
         t0 = time.monotonic()
         try:
-            r = await self._http.post(self._url, json=body)
-            r.raise_for_status()
-            raw = r.json()["choices"][0]["message"]["content"] or "{}"
+            async with _DGX_SEMAPHORE:
+                r = await self._http.post(self._url, json=body)
+                r.raise_for_status()
+                raw = r.json()["choices"][0]["message"]["content"] or "{}"
             parsed = _extract_json_object(raw) or {}
             name = parsed.get("intent")
             if name not in ("deck", "chat"):

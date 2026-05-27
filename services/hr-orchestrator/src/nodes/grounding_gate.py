@@ -28,10 +28,40 @@ logger = structlog.get_logger("hr-orchestrator.grounding_gate")
 _DEFAULT_MIN_RELEVANCE: float = 0.50
 _MIN_RELEVANCE: float = float(os.getenv("RAG_MIN_RELEVANCE", str(_DEFAULT_MIN_RELEVANCE)))
 
+_URL_RE = re.compile(r"https?://\S+")
+_SHAREPOINT_RE = re.compile(r"sharepoint\.com|1drv\.ms|onedrive", re.I)
+
+# Generic fallback only (used if abstain() builder errors out).
 _ABSTENTION_ANSWER = (
     "I don't have reference material on this topic in my knowledge base yet. "
     "Please share a relevant document or data source and I'll analyse it."
 )
+
+
+def abstain(query: str) -> str:
+    """Context-aware abstain for the HR chat path.
+
+    HR's ingested record is thin (two completed internal-control self-assessment
+    questionnaires in Thai). The abstain names that explicitly, acknowledges any
+    link the user shared (instead of asking them to share a doc they just did),
+    and notes the chat path can't open external files.
+    """
+    q = query or ""
+    has_url = bool(_URL_RE.search(q))
+    is_share = bool(_SHAREPOINT_RE.search(q))
+    base = ("I don't have an answer for that in the HR agent's ingested records "
+            "(two internal-control self-assessment questionnaires in Thai — "
+            "employment-contract storage + working-time/leave).")
+    if is_share:
+        return (f"{base} I can see the SharePoint/OneDrive link you shared, but the "
+                f"chat path can't open external files. Upload the document directly "
+                f"to this channel and I'll ingest it into the HR knowledge base.")
+    if has_url:
+        return (f"{base} The link in your message isn't a source I can fetch from "
+                f"this chat path — upload the file directly to this channel and "
+                f"I'll ingest it.")
+    return (f"{base} Share the relevant document (PDF / Word / Excel) directly in "
+            f"this channel and I'll ingest and analyse it.")
 
 _CONVERSATIONAL_RE = re.compile(
     r"^("
@@ -85,7 +115,22 @@ async def grounding_gate(state: dict) -> dict:
 
     if _is_conversational(query):
         logger.info("grounding_gate_pass", reason="conversational")
-        return {"is_grounded": True}
+        # is_capability_bypass tells synthesise to skip the post-LLM citation
+        # backstop — capability answers come from the SKILL mandate, not from
+        # retrieved sources, so the backstop has nothing legit to verify against.
+        return {"is_grounded": True, "is_capability_bypass": True}
+
+    # SharePoint/OneDrive link: chat path can NOT open external files. Short-
+    # circuit even if RAG returned weakly-related chunks, otherwise synthesise
+    # produces a confidently-cited but irrelevant answer that pretends to read it.
+    if _SHAREPOINT_RE.search(query or ""):
+        logger.warning("grounding_gate_blocked", reason="external_share_link",
+                       query_preview=query[:80])
+        return {
+            "is_grounded": False,
+            "answer": abstain(query),
+            "confidence": "Low",
+        }
 
     grounded = _has_grounded_source(sources, _MIN_RELEVANCE) or bool(attached.strip())
 
@@ -105,6 +150,6 @@ async def grounding_gate(state: dict) -> dict:
     )
     return {
         "is_grounded": False,
-        "answer": _ABSTENTION_ANSWER,
+        "answer": abstain(query),
         "confidence": "Low",
     }

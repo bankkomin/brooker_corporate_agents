@@ -1,0 +1,85 @@
+{
+  "filename": "VCC_NAV_Tracker.xlsx",
+  "description": "Brook Technology Capital VCC — NAV + Closing batch + LP commitment tracker. Pattern per skills/vcc/vcc-agent.md. Cell coordinates PROVISIONAL until canonical file is registered.",
+  "tabs": [
+    {
+      "name": "FoF I NAV",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "Period-end NAV (USD)",
+          "columns": {"B": "Period", "C": "NAV USD", "D": "As-of date", "E": "Source"}
+        },
+        {
+          "row": 5,
+          "label": "Total Commitments (USD)",
+          "columns": {"B": "Metric", "C": "Amount", "D": "% of US$150M cap"}
+        },
+        {
+          "row": 6,
+          "label": "Capital Called (USD)",
+          "columns": {"B": "Metric", "C": "Amount", "D": "% of Commitments"}
+        },
+        {
+          "row": 7,
+          "label": "Distributions to date (USD)",
+          "columns": {"B": "Metric", "C": "Amount", "D": "DPI multiple"}
+        }
+      ],
+      "agent_targets": ["C4", "C5", "C6", "C7", "D4", "D5", "D6", "D7"],
+      "notes": "NAV updates MUST follow Formidium reconciliation per skills/vcc Hard Rule. Carry confidence ≥0.90."
+    },
+    {
+      "name": "Closings",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "Initial Offer Period end",
+          "columns": {"B": "Event", "C": "Date", "D": "Subscribers count", "E": "USD raised"}
+        },
+        {
+          "row": 5,
+          "label": "First Closing",
+          "columns": {"B": "Event", "C": "Date", "D": "Subscribers count", "E": "USD raised"}
+        },
+        {
+          "row": 6,
+          "label": "Subsequent Closings",
+          "columns": {"B": "Event", "C": "Date", "D": "Subscribers count", "E": "USD raised", "F": "Equalisation Premium"}
+        }
+      ],
+      "agent_targets": ["C4", "C5", "C6", "D4", "D5", "D6", "E4", "E5", "E6"],
+      "notes": "Held Supplement is a 30-Mar-2026 tracked draft with blank [●] closing dates — flag as provisional."
+    },
+    {
+      "name": "Service Providers",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "Fund Manager (Ternary)",
+          "columns": {"B": "Role", "C": "Entity", "D": "Fee mechanism", "E": "Termination notice"}
+        },
+        {
+          "row": 5,
+          "label": "Administrator (Formidium)",
+          "columns": {"B": "Role", "C": "Entity", "D": "Fee mechanism", "E": "Termination notice"}
+        },
+        {
+          "row": 6,
+          "label": "Custodian (DBS Bank)",
+          "columns": {"B": "Role", "C": "Entity", "D": "Fee mechanism", "E": "Termination notice"}
+        },
+        {
+          "row": 7,
+          "label": "Auditor (Ernst & Young)",
+          "columns": {"B": "Role", "C": "Entity", "D": "Fee mechanism", "E": "Engagement period"}
+        }
+      ],
+      "agent_targets": ["E4", "E5"],
+      "notes": "Termination notices: Formidium 90 days; Ternary TSA 30 days; CIG auto-renew at 13mo."
+    }
+  ]
+}

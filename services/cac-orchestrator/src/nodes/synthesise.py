@@ -9,18 +9,11 @@ import re
 import structlog
 
 from ..tools.llm_client import LLMClient
+from .grounding_gate import _MIN_RELEVANCE, abstain as _abstain
 
 # Strip any [N] citation markers the model may emit even when told not to.
 # Applied as a last-resort defence when a turn was not grounded.
 _CITATION_RE = re.compile(r"\[\d+\]")
-
-# Shown when an answer cites sources but none of them actually support its
-# claims — i.e. the model fabricated figures and attached citations that don't
-# back them. Kept identical to grounding_gate's message for a consistent voice.
-_ABSTENTION_ANSWER = (
-    "I don't have reference material on this topic in my knowledge base yet. "
-    "Please share a relevant document or data source and I'll analyse it."
-)
 
 try:
     from services.shared.knowledge_gaps import detect_self_report
@@ -53,13 +46,20 @@ Rules:
 - For substantive committee questions: include source citations in [N] format
   referencing the provided sources. Be precise and factual — never speculate
   beyond the sources.
+- Quote KEY facts (numbers, names, dates) verbatim from the source chunks —
+  do not paraphrase numbers; do not synthesise a number from multiple chunks.
+- If a chunk has a "Quick-answer aliases" section with a Q&A that matches the
+  user's question, PREFER it — that's the canonical phrasing of the answer.
+- Match the SPECIFIC metric named in the question (e.g. "AUM target" ≠
+  "recurring income"; "FoF I Management Fee" ≠ "TSA residual fee";
+  "PN.35 principal" ≠ "PN.36 principal").
 - For greetings, small talk, or meta-questions about your capabilities (e.g.
   "hi", "hello", "what can you do?"): reply conversationally in 1-2 sentences.
   Briefly mention you cover liquidity, capital, ALM, funding, and covenant
   topics for the CAC. Do NOT say "no documents found" for these.
-- For substantive questions where no sources were retrieved: say you don't have
-  reference material for that topic and suggest the user share a relevant doc.
-  Do NOT fabricate facts or cite sources that weren't provided.
+- For substantive questions where no chunk literally contains the answer: say
+  "I don't have reference material for that" — do NOT invent facts or cite
+  sources that don't support the claim.
 - Include any escalation warnings if present.
 - Mention the Excel navigation pointer if a change was proposed.
 - Keep the response concise but complete."""
@@ -155,7 +155,7 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient,
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.2,
+            temperature=0.0,  # was 0.2; lowered to reduce factual-recall flakiness
             max_tokens=2048,
         )
     except Exception as exc:
@@ -173,22 +173,34 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient,
     # each source uses {filename, page, excerpt, relevance_score, type, ...}.
     # ground_citations expects {id, text, source} keyed by 1-based position.
     # Normalize once so the grounding helper can do its job.
+    # Build grounding_sources only from chunks that actually cleared the relevance
+    # bar. RAG noise below threshold is what the LLM is told to ignore; including
+    # it here would make the post-LLM backstop "verify" the answer's citations
+    # against irrelevant text and wrongly fail every conversational/capability
+    # answer (whose [N] markers reference the skill mandate, not retrieved docs).
     raw_sources = state.get("sources", []) or []
     grounding_sources: list[dict] = []
     top_sim = 0.0
     for i, s in enumerate(raw_sources, start=1):
+        score = float(s.get("relevance_score") or s.get("score") or 0.0)
+        if score > top_sim:
+            top_sim = score
+        if score < _MIN_RELEVANCE:
+            continue
         text = s.get("text") or s.get("excerpt") or ""
         grounding_sources.append({
             "id": str(i),
             "text": text,
             "source": s.get("filename") or s.get("type") or f"src{i}",
         })
-        score = float(s.get("relevance_score") or s.get("score") or 0.0)
-        if score > top_sim:
-            top_sim = score
 
-    # Citation grounding
-    if ground_citations is not None:
+    # Citation grounding — ONLY meaningful when we have real sources AND the
+    # answer was supposed to come from them. Capability / greeting bypasses
+    # (is_capability_bypass) answer from the SKILL mandate, so the LLM's [N]
+    # markers reference skill content the backstop has no way to verify; running
+    # it here would replace every mandate/help answer with an abstain.
+    is_bypass = bool(state.get("is_capability_bypass"))
+    if ground_citations is not None and grounding_sources and not is_bypass:
         grounding_report = ground_citations(answer, grounding_sources)
         # Hard backstop: an answer that cites sources but verifies NONE of them
         # is fabrication — the model invented claims (e.g. specific figures) and
@@ -202,7 +214,7 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient,
                 citations=grounding_report.total_citations,
                 query_preview=state.get("query", "")[:80],
             )
-            return {"answer": _ABSTENTION_ANSWER, "confidence": "Low"}
+            return {"answer": _abstain(state.get("query", "")), "confidence": "Low"}
         answer = add_grounding_badges(answer, grounding_report)
 
     # Defence-in-depth citation strip: if no sources passed the relevance bar and

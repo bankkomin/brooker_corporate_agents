@@ -6,16 +6,23 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+for _p in Path(__file__).resolve().parents:
+    if (_p / ".env").exists():
+        load_dotenv(_p / ".env")
+        break
 
+import asyncio
 import contextlib
 import hashlib
+import json
 import os
 import tempfile
+from pathlib import Path
 
 import httpx
 import structlog
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 
 from .chat_indexer import ChatIndexer
 from .chunker import DocumentChunker
@@ -28,8 +35,10 @@ from .models import (
     IngestDocumentResponse,
     IngestMessageRequest,
     IngestMessageResponse,
+    ReIngestVaultRequest,
 )
 from .qdrant_store import COLLECTIONS, QdrantStore
+from .vault_reingest import VaultReingester
 
 logger = structlog.get_logger("rag-ingestion")
 
@@ -80,12 +89,57 @@ async def lifespan(app: FastAPI):
                 f"is unreachable. Set EMBEDDING_DIM env var to override."
             ) from exc
 
-    await store.ensure_collections(vector_size=dim)
+    # Qdrant connection can race the rag-ingestion lifespan on cold-boot —
+    # Docker can mark qdrant "healthy" before its REST API accepts all routes,
+    # and Docker Desktop restarts skip the depends_on re-check entirely. Retry
+    # ensure_collections with exponential backoff so a brief race doesn't kill
+    # the whole service.
+    _last_exc = None
+    for _attempt in range(6):  # ~31s total: 1+2+4+8+16
+        try:
+            await store.ensure_collections(vector_size=dim)
+            _last_exc = None
+            break
+        except Exception as exc:  # noqa: BLE001
+            _last_exc = exc
+            logger.warning(
+                "rag-ingestion.startup.qdrant_not_ready_retrying",
+                attempt=_attempt + 1, error=str(exc)[:120],
+            )
+            await asyncio.sleep(min(2 ** _attempt, 16))
+    if _last_exc is not None:
+        raise RuntimeError(
+            f"Qdrant unreachable after 6 attempts; last error: {_last_exc}"
+        ) from _last_exc
+
+    # Load obsidian_watch.json for /reingest-vault dept validation + path resolution.
+    _watch_config_path = os.getenv("OBSIDIAN_WATCH_CONFIG", "/app/config/obsidian_watch.json")
+    try:
+        with open(_watch_config_path) as _f:
+            _watch_config: dict = json.load(_f)
+    except (FileNotFoundError, json.JSONDecodeError) as _exc:
+        logger.warning(
+            "rag-ingestion.startup.watch_config_missing",
+            path=_watch_config_path,
+            error=str(_exc),
+        )
+        _watch_config = {"watch_folders": [], "ignore_folders": [], "ignore_files": []}
+
+    _vault_root = Path(os.getenv("OBSIDIAN_VAULT_PATH", "/mnt/obsidian-vault"))
+    _vault_reingester = VaultReingester(
+        chunker=chunker,
+        embedder=embedder,
+        store=store,
+        vault_root=_vault_root,
+        watch_config=_watch_config,
+    )
 
     app.state.embedder = embedder
     app.state.store = store
     app.state.chunker = chunker
     app.state.chat_indexer = chat_indexer
+    app.state.watch_config = _watch_config
+    app.state.vault_reingester = _vault_reingester
 
     logger.info("rag-ingestion.startup", port=3004)
     yield
@@ -287,6 +341,66 @@ async def collections() -> CollectionsResponse:
         except Exception:
             infos.append(CollectionInfo(name=name, vectors_count=0))
     return CollectionsResponse(collections=infos)
+
+
+@app.post("/reingest-vault")
+async def reingest_vault(req: ReIngestVaultRequest) -> StreamingResponse:
+    """Trigger a dept-scoped full re-ingest of the Obsidian vault.
+
+    Returns a StreamingResponse of newline-delimited JSON progress events:
+
+        {"event":"start","dept":"ib","total_files":16}
+        {"event":"file","name":"obsidian-vault/ib/entities/foo.md","chunks":4,
+         "collection":"ib_docs","doc_type":"entity","status":"ok"}
+        ...
+        {"event":"done","dept":"ib","files":16,"chunks":97,"deleted":0,
+         "collections":["ib_docs","ib_knowledge"],"duration_s":38.4,"errors":[]}
+
+    Set dry_run=true to get the file list without touching Qdrant.
+
+    PRE-EXISTING BUG (documented, not fixed here):
+      upsert_chunks() in qdrant_store.py uses uuid.uuid4() for point IDs,
+      making them non-deterministic.  Re-ingesting the same file will create
+      duplicate vectors rather than updating existing ones.  A proper fix
+      requires deriving point IDs from hash(source_path + chunk_index) and
+      calling client.upsert() with those stable IDs.  Tracked for a follow-up
+      task — do not fix in this PR to keep the diff reviewable.
+    """
+    watch_config: dict = app.state.watch_config
+
+    # Build the set of dept slugs present in watch_folders.
+    known_depts: set[str] = set()
+    for entry in watch_config.get("watch_folders", []):
+        path_str = entry["path"].strip("/")
+        first_seg = path_str.split("/")[0]
+        if first_seg:
+            known_depts.add(first_seg)
+
+    if req.dept not in known_depts:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unknown dept {req.dept!r}. "
+                f"Valid depts: {sorted(known_depts)}"
+            ),
+        )
+
+    reingester: VaultReingester = app.state.vault_reingester
+
+    async def _event_stream():
+        async for line in reingester.reingest_streaming(
+            dept=req.dept,
+            subdirs=req.subdirs,
+            delete_stale=req.delete_stale,
+            dry_run=req.dry_run,
+        ):
+            yield line + "\n"
+
+    return StreamingResponse(
+        _event_stream(),
+        media_type="application/x-ndjson",
+        headers={"X-Accel-Buffering": "no"},  # disable nginx buffering for streaming
+    )
 
 
 if __name__ == "__main__":

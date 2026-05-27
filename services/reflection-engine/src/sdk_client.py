@@ -5,6 +5,7 @@ Degrades gracefully: returns empty update dicts on any LLM failure.
 """
 import asyncio
 import json
+import os
 
 import structlog
 from langchain_openai import ChatOpenAI
@@ -12,6 +13,11 @@ from langchain_openai import ChatOpenAI
 from .config import settings
 
 log = structlog.get_logger(__name__)
+
+# The shared DGX Spark fails beyond a few concurrent sequences. The reflection
+# engine runs a nightly batch over many agents, so cap concurrent LLM calls.
+LLM_MAX_CONCURRENCY = int(os.getenv("LLM_MAX_CONCURRENCY", "4"))
+_DGX_SEMAPHORE = asyncio.Semaphore(LLM_MAX_CONCURRENCY)
 
 REFLECTION_PROMPT = """You are a reflection agent for the {dept_id} department's {agent_id} agent.
 Analyze yesterday's interactions and approval decisions, then determine what should be updated
@@ -91,7 +97,8 @@ async def run_reflection_llm(
 
     for attempt in range(3):
         try:
-            response = await llm.ainvoke(prompt)
+            async with _DGX_SEMAPHORE:
+                response = await llm.ainvoke(prompt)
             content: str = response.content.strip()
 
             # Strip markdown code fences if present

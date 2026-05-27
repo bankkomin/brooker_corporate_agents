@@ -17,6 +17,12 @@ tags: ["vcc", "decision", "contract", "fee-arrangement", "brand-licensing"]
 
 # Ternary x Brooker — Technical Services Agreement
 
+## Quick-answer aliases (for retrieval — disambiguation)
+
+- **Q: What is the Ternary Technical Services Fee (TSA fee)?** A: A **residual** payable to BICL — equals the Management Fee from the VCC sub-fund, MINUS Ternary's own fees (per the 19 June 2025 engagement letter), MINUS the PM salary, MINUS Manager expenses. Paid quarterly in arrears within 30 days of quarter-end.
+- **Q: Is the TSA fee the same as the FoF I Management Fee?** A: **NO. They are different.** The **FoF I Management Fee** is **1.5% p.a. of aggregate Commitments**, paid by the fund to the Fund Manager (Ternary) per the Supplement. The **TSA fee** is the BICL-side residual carved out of that 1.5% after Ternary's costs. See `[[brook-lp-fof-terms]]` for the LP-facing fee.
+- **Q: Who pays the TSA fee and to whom?** A: Paid by the VCC sub-fund (mechanism) to **BICL** as Technical Services Consultant. Non-fiduciary, non-binding recommendations only. Investment decisions stay with Ternary.
+
 ## Summary
 
 [[ternary-fund-management]] (the "Manager") and [[brooker-international-company]] (the

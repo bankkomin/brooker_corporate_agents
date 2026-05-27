@@ -85,8 +85,9 @@ class QueryResponse(BaseModel):
     answer: str = ""
     # cac-orchestrator returns `sources`; older slack-bot code reads `citations`.
     citations: list[Citation] = Field(default_factory=list, alias="sources")
-    # Categorical: "High" | "Medium" | "Low".
-    confidence: str = "Low"
+    # Accepts both numeric (0.0–1.0) from orchestrators and categorical
+    # ("High" | "Medium" | "Low") from deck-writer / clients.py.
+    confidence: float | str = "Low"
     agent_id: str = ""
     error: str | None = None
     # deck-writer / any artefact-producing service returns these so we can

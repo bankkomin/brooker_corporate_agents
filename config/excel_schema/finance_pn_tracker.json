@@ -1,0 +1,65 @@
+{
+  "filename": "Finance_PN_Tracker.xlsx",
+  "description": "BICL intercompany Promissory Note tracker (PN.34 → PN.35 → PN.36) per skills/finance/cfo-agent.md. Cell coordinates PROVISIONAL.",
+  "tabs": [
+    {
+      "name": "Promissory Notes",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "PN.34 (superseded)",
+          "columns": {"B": "Instrument", "C": "Principal USD", "D": "Issue date", "E": "Status", "F": "Outstanding balance"}
+        },
+        {
+          "row": 5,
+          "label": "PN.35 (renews PN.34)",
+          "columns": {"B": "Instrument", "C": "Principal USD", "D": "Issue date", "E": "Status", "F": "Outstanding balance"}
+        },
+        {
+          "row": 6,
+          "label": "PN.36",
+          "columns": {"B": "Instrument", "C": "Principal USD", "D": "Issue date", "E": "Status", "F": "Outstanding balance"}
+        },
+        {
+          "row": 7,
+          "label": "Total related-party exposure",
+          "columns": {"B": "Metric", "C": "USD", "D": "THB equivalent", "E": "FX used"}
+        }
+      ],
+      "agent_targets": ["C5", "C6", "F5", "F6", "C7", "D7", "E7"],
+      "notes": "PN.35 = USD 39,023,179.25 (8 Apr 2025; renews PN.34). PN.36 = USD 2.3M (16 Jan 2026). Total = ~USD 41.3M."
+    },
+    {
+      "name": "Interest Schedule",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "PN.35 monthly interest accrual",
+          "columns": {"B": "Period", "C": "Rate %", "D": "Interest USD", "E": "Cumulative"}
+        },
+        {
+          "row": 5,
+          "label": "PN.36 monthly interest accrual",
+          "columns": {"B": "Period", "C": "Rate %", "D": "Interest USD", "E": "Cumulative"}
+        }
+      ],
+      "agent_targets": ["D4", "D5", "E4", "E5"],
+      "notes": "Interest accrual cadence per signed PN; update only with reconciled bank-statement evidence."
+    },
+    {
+      "name": "FATCA Status",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "BICL FATCA classification",
+          "columns": {"B": "Entity", "C": "Classification", "D": "Form", "E": "Sign date", "F": "Renewal due"}
+        }
+      ],
+      "agent_targets": ["F4"],
+      "notes": "BICL = Active NFFE per signed W-8BEN-E (Rev. Oct 2021). Re-cert required every 3 years."
+    }
+  ]
+}

@@ -13,6 +13,18 @@ tags: ["vcc", "concept", "fund-terms", "vcc-structure", "singapore"]
 
 # Brook Limited Partners FoF I — Fund Terms & Structure
 
+## Quick-answer aliases (for retrieval)
+
+- **Q: What is the management fee on Brook LP FoF I?** A: **1.5% p.a. of aggregate Commitments**, paid quarterly in advance (Supplement Key Commercial Terms — this is the LP-facing fee, NOT the BICL Technical Services residual fee).
+- **Q: What is the hard cap on Brook LP FoF I?** A: **US$150M** hard cap (US$100M target; US$10M–$100M expected launch range).
+- **Q: What is the minimum subscription for FoF I?** A: **US$100,000** (individual); US$1M institutional per the deck.
+- **Q: Who is the custodian of Brook LP FoF I?** A: **DBS Bank Ltd**.
+- **Q: Who is the auditor of Brook LP FoF I?** A: **Ernst & Young LLP**.
+- **Q: Who is the fund administrator of Brook LP FoF I?** A: **Formidium Singapore Pte Ltd** (calculates NAV; 90 days' termination notice).
+- **Q: Who is the fund manager of Brook LP FoF I?** A: **Ternary Fund Management Pte Ltd** (MAS-licensed, UEN 201902851Z; CEO Edward Choi).
+- **Q: What is the carried interest structure?** A: 0% to 1.5x Net MOIC; 10% from 1.5x–2.5x; 15% from 2.5x–5x; 20% above 5x. Carry paid to Class B Founder Shares.
+- **Q: What is the fund term?** A: 10 years + three optional 1-year extensions; 5-year Investment Period (extendable to 8).
+
 ## Summary
 
 This article captures the binding commercial and structural terms of

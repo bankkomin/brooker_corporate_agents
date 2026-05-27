@@ -128,6 +128,58 @@ class QdrantStore:
         )
         logger.info("qdrant_store.deleted_by_file", collection=collection, file=file_path)
 
+    async def delete_by_source_prefix(self, collection: str, source_prefix: str) -> int:
+        """Delete all points whose 'source' payload field starts with *source_prefix*.
+
+        Used by /reingest-vault delete_stale=true to wipe existing chunks before
+        a full dept re-ingest.  Returns the number of points deleted.
+
+        Qdrant's Python client supports prefix matching via MatchText (full-text
+        match token) which is not appropriate here.  We use scroll+filter to
+        gather matching point IDs, then delete by IDs in batches.  This is safe
+        for collections up to ~500k points; for larger collections a scroll-based
+        approach with pagination is required (not a concern for vault docs today).
+        """
+
+        deleted = 0
+        offset = None
+        batch_size = 256
+
+        while True:
+            results, next_offset = await self._client.scroll(
+                collection_name=collection,
+                scroll_filter=Filter(
+                    must=[
+                        FieldCondition(
+                            key="source",
+                            match=MatchValue(value=source_prefix),
+                        )
+                    ]
+                ),
+                limit=batch_size,
+                offset=offset,
+                with_payload=False,
+                with_vectors=False,
+            )
+            ids = [str(p.id) for p in results]
+            if ids:
+                await self._client.delete(
+                    collection_name=collection,
+                    points_selector=ids,  # type: ignore[arg-type]
+                )
+                deleted += len(ids)
+                logger.info(
+                    "qdrant_store.deleted_by_source_prefix",
+                    collection=collection,
+                    prefix=source_prefix,
+                    batch=len(ids),
+                )
+            if next_offset is None:
+                break
+            offset = next_offset
+
+        return deleted
+
     async def get_collection_info(self, collection: str) -> dict:
         """Get collection stats."""
         info = await self._client.get_collection(collection)

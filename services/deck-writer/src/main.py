@@ -8,13 +8,22 @@ Flow:
     3. LLM (Qwen) composes a slide JSON spec from brief + context
     4. python-pptx renders the spec into a .pptx (template if available)
     5. Save to /data/decks/<id>.pptx, return URL/path
+
+  POST /report
+    Produces a .docx review document from the same drafter pipeline.
+    Optional rich-content fields: images, charts, mermaid diagrams.
+
+  POST /compose-xlsx
+    Builds a .xlsx workbook from an XlsxComposeSpec.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
 import re
+import tempfile
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -27,12 +36,31 @@ import structlog
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN
 from pptx.util import Emu, Inches, Pt
+from pydantic import BaseModel, Field
+
+# ----- rich-content helper modules (frozen, tested) -----
+from services.shared.chart_render import render_chart_png, validate_chart_spec
+from services.shared.drafter_table_prompt import (
+    extract_tables_from_text,
+    table_emission_prompt_snippet,
+)
+from services.shared.image_embed import (
+    ImageSource,
+    embed_image_in_docx,
+    embed_image_in_pptx,
+)
+from services.shared.mermaid_render import render_mermaid_png
+from services.shared.table_render import (
+    add_table_to_docx,
+    add_table_to_pptx,
+    validate_table_spec,
+)
+from services.shared.xlsx_compose import compose_xlsx, validate_xlsx_spec
 
 load_dotenv()
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
@@ -42,6 +70,9 @@ log = structlog.get_logger("deck-writer")
 LLM_BASE_URL = os.getenv("VLLM_LARGE_URL", "http://nginx:8080/v1").rstrip("/")
 LLM_MODEL = os.getenv("VLLM_LARGE_MODEL", "qwen-large")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+# The DGX Spark fails beyond a few concurrent sequences — cap concurrent LLM calls.
+LLM_MAX_CONCURRENCY = int(os.getenv("LLM_MAX_CONCURRENCY", "4"))
+_DGX_SEMAPHORE = asyncio.Semaphore(LLM_MAX_CONCURRENCY)
 RAG_INGESTION_URL = os.getenv("RAG_INGESTION_URL", "http://rag-ingestion:3004").rstrip("/")
 QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333").rstrip("/")
 DEPARTMENTS_CONFIG = os.getenv("DEPARTMENTS_CONFIG", "/app/config/templates/../departments.json")
@@ -71,6 +102,42 @@ RAG_TOP_K = int(os.getenv("RAG_TOP_K", "8"))
 RAG_MIN_RELEVANCE = float(os.getenv("RAG_MIN_RELEVANCE", "0.50"))
 
 
+# ----- rich-content embedding models (shared by /compose and /report) -----
+
+class ImageEmbed(BaseModel):
+    """Embed a PNG/JPEG image by URL, filesystem path, or MinIO key."""
+    url: str | None = None
+    path: str | None = None
+    minio_key: str | None = None
+    section_hint: str | None = None        # docx: heading-substring match
+    slide_index: int | None = None         # pptx: 0-based slide index
+    slide_title_hint: str | None = None    # pptx: slide title substring match
+    caption: str | None = None
+    width_inches: float = 5.5
+
+
+class ChartEmbed(BaseModel):
+    """Render a matplotlib chart from a ChartSpec dict and embed as PNG."""
+    spec: dict                             # validated by validate_chart_spec
+    section_hint: str | None = None
+    slide_index: int | None = None
+    slide_title_hint: str | None = None
+    caption: str | None = None
+    width_inches: float = 5.5
+
+
+class MermaidEmbed(BaseModel):
+    """Render a Mermaid diagram and embed as PNG."""
+    mermaid: str
+    theme: str = "default"
+    background: str = "white"
+    section_hint: str | None = None
+    slide_index: int | None = None
+    slide_title_hint: str | None = None
+    caption: str | None = None
+    width_inches: float = 5.5
+
+
 # ----- request / response models -----
 class ComposeRequest(BaseModel):
     # Accept either `brief` (preferred) or `query` (slack-bot router shape).
@@ -83,6 +150,10 @@ class ComposeRequest(BaseModel):
     query: str | None = None
     channel: str | None = None
     thread_ts: str | None = None
+    # rich-content embeds — all optional; default to empty list for back-compat
+    images: list[ImageEmbed] = Field(default_factory=list)
+    charts: list[ChartEmbed] = Field(default_factory=list)
+    mermaid: list[MermaidEmbed] = Field(default_factory=list)
 
 
 class ComparisonColumn(BaseModel):
@@ -128,6 +199,13 @@ class ComposeResponse(BaseModel):
     file_name: str  # basename for nice display
     file_url: str | None = None  # if exposed via static route
     sources: list[dict] = Field(default_factory=list)
+
+
+class ComposeXlsxRequest(BaseModel):
+    """Request body for POST /compose-xlsx."""
+    spec: dict = Field(description="XlsxComposeSpec — sheets, optional charts, optional metadata.")
+    filename: str = Field(default="report.xlsx", description="Output filename (basename only).")
+    caller_dept: str = Field(default="", description="Requesting department; used for output path scoping.")
 
 
 # ----- HTTP clients -----
@@ -299,6 +377,11 @@ _DRAFTER_SYSTEM = (
     "- Put the full sentence in `key_points` if it's an argument; the headline is just the section label.\n"
 )
 
+# Append the table-emission instructions to the drafter system prompt so that
+# the LLM can emit ```table JSON blocks when comparison/grid data would help.
+# extract_tables_from_text() parses these blocks out before rendering.
+_DRAFTER_SYSTEM = _DRAFTER_SYSTEM + "\n\n" + table_emission_prompt_snippet()
+
 _DESIGNER_SYSTEM = (
     "You are a deck DESIGNER. You receive a content outline and produce the final "
     "JSON spec that the renderer uses. You decide the visual layout for each "
@@ -355,9 +438,10 @@ async def _llm_call(system: str, user: str, *, max_tokens: int = 3000) -> dict |
         "response_format": {"type": "json_object"},
         "chat_template_kwargs": {"enable_thinking": False},
     }
-    r = await _http.post(f"{LLM_BASE_URL}/chat/completions", json=body)
-    r.raise_for_status()
-    raw = r.json()["choices"][0]["message"]["content"] or "{}"
+    async with _DGX_SEMAPHORE:
+        r = await _http.post(f"{LLM_BASE_URL}/chat/completions", json=body)
+        r.raise_for_status()
+        raw = r.json()["choices"][0]["message"]["content"] or "{}"
     return _extract_json_object(raw)
 
 
@@ -414,8 +498,17 @@ async def _design_layouts(outline: dict) -> DeckSpec:
 
 async def _draft_outline_with_retry(brief: str, context: str, title: str | None,
                                     audience: str | None) -> dict:
-    """Draft with one retry if the first call returns an empty outline."""
-    outline = await _draft_outline(brief, context, title, audience)
+    """Draft with one retry if the first call returns an empty outline.
+
+    HTTPException is caught explicitly because in some FastAPI/Starlette builds it
+    does not inherit from Exception, so a bare `except Exception` would miss it and
+    let the 502 propagate past the minimal-outline fallback.
+    """
+    try:
+        outline = await _draft_outline(brief, context, title, audience)
+    except (Exception, HTTPException) as exc:
+        log.warning("draft.first_call_failed", error=str(exc))
+        outline = {}
     items = outline.get("outline") or []
     if items:
         return outline
@@ -425,7 +518,11 @@ async def _draft_outline_with_retry(brief: str, context: str, title: str | None,
         "Your previous reply had no outline items. You MUST return 4-8 outline "
         "items in `outline`. Use the schema in the system prompt."
     )
-    outline2 = await _draft_outline(brief, context + "\n\n" + nudge, title, audience)
+    try:
+        outline2 = await _draft_outline(brief, context + "\n\n" + nudge, title, audience)
+    except (Exception, HTTPException) as exc:
+        log.warning("draft.retry_call_failed", error=str(exc))
+        outline2 = {}
     items2 = outline2.get("outline") or []
     if items2:
         return outline2
@@ -1051,6 +1148,201 @@ def _render(spec: DeckSpec, dept_id: str = "ic") -> Path:
     return out
 
 
+# ----- rich-content helpers -----
+
+def _build_image_source(embed: ImageEmbed) -> ImageSource:
+    """Convert an ImageEmbed Pydantic model into an ImageSource dict."""
+    if embed.url is not None:
+        return {"url": embed.url}
+    if embed.path is not None:
+        return {"path": embed.path}
+    if embed.minio_key is not None:
+        return {"minio_key": embed.minio_key}
+    raise ValueError("ImageEmbed must have exactly one of: url, path, minio_key")
+
+
+def _embed_rich_content_docx(
+    doc,
+    images: list[ImageEmbed],
+    charts: list[ChartEmbed],
+    mermaid_items: list[MermaidEmbed],
+) -> None:
+    """Embed images, charts, and Mermaid diagrams into an open python-docx Document.
+
+    All insertions happen AFTER the document body is already built.  Failures on
+    individual items are logged and skipped — we never let a bad image kill the
+    whole report.
+    """
+    for img in images:
+        try:
+            src = _build_image_source(img)
+            result = embed_image_in_docx(
+                doc, src,
+                section_hint=img.section_hint,
+                caption=img.caption,
+                width_inches=img.width_inches,
+            )
+            log.info("report.image_embedded", section_hint=img.section_hint, result=result)
+        except Exception as exc:
+            log.warning("report.image_embed_failed", error=str(exc))
+
+    for chart in charts:
+        try:
+            validated_spec = validate_chart_spec(chart.spec)
+            png_bytes = render_chart_png(validated_spec)
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                tmp.write(png_bytes)
+                tmp_path = tmp.name
+            try:
+                result = embed_image_in_docx(
+                    doc, {"path": tmp_path},
+                    section_hint=chart.section_hint,
+                    caption=chart.caption,
+                    width_inches=chart.width_inches,
+                )
+                log.info("report.chart_embedded", section_hint=chart.section_hint, result=result)
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
+        except Exception as exc:
+            log.warning("report.chart_embed_failed", error=str(exc))
+
+    for item in mermaid_items:
+        try:
+            png_bytes = render_mermaid_png(
+                item.mermaid,
+                theme=item.theme,  # type: ignore[arg-type]
+                background=item.background,
+            )
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                tmp.write(png_bytes)
+                tmp_path = tmp.name
+            try:
+                result = embed_image_in_docx(
+                    doc, {"path": tmp_path},
+                    section_hint=item.section_hint,
+                    caption=item.caption,
+                    width_inches=item.width_inches,
+                )
+                log.info("report.mermaid_embedded", section_hint=item.section_hint,
+                         result=result)
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
+        except Exception as exc:
+            log.warning("report.mermaid_embed_failed", error=str(exc))
+
+
+def _embed_rich_content_pptx(
+    prs,
+    images: list[ImageEmbed],
+    charts: list[ChartEmbed],
+    mermaid_items: list[MermaidEmbed],
+) -> None:
+    """Embed images, charts, and Mermaid diagrams into an open python-pptx Presentation.
+
+    All insertions happen AFTER the deck is rendered.  Failures on individual
+    items are logged and skipped — we never let a bad chart kill the whole deck.
+    """
+    for img in images:
+        try:
+            src = _build_image_source(img)
+            result = embed_image_in_pptx(
+                prs, src,
+                slide_index=img.slide_index,
+                slide_title_hint=img.slide_title_hint,
+                caption=img.caption,
+                width_inches=img.width_inches,
+            )
+            log.info("compose.image_embedded",
+                     slide_index=img.slide_index,
+                     slide_title_hint=img.slide_title_hint,
+                     result=result)
+        except Exception as exc:
+            log.warning("compose.image_embed_failed", error=str(exc))
+
+    for chart in charts:
+        try:
+            validated_spec = validate_chart_spec(chart.spec)
+            png_bytes = render_chart_png(validated_spec)
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                tmp.write(png_bytes)
+                tmp_path = tmp.name
+            try:
+                result = embed_image_in_pptx(
+                    prs, {"path": tmp_path},
+                    slide_index=chart.slide_index,
+                    slide_title_hint=chart.slide_title_hint,
+                    caption=chart.caption,
+                    width_inches=chart.width_inches,
+                )
+                log.info("compose.chart_embedded",
+                         slide_index=chart.slide_index,
+                         slide_title_hint=chart.slide_title_hint,
+                         result=result)
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
+        except Exception as exc:
+            log.warning("compose.chart_embed_failed", error=str(exc))
+
+    for item in mermaid_items:
+        try:
+            png_bytes = render_mermaid_png(
+                item.mermaid,
+                theme=item.theme,  # type: ignore[arg-type]
+                background=item.background,
+            )
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                tmp.write(png_bytes)
+                tmp_path = tmp.name
+            try:
+                result = embed_image_in_pptx(
+                    prs, {"path": tmp_path},
+                    slide_index=item.slide_index,
+                    slide_title_hint=item.slide_title_hint,
+                    caption=item.caption,
+                    width_inches=item.width_inches,
+                )
+                log.info("compose.mermaid_embedded",
+                         slide_index=item.slide_index,
+                         slide_title_hint=item.slide_title_hint,
+                         result=result)
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
+        except Exception as exc:
+            log.warning("compose.mermaid_embed_failed", error=str(exc))
+
+
+def _extract_tables_from_outline(outline: dict) -> tuple[dict, list[dict]]:
+    """Scan all text fields in the drafter outline for ```table blocks.
+
+    Modifies a shallow copy of the outline (does not mutate the original).
+    Returns (cleaned_outline, [table_specs]).
+    """
+    all_table_specs: list[dict] = []
+
+    def _clean(text: str) -> str:
+        nonlocal all_table_specs
+        cleaned, specs = extract_tables_from_text(text)
+        all_table_specs.extend(specs)
+        return cleaned
+
+    cleaned_outline = dict(outline)
+    cleaned_items: list[dict] = []
+    for item in (outline.get("outline") or []):
+        cleaned_item = dict(item)
+        if "headline" in cleaned_item:
+            cleaned_item["headline"] = _clean(cleaned_item["headline"])
+        if "key_points" in cleaned_item:
+            cleaned_item["key_points"] = [_clean(kp) for kp in (cleaned_item["key_points"] or [])]
+        if "supporting_data" in cleaned_item:
+            cleaned_item["supporting_data"] = [
+                _clean(sd) for sd in (cleaned_item["supporting_data"] or [])
+            ]
+        cleaned_items.append(cleaned_item)
+
+    cleaned_outline["outline"] = cleaned_items
+    return cleaned_outline, all_table_specs
+
+
 # ----- endpoint -----
 @app.post("/compose", response_model=ComposeResponse)
 async def compose(req: ComposeRequest) -> ComposeResponse:
@@ -1064,9 +1356,35 @@ async def compose(req: ComposeRequest) -> ComposeResponse:
     hits = await _retrieve(brief, req.dept_id)
     context = "\n\n".join(f"[{h['source']}] {h['excerpt']}" for h in hits[:8])
     # Two-agent pipeline: Drafter → Designer → Renderer.
-    outline = await _draft_outline_with_retry(brief, context, req.title, req.audience)
+    raw_outline = await _draft_outline_with_retry(brief, context, req.title, req.audience)
+
+    # Strip ```table blocks from outline text before the designer sees it;
+    # extracted specs are inserted as table slides after the deck is rendered.
+    outline, deck_table_specs = _extract_tables_from_outline(raw_outline)
+
     spec = await _design_layouts(outline)
     out_path = _render(spec, req.dept_id)
+
+    # ----- rich-content insertion (runs AFTER the pptx is rendered) -----
+    need_pptx_save = bool(req.images or req.charts or req.mermaid or deck_table_specs)
+    if need_pptx_save:
+        from pptx import Presentation as _Prs
+        prs = _Prs(str(out_path))
+        # Insert tables extracted from the drafter outline as slides.
+        for tspec in deck_table_specs:
+            try:
+                validated_tspec = validate_table_spec(tspec)
+                add_table_to_pptx(prs, validated_tspec)
+                log.info("compose.table_slide_inserted", title=tspec.get("title", ""))
+            except Exception as exc:
+                log.warning("compose.table_slide_failed", error=str(exc))
+        # Insert explicitly requested rich-content embeds.
+        if req.images or req.charts or req.mermaid:
+            _embed_rich_content_pptx(prs, req.images, req.charts, req.mermaid)
+            log.info("compose.rich_content_done",
+                     images=len(req.images), charts=len(req.charts),
+                     mermaid=len(req.mermaid))
+        prs.save(str(out_path))
 
     elapsed_ms = int((time.monotonic() - t0) * 1000)
     log.info(
@@ -1109,17 +1427,24 @@ async def query_alias(req: ComposeRequest) -> ComposeResponse:
 # --------------------------------------------------------------------------
 _REPORT_OUTPUT_DIR = OUTPUT_DIR.parent / "reports"
 _REPORT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+_XLSX_OUTPUT_DIR = _REPORT_OUTPUT_DIR  # reuse /data/reports for xlsx output
 
 
-def _render_docx(outline: dict, hits: list[dict]) -> Path:
+def _render_docx(outline: dict, hits: list[dict], *,
+                  extra_table_specs: list[dict] | None = None) -> Path:
+    """Render a .docx from a drafter outline.
+
+    extra_table_specs: pre-parsed TableSpec dicts extracted from drafter text
+    via extract_tables_from_text(); inserted at the end of the document body
+    before the Sources section.
+    """
     from docx import Document
-    from docx.shared import Pt as DocxPt, RGBColor as DocxColor
 
     doc = Document()
     title = outline.get("title", "Untitled Report")
     subtitle = outline.get("subtitle")
 
-    h = doc.add_heading(title, level=0)
+    doc.add_heading(title, level=0)
     if subtitle:
         sub = doc.add_paragraph(subtitle)
         sub.runs[0].italic = True
@@ -1151,10 +1476,19 @@ def _render_docx(outline: dict, hits: list[dict]) -> Path:
             for s in supporting:
                 doc.add_paragraph(s, style="List Bullet")
 
+    # Tables extracted from drafter text — appended after section content
+    for tspec in (extra_table_specs or []):
+        try:
+            validated = validate_table_spec(tspec)
+            add_table_to_docx(doc, validated)
+            log.info("report.table_inserted", title=tspec.get("title", ""))
+        except Exception as exc:
+            log.warning("report.table_insert_failed", error=str(exc))
+
     # Sources section
     if hits:
         doc.add_heading("Sources", level=1)
-        seen = set()
+        seen: set[str] = set()
         for h in hits[:20]:
             src = h.get("source")
             if not src or src in seen:
@@ -1170,18 +1504,44 @@ def _render_docx(outline: dict, hits: list[dict]) -> Path:
 
 @app.post("/report")
 async def report(req: ComposeRequest) -> ComposeResponse:
-    """Generate a .docx review document from the same drafter outline used for decks."""
+    """Generate a .docx review document from the same drafter outline used for decks.
+
+    Optional rich-content fields on ComposeRequest:
+      images  — list[ImageEmbed]: PNG/JPEG images inserted after the docx is built
+      charts  — list[ChartEmbed]: matplotlib charts rendered to PNG then embedded
+      mermaid — list[MermaidEmbed]: Mermaid diagrams rendered to PNG then embedded
+
+    Table extraction: when the drafter LLM emits ```table JSON blocks, they are
+    stripped from the narrative text and rendered as styled Word tables in the
+    document body via add_table_to_docx.
+    """
     brief = (req.brief or req.query or "").strip()
     if not brief:
         raise HTTPException(400, "brief (or query) is required")
     log.info("report.start", brief=brief[:120], dept_id=req.dept_id)
     hits = await _retrieve(brief, req.dept_id)
     context = "\n\n".join(f"[{h['source']}] {h['excerpt']}" for h in hits[:8])
-    outline = await _draft_outline_with_retry(brief, context, req.title, req.audience)
-    out_path = _render_docx(outline, hits)
+    raw_outline = await _draft_outline_with_retry(brief, context, req.title, req.audience)
+
+    # Extract ```table blocks from all free-text fields in the outline so they
+    # render as structured Word tables rather than raw JSON in the narrative.
+    outline, table_specs = _extract_tables_from_outline(raw_outline)
+
+    out_path = _render_docx(outline, hits, extra_table_specs=table_specs)
+
+    # ----- rich-content insertion (runs AFTER the docx is rendered) -----
+    if req.images or req.charts or req.mermaid:
+        from docx import Document as _Doc
+        doc = _Doc(str(out_path))
+        _embed_rich_content_docx(doc, req.images, req.charts, req.mermaid)
+        doc.save(str(out_path))
+        log.info("report.rich_content_done",
+                 images=len(req.images), charts=len(req.charts),
+                 mermaid=len(req.mermaid))
+
     fname = out_path.name
     log.info("report.done", file=fname, sections=len(outline.get("outline") or []),
-             sources=len(hits))
+             sources=len(hits), tables=len(table_specs))
     return ComposeResponse(
         answer=f"Drafted *{outline.get('title','Report')}* — "
                f"{len(outline.get('outline') or [])} sections, {len(hits)} sources. "
@@ -1208,3 +1568,168 @@ async def get_report(name: str) -> FileResponse:
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         filename=safe,
     )
+
+
+# --------------------------------------------------------------------------
+# /compose-xlsx — free-form Excel workbook builder
+# --------------------------------------------------------------------------
+@app.post("/compose-xlsx")
+async def compose_xlsx_endpoint(req: ComposeXlsxRequest) -> FileResponse:
+    """Build a .xlsx workbook from an XlsxComposeSpec.
+
+    Request body:
+        spec        — XlsxComposeSpec dict (sheets, optional charts, optional metadata)
+        filename    — output filename, e.g. "capital_report.xlsx" (basename only)
+        caller_dept — requesting department; used to scope the output directory
+
+    Returns the .xlsx file as an attachment.
+    """
+    # Sanitise filename — strip path separators so callers can't traverse dirs.
+    safe_filename = re.sub(r"[^A-Za-z0-9_.\-]", "_", req.filename) or "report.xlsx"
+    if not safe_filename.endswith(".xlsx"):
+        safe_filename += ".xlsx"
+
+    # Validate spec eagerly so we return a 400 before writing any file.
+    try:
+        validated_spec = validate_xlsx_spec(req.spec)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    dept = re.sub(r"[^A-Za-z0-9_\-]", "", req.caller_dept or "shared")
+    out_dir = Path("/data/reports") / dept
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / safe_filename
+
+    try:
+        result = compose_xlsx(validated_spec, out_path)
+    except (ValueError, OSError) as exc:
+        log.error("compose_xlsx.failed", error=str(exc), caller_dept=dept)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    log.info("compose_xlsx.done",
+             out=result["out"],
+             sheets=result["sheets"],
+             cells_written=result["cells_written"],
+             charts=result["charts"],
+             caller_dept=dept)
+
+    return FileResponse(
+        path=str(out_path),
+        filename=safe_filename,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+# --------------------------------------------------------------------------
+# /report/cac-meeting — DETERMINISTIC CAC committee report from the live Excel
+# Online data pack (MS Graph). Numbers are read straight from the workbook cells
+# (no LLM, so figures can never be altered/rounded by a model); limit breaches
+# are computed in code. Returns the .docx via file_url so the slack-bot uploads
+# it to the thread instead of posting markdown. Mirrors the deterministic builder
+# in scripts/gen_cac_report_from_xlsx.py via services/shared/cac_report_docx.py.
+# --------------------------------------------------------------------------
+@app.get("/report/cac-meeting")
+async def cac_meeting_report(
+    share_url: str | None = None,
+    caller_dept: str | None = None,
+) -> dict:
+    """Build the CAC committee report .docx from the live Data Pack.
+
+    Department guard (defence in depth — slack-bot also gates routing):
+      The CAC report is a CAC-owned artefact. Only the CAC department may invoke
+      this endpoint over the Slack pipeline. `caller_dept` is the channel-dept
+      slack-bot resolved for the message; it is omitted for direct curl/test calls
+      (which are allowed so the endpoint stays diagnosable).
+    """
+    from datetime import date
+
+    from services.shared.cac_report_docx import (
+        build_cac_report_docx,
+        pack_from_workbook,
+    )
+    from services.shared.ms_graph_excel import GraphExcel
+
+    # caller_dept None == direct call (curl/test); anything else must be 'cac'.
+    if caller_dept is not None and caller_dept != "cac":
+        log.warning("cac_meeting_report.dept_blocked", caller_dept=caller_dept)
+        raise HTTPException(
+            403,
+            f"The CAC meeting report can only be requested from a CAC context "
+            f"(caller_dept='{caller_dept}'). Post the request in #cac-committee.",
+        )
+
+    share_url = (share_url or os.getenv("CAC_DATA_PACK_SHARE_URL", "")).strip()
+    if not share_url:
+        raise HTTPException(
+            422,
+            "No Excel Online link given. Paste a SharePoint/OneDrive share link "
+            "after the command (e.g. `[cac-report] https://...`) or set "
+            "CAC_DATA_PACK_SHARE_URL.",
+        )
+    if not share_url.lower().startswith(("http://", "https://")):
+        raise HTTPException(422, f"Not a valid share link: {share_url[:80]!r}")
+
+    try:
+        gx = GraphExcel.from_env()
+        workbook = await gx.read_workbook_by_share_url(share_url)
+    except Exception as exc:  # noqa: BLE001
+        log.error("cac_meeting_report.excel_read_failed", error=str(exc))
+        raise HTTPException(502, f"Could not read the Excel Online data pack: {exc}")
+
+    month = date.today().strftime("%B %Y")
+    fname = f"CAC_Report_{month.replace(' ', '_')}_{uuid.uuid4().hex[:6]}.docx"
+    out_path = _REPORT_OUTPUT_DIR / fname
+
+    # ── TEMPLATE-FIRST PATH ──────────────────────────────────────────────
+    # If a user-authored Word template exists at config/templates/office/cac/,
+    # render that with {{placeholders}} → produces a polished docx that
+    # inherits the user's brand, images, layout. Otherwise fall back to the
+    # deterministic programmatic builder (kept as backup).
+    try:
+        pack = pack_from_workbook(workbook)
+    except Exception as exc:  # noqa: BLE001
+        log.error("cac_meeting_report.pack_failed", error=str(exc))
+        raise HTTPException(500, f"Could not parse the data pack: {exc}")
+
+    template_used = None
+    try:
+        from services.shared.office_template import (
+            template_path_for, render_docx,
+        )
+        from services.shared.cac_report_docx import cac_report_context
+
+        tpl = template_path_for("cac", "report", "CAC_Monthly_Report") \
+            or template_path_for("cac", "report", "monthly")
+        if tpl is not None:
+            context, breaches = cac_report_context(pack, month)
+            result = render_docx(tpl, context, out_path)
+            template_used = str(tpl)
+            log.info("cac_meeting_report.template_rendered",
+                     template=template_used,
+                     substitutions=result["substitutions"],
+                     missing=result["missing"])
+        else:
+            # Fallback: existing deterministic builder
+            breaches = build_cac_report_docx(pack, out_path, month)
+            log.info("cac_meeting_report.programmatic_built",
+                     reason="no user template at config/templates/office/cac/")
+    except Exception as exc:  # noqa: BLE001
+        log.error("cac_meeting_report.build_failed", error=str(exc),
+                  template_used=template_used)
+        raise HTTPException(500, f"Could not build the CAC report: {exc}")
+
+    hard = [b for b in breaches if b.get("status") == "BREACH"]
+    summary = (f"{len(hard)} limit breach(es), {len(breaches) - len(hard)} watch item(s)"
+               if breaches else "no limit breaches")
+    log.info("cac_meeting_report.done", month=month, file=fname, breaches=len(breaches))
+    return {
+        "answer": (f":page_facing_up: *CAC Meeting Report — First Draft ({month})* is ready "
+                   f"(DRAFT for committee review) — {summary}. Figures are read straight from "
+                   "the live Data Pack; see the attached .docx."),
+        "confidence": "High",
+        "file_path": str(out_path),
+        "file_name": fname,
+        "file_url": f"http://deck-writer:3050/reports/{fname}",
+        "breaches": [f"{b['metric']} = {b['value']} (limit {b['limit']})" for b in breaches],
+        "month": month,
+    }

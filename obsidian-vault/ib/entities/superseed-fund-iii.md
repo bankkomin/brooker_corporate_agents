@@ -16,6 +16,14 @@ tags: ["ib", "entity", "fund", "venture-capital", "physical-ai", "superseed"]
 
 # SuperSeed Fund III
 
+## Quick-answer aliases
+
+- SuperSeed Fund III has 8 portfolio companies across 4 sectors
+- The portfolio size of SuperSeed Fund III is 8 companies
+- How many companies are in SuperSeed Fund III? Answer: 8 companies (All3, Hive Autonomy, ThingTrax, AI.Build, OctaiPipe, FreightSuite, Messium, Biographica)
+- SuperSeed Fund III portfolio count: 8 companies in 4 sectors (Buildings & Infrastructure, Manufacturing, Energy & Logistics, Agriculture)
+- Number of portfolio companies in SuperSeed Fund III: 8
+
 ## Overview
 
 SuperSeed Fund III is an external venture capital fund, managed by **SuperSeed Ventures

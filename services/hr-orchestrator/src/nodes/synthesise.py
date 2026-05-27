@@ -24,12 +24,7 @@ try:
 except ImportError:
     ground_citations = None  # type: ignore[assignment]
 
-# Shown when an answer cites sources but none of them actually support its
-# claims — i.e. the model fabricated and attached citations that don't back it.
-_ABSTENTION_ANSWER = (
-    "I don't have reference material on this topic in my knowledge base yet. "
-    "Please share a relevant document or data source and I'll analyse it."
-)
+from .grounding_gate import _MIN_RELEVANCE, abstain as _abstain
 
 logger = structlog.get_logger("hr-orchestrator.synthesise")
 
@@ -38,12 +33,16 @@ You are an HR AI assistant for the Brooker Group Human Resources department.
 Synthesise a clear, professional answer using the provided context and agent analysis.
 
 Rules:
-- Include source citations in [N] format referencing the provided sources
-- Be precise and factual -- never speculate
-- If no relevant sources were found, say so clearly
-- Include any escalation warnings if present
-- Keep the response concise but complete
-- NEVER propose data changes -- HR is read-only"""
+- Include source citations in [N] format referencing the provided sources.
+- Quote KEY facts (status, control item number, Yes/No mark, date) verbatim
+  from the source chunks — do not paraphrase the checklist marks.
+- If a chunk has a "Quick-answer aliases" Q&A that matches the user's question,
+  PREFER it — that's the canonical phrasing of the answer.
+- Be precise and factual — never speculate. If no relevant chunks were retrieved,
+  say so. Do not invent compensation or headcount figures.
+- Include any escalation warnings if present.
+- Keep the response concise but complete.
+- NEVER propose data changes -- HR is read-only."""
 
 
 def _confidence_label(score: float) -> str:
@@ -97,24 +96,30 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient, db_conn=Non
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.2,
+            temperature=0.0,  # was 0.2; lowered to reduce factual-recall flakiness
             max_tokens=2048,
         )
     except Exception as exc:
         logger.error("synthesise_failed", error=str(exc))
         answer = "I encountered an error while processing your question. Please try again."
 
-    # Hard backstop: an answer that cites sources but verifies NONE of them is
-    # fabrication. Replace it with abstention rather than show false data.
-    if ground_citations is not None and state.get("sources"):
-        gsources = [
-            {
-                "id": str(i),
-                "text": s.get("text") or s.get("excerpt") or "",
-                "source": s.get("filename") or s.get("type") or f"src{i}",
-            }
-            for i, s in enumerate(state.get("sources", []), start=1)
-        ]
+    # Build gsources from RELEVANCE-PASSING chunks only — otherwise the backstop
+    # tries to verify the LLM's citations against retrieval noise. Also skip the
+    # backstop entirely on capability/conversational bypasses (answer comes from
+    # the SKILL mandate, not from retrieved sources, so there's nothing legit to
+    # verify against). See cac-orchestrator/nodes/synthesise.py for the same fix.
+    is_bypass = bool(state.get("is_capability_bypass"))
+    gsources = []
+    for i, s in enumerate(state.get("sources", []), start=1):
+        score = float(s.get("relevance_score") or s.get("score") or 0.0)
+        if score < _MIN_RELEVANCE:
+            continue
+        gsources.append({
+            "id": str(i),
+            "text": s.get("text") or s.get("excerpt") or "",
+            "source": s.get("filename") or s.get("type") or f"src{i}",
+        })
+    if ground_citations is not None and gsources and not is_bypass:
         report = ground_citations(answer, gsources)
         if report.total_citations > 0 and report.verified == 0:
             logger.warning(
@@ -122,10 +127,11 @@ async def synthesise_response(state: dict, *, llm_client: LLMClient, db_conn=Non
                 citations=report.total_citations,
                 query_preview=state.get("query", "")[:80],
             )
+            canned = _abstain(state.get("query", ""))
             return {
-                "answer": _ABSTENTION_ANSWER,
+                "answer": canned,
                 "confidence": "Low",
-                "response": _ABSTENTION_ANSWER,
+                "response": canned,
                 "citations": [],
             }
         answer = add_grounding_badges(answer, report)

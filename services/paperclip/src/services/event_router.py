@@ -16,11 +16,18 @@ MAX_RETRIES = 3
 RETRY_BASE_DELAY = 1.0
 STAGING_BASE = os.getenv("STAGING_PATH", "/data/staging")
 
-# departments.json is mounted/copied into the container at this path
-_DEPARTMENTS_JSON_PATH = os.getenv(
-    "DEPARTMENTS_JSON_PATH",
-    str(Path(__file__).resolve().parents[4] / "config" / "departments.json"),
-)
+# departments.json is mounted/copied into the container at this path.
+# Compute by walking parents looking for config/, since the file depth differs
+# between the host repo layout (parents[4]) and the container (/app/src/services
+# → parents[3]). Falls back to /app/config/departments.json (compose-mounted).
+def _find_departments_json() -> str:
+    for _p in Path(__file__).resolve().parents:
+        cand = _p / "config" / "departments.json"
+        if cand.exists():
+            return str(cand)
+    return "/app/config/departments.json"
+
+_DEPARTMENTS_JSON_PATH = os.getenv("DEPARTMENTS_JSON_PATH", _find_departments_json())
 
 # Lazily built agent-to-department mapping: {"liquidity": "cac", "recruitment": "hr", ...}
 _agent_dept_map: dict[str, str] | None = None

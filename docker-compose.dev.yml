@@ -83,16 +83,28 @@ services:
       RAG_INGESTION_URL: http://rag-ingestion:3004
       QDRANT_URL: http://qdrant:6333
       DEPARTMENTS_CONFIG: /app/config/departments.json
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
       # DECK_TEMPLATE_PATH intentionally unset — deck-writer picks per dept_id
       # from its internal _TEMPLATE_BY_DEPT map. Set this env var to force one
       # template for every request (e.g. for testing).
       DECK_OUTPUT_DIR: /data/decks
       RAG_TOP_K: ${RAG_TOP_K:-8}
       RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
+      # Local mermaid CLI path — set by the Dockerfile ENV; listed here so it
+      # is visible in `docker compose config` and can be overridden per-env.
+      MERMAID_CLI_PATH: /usr/bin/mmdc
+      # MS Graph (read the CAC data pack from Excel Online) for /report/cac-meeting.
+      MS_GRAPH_TENANT_ID: ${MS_GRAPH_TENANT_ID:-}
+      MS_GRAPH_CLIENT_ID: ${MS_GRAPH_CLIENT_ID:-}
+      MS_GRAPH_CLIENT_SECRET: ${MS_GRAPH_CLIENT_SECRET:-}
+      MS_GRAPH_SENDER_EMAIL: ${MS_GRAPH_SENDER_EMAIL:-}
+      CAC_DATA_PACK_SHARE_URL: ${CAC_DATA_PACK_SHARE_URL:-}
     volumes:
       - ./config:/app/config:ro
       - ./data/decks:/data/decks:rw
       - ./data/reports:/data/reports:rw
+      # shared modules (ms_graph_excel, cac_report_docx) — same mount cac-orchestrator uses
+      - ./services/shared:/app/services/shared:ro
       - ./services/deck-writer/src:/app/src
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3050", "--reload"]
     healthcheck:
@@ -117,6 +129,7 @@ services:
       QDRANT_MODE: server
     volumes:
       - ./services/rag-ingestion/src:/app/src
+      - ./config:/app/config:ro
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3004", "--reload"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:3004/health',timeout=3).status==200 else 1)"]
@@ -134,6 +147,14 @@ services:
       ESCALATIONS_CHANNEL_ID: ${ESCALATIONS_CHANNEL_ID:-C0000000001}
       APPROVALS_CHANNEL_ID: ${APPROVALS_CHANNEL_ID:-C0000000002}
       ORCHESTRATOR_ENABLED: ${ORCHESTRATOR_ENABLED:-false}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
+      # Intent router + image_intent extractor need a working vLLM URL.
+      # The hardcoded nginx:8080 default in intent_router.py was failing
+      # with 405 because nginx can't resolve host.docker.internal over IPv6
+      # in this environment. Match cac-orchestrator: direct DGX URL from .env.
+      VLLM_LARGE_URL: ${VLLM_LARGE_URL:-http://192.168.1.31:8000/v1}
+      VLLM_LARGE_MODEL: ${VLLM_LARGE_MODEL:-Qwen/Qwen3.6-35B-A3B-FP8}
+      LLM_API_KEY: ${LLM_API_KEY:-}
     volumes:
       - ./services/slack-bot/src:/app/src
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3003", "--reload"]
@@ -152,6 +173,14 @@ services:
       - ./services:/app/services
     working_dir: /app
     command: ["uvicorn", "services.gateway.src.main:app", "--host", "0.0.0.0", "--port", "3000", "--reload", "--reload-dir", "/app/services/gateway"]
+    healthcheck:
+      # gateway image lacks curl — switch to stdlib urllib so Docker doesn't
+      # falsely mark it unhealthy. App is fine; only the check was broken.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:3000/health',timeout=3).status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   # HR orchestrator — bring up live with the same Qwen flip + healthcheck
   # fixes as cac-orchestrator. Bind-mount src for hot-reload of the embed_fn
@@ -163,6 +192,7 @@ services:
       LLM_API_KEY: ${LLM_API_KEY:-}
       RAG_INGESTION_URL: http://rag-ingestion:3004
       RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
     volumes:
       - ./obsidian-vault:/vault:rw
       - ./services/hr-orchestrator/src:/app/src
@@ -188,9 +218,13 @@ services:
       SKILLS_ROOT: /skills
       VAULT_ROOT: /vault
       RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
     volumes:
       - ./obsidian-vault:/vault:rw
       - ./services/read-only-orchestrator/src:/app/src
+      # Write-tier dept proposals (Finance/CIO/VCC) need /data/staging to persist
+      # past container lifetime AND be visible to sync-back + approval-ui.
+      - staging_data:/data/staging
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3040", "--reload"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:3040/health',timeout=3).status==200 else 1)"]
@@ -210,9 +244,17 @@ services:
       LLM_API_KEY: ${LLM_API_KEY:-}
       RAG_INGESTION_URL: http://rag-ingestion:3004
       RAG_MIN_RELEVANCE: ${RAG_MIN_RELEVANCE:-0.35}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
+      # MS Graph (read the CAC data pack from Excel Online) + the share link.
+      MS_GRAPH_TENANT_ID: ${MS_GRAPH_TENANT_ID:-}
+      MS_GRAPH_CLIENT_ID: ${MS_GRAPH_CLIENT_ID:-}
+      MS_GRAPH_CLIENT_SECRET: ${MS_GRAPH_CLIENT_SECRET:-}
+      MS_GRAPH_SENDER_EMAIL: ${MS_GRAPH_SENDER_EMAIL:-}
+      CAC_DATA_PACK_SHARE_URL: ${CAC_DATA_PACK_SHARE_URL:-}
     volumes:
       - ./obsidian-vault:/vault:rw
       - ./services/cac-orchestrator/src:/app/src
+      - ./services/shared:/app/services/shared:ro
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "3001", "--reload"]
 
   # reflection-engine: base compose left it on the default network so it could
@@ -224,6 +266,30 @@ services:
       VLLM_LARGE_URL: ${VLLM_LARGE_URL:-http://nginx:8080/v1}
       VLLM_LARGE_MODEL: ${VLLM_LARGE_MODEL:-qwen-large}
       LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
     volumes:
       - ./services/reflection-engine/src:/app/src
       - ./obsidian-vault:/vault:rw
+    healthcheck:
+      # base compose uses curl which isn't in this image (false-unhealthy).
+      # Use stdlib urllib instead — same pattern as deck-writer/cac-orchestrator.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:3008/health',timeout=3).status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # paperclip — bind-mount src for hot-reload + fix the healthcheck (no curl in image)
+  # Also mount config/ since event_router.py reads departments.json from there.
+  paperclip:
+    volumes:
+      - ./services/paperclip/src:/app/src
+      - ./config:/app/config:ro
+      - ./data/staging:/data/staging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:3100/health',timeout=3).status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+

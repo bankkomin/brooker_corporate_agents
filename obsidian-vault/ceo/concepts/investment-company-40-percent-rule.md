@@ -13,6 +13,13 @@ tags: ["ceo", "concept", "regulatory", "compliance", "thai-sec", "40-percent-rul
 
 # The 40% Investment Company Rule
 
+## Quick-answer aliases (for retrieval)
+
+- **Q: When does the 40% Investment Company rule become binding?** A: **30 June 2026** — end of the 2-year grace period the Thai SEC granted; the value-chain carve-out was proposed but denied.
+- **Q: What is the hard line for the 40% rule?** A: Passive investment assets must be **≤ 40% of total assets** to avoid Investment-Company reclassification under Thai SEC rules.
+- **Q: What is the 2026 OKR target for the investment ratio?** A: **< 38% by 30 June 2026** (operating target ~35%, vs ~50% at the Khao Yai retreat).
+- **Q: What happens if the 40% rule is breached after the deadline?** A: Reclassification as an Investment Company by Thai SEC — severely limits capital deployment and operational flexibility.
+
 ## Summary
 
 The Thai SEC maintains a threshold: if a company's passive investment assets exceed **40%

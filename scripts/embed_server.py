@@ -58,6 +58,30 @@ log = logging.getLogger("embed-server")
 _state: dict[str, Any] = {}
 
 
+class RerankRequest(BaseModel):
+    """Cross-encoder rerank request.
+
+    Given a `query` and a list of `documents`, return per-document relevance
+    scores in the original order. The orchestrator can then re-sort retrieval
+    results by these scores (more semantically faithful than cosine similarity
+    on standalone embeddings).
+    """
+    query: str
+    documents: list[str]
+    model: str | None = None  # accepted but ignored; always uses loaded model
+
+
+class RerankItem(BaseModel):
+    index: int
+    score: float
+
+
+class RerankResponse(BaseModel):
+    model: str
+    results: list[RerankItem]
+    latency_ms: float
+
+
 class EmbeddingsRequest(BaseModel):
     """OpenAI-compatible /embeddings request.
 
@@ -163,6 +187,47 @@ def _do_encode(texts: list[str]) -> list[list[float]]:
         batch_size=batch,
     )
     return arr.tolist()
+
+
+def _get_reranker():
+    """Lazy-load the cross-encoder on first /rerank call (keeps startup fast)."""
+    if "reranker" in _state:
+        return _state["reranker"]
+    from sentence_transformers import CrossEncoder
+    import torch
+    name = os.getenv("RERANK_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
+    device = _state.get("device") or ("cuda" if torch.cuda.is_available() else "cpu")
+    log.info("loading reranker=%s on device=%s ...", name, device)
+    t0 = time.monotonic()
+    model = CrossEncoder(name, device=device, max_length=384)
+    log.info("reranker loaded in %.1fs", time.monotonic() - t0)
+    _state["reranker"] = model
+    _state["reranker_name"] = name
+    return model
+
+
+@app.post("/rerank", response_model=RerankResponse)
+async def rerank(req: RerankRequest) -> RerankResponse:
+    """Score `documents` by relevance to `query` using a cross-encoder.
+
+    Returns results in INPUT ORDER (caller sorts by score). This is intentionally
+    a thin scoring API — the orchestrator's reranker policy (top-K, tie-break,
+    minimum score) lives on its side.
+    """
+    if not req.documents:
+        raise HTTPException(400, "documents must be non-empty")
+    if len(req.documents) > 64:
+        raise HTTPException(400, f"too many documents ({len(req.documents)}); cap is 64")
+    model = _get_reranker()
+    t0 = time.monotonic()
+    pairs = [(req.query, d or "") for d in req.documents]
+    scores = model.predict(pairs, batch_size=32, show_progress_bar=False)
+    elapsed_ms = (time.monotonic() - t0) * 1000
+    return RerankResponse(
+        model=_state.get("reranker_name", "cross-encoder"),
+        results=[RerankItem(index=i, score=float(s)) for i, s in enumerate(scores)],
+        latency_ms=round(elapsed_ms, 1),
+    )
 
 
 @app.post("/v1/embeddings", response_model=EmbeddingsResponse)

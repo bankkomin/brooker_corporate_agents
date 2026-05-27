@@ -1,0 +1,120 @@
+{
+  "filename": "CEO_OKR_Tracker.xlsx",
+  "description": "CEO OKR + North Star progress tracker per Khao Yai R-07 (2026 OKRs) + the 2028 North Star targets. Pattern per skills/ceo/ceo-agent.md. Cell coordinates PROVISIONAL.",
+  "tabs": [
+    {
+      "name": "North Star 2028",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "Recurring income (THB M)",
+          "columns": {"B": "Metric", "C": "2028 Target", "D": "Current run-rate", "E": "Gap vs target"}
+        },
+        {
+          "row": 5,
+          "label": "Institutional AUM (USD M)",
+          "columns": {"B": "Metric", "C": "2028 Target", "D": "Current", "E": "Gap vs target"}
+        },
+        {
+          "row": 6,
+          "label": "Balance sheet / Treasury (THB B)",
+          "columns": {"B": "Metric", "C": "2028 Target", "D": "Current", "E": "Gap vs target"}
+        },
+        {
+          "row": 7,
+          "label": "Leverage D/E",
+          "columns": {"B": "Metric", "C": "Target ceiling", "D": "Current", "E": "Headroom"}
+        },
+        {
+          "row": 8,
+          "label": "Investment / Total Assets",
+          "columns": {"B": "Metric", "C": "40% cap (Jun 2026)", "D": "Current", "E": "Status"}
+        }
+      ],
+      "agent_targets": ["D4", "D5", "D6", "D7", "D8", "E4", "E5", "E6", "E7", "E8"],
+      "notes": "Canonical targets: 500M THB recurring / 600M USD AUM / 4B THB BS / D/E <0.5x / <38% Inv/TA by Jun 2026."
+    },
+    {
+      "name": "2026 OKRs",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "OKR-1 Revenue Transformation",
+          "columns": {"B": "Objective", "C": "Q4 2026 target", "D": "Progress %", "E": "Status"}
+        },
+        {
+          "row": 5,
+          "label": "OKR-2 Structural/Regulatory Re-alignment",
+          "columns": {"B": "Objective", "C": "Jun 2026 target", "D": "Progress %", "E": "Status"}
+        },
+        {
+          "row": 6,
+          "label": "OKR-3 Institutional-Grade Treasury",
+          "columns": {"B": "Objective", "C": "Target", "D": "Progress %", "E": "Status"}
+        },
+        {
+          "row": 7,
+          "label": "OKR-4 Talent Bench",
+          "columns": {"B": "Objective", "C": "Q2 2026 target", "D": "Progress %", "E": "Status"}
+        },
+        {
+          "row": 8,
+          "label": "OKR-5 Market Narrative & IR",
+          "columns": {"B": "Objective", "C": "Target", "D": "Progress %", "E": "Status"}
+        }
+      ],
+      "agent_targets": ["D4", "D5", "D6", "D7", "D8", "E4", "E5", "E6", "E7", "E8"],
+      "notes": "Targets per Khao Yai R-07. CEO agent updates progress columns based on dept-level reports."
+    },
+    {
+      "name": "Khao Yai Resolutions",
+      "header_row": 3,
+      "rows": [
+        {
+          "row": 4,
+          "label": "R-01 Three-Engine adoption",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        },
+        {
+          "row": 5,
+          "label": "R-02 Melt-Up Divestment Plan",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        },
+        {
+          "row": 6,
+          "label": "R-03 Capital Sovereignty (Stay Liquid)",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        },
+        {
+          "row": 7,
+          "label": "R-04 AI Prediction-Market Arbitrage",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        },
+        {
+          "row": 8,
+          "label": "R-05 Committee-led governance",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        },
+        {
+          "row": 9,
+          "label": "R-06 Strategic Partner Map",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        },
+        {
+          "row": 10,
+          "label": "R-07 2026 OKRs",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        },
+        {
+          "row": 11,
+          "label": "R-08 Equity-story re-rating",
+          "columns": {"B": "Resolution", "C": "Status", "D": "Owner", "E": "Notes"}
+        }
+      ],
+      "agent_targets": ["C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11"],
+      "notes": "CEO agent tracks status (planned / in-progress / done / blocked) per resolution."
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-"""Download Slack files and forward to rag-ingestion."""
+"""Download Slack files and forward to rag-ingestion or MinIO (images)."""
 from __future__ import annotations
 
 import tempfile
@@ -6,13 +6,20 @@ from pathlib import Path
 
 import httpx
 import structlog
+from minio import Minio
 
+from .image_upload import IMAGE_TYPES, upload_image_to_minio
 from .models import SlackFileInfo
 
 logger = structlog.get_logger("slack-bot.file_handler")
 
 SUPPORTED_TYPES: frozenset[str] = frozenset({"pdf", "xlsx", "docx", "txt", "md"})
 
+# Images are accepted but routed to MinIO, not rag-ingestion.
+IMAGE_TYPES = IMAGE_TYPES  # re-export so callers can import from here if needed
+
+# All file types that pass the size gate — images + documents.
+ALL_ACCEPTED: frozenset[str] = SUPPORTED_TYPES | IMAGE_TYPES
 
 MAX_FILE_SIZE_MB = 50  # Default; overridable via config
 
@@ -24,12 +31,17 @@ async def download_and_forward_file(
     bot_token: str,
     rag_client,
     http: httpx.AsyncClient | None = None,
-    allowed_types: frozenset[str] = SUPPORTED_TYPES,
+    allowed_types: frozenset[str] = ALL_ACCEPTED,
     max_file_size_mb: int = MAX_FILE_SIZE_MB,
+    minio_client: Minio | None = None,
 ) -> dict:
-    """Download file from Slack, POST to rag-ingestion, clean up.
+    """Download file from Slack and route based on type.
 
-    Returns response dict from rag-ingestion or {"status": "skipped"}.
+    - Images (png/jpg/jpeg/gif) → MinIO via upload_image_to_minio.
+    - Documents (pdf/xlsx/docx/txt/md) → rag-ingestion via rag_client.
+    - Everything else → {"status": "skipped"}.
+
+    Returns response dict from the appropriate backend.
     """
     filetype = file_info.filetype.lower()
     if filetype not in allowed_types:
@@ -53,6 +65,24 @@ async def download_and_forward_file(
     tmp_path = await _download_to_temp(file_info, bot_token, http)
     try:
         file_bytes = tmp_path.read_bytes()
+
+        if filetype in IMAGE_TYPES:
+            result = upload_image_to_minio(
+                file_bytes=file_bytes,
+                filename=file_info.name,
+                filetype=filetype,
+                channel_id=channel_id,
+                file_id=file_info.id,
+                client=minio_client,
+            )
+            result["status"] = "uploaded_image"
+            logger.info(
+                "file_handler.image_uploaded",
+                file_id=file_info.id,
+                minio_key=result.get("minio_key"),
+            )
+            return result
+
         result = await rag_client.upload_file(
             file_bytes=file_bytes,
             filename=file_info.name,

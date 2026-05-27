@@ -14,6 +14,13 @@ tags: ["cio", "trend", "digital-asset", "coin-book", "btc", "bnb", "2026", "snap
 
 # Digital Asset Coin Book — Weekly Reports Jan–Apr 2026
 
+## Quick-answer aliases (for retrieval)
+
+- **Q: How many BTC do we hold per the coin book?** A: **164.6554 BTC** (cost basis USD 9,399,538.57; constant across Jan/Feb/Mar/Apr 2026 — no BTC sold yet).
+- **Q: How many BNB do we hold per the coin book?** A: ~**43,065–43,086 BNB** units (cost basis ~USD 13.2M).
+- **Q: What is the difference between the Sovereignty Buffer (100 BTC) and our BTC holdings?** A: The Sovereignty Buffer is the **floor / on-chain reserve anchor** (100 BTC, per the Stay Liquid Doctrine); our actual coin-book holding is **164.6554 BTC** — i.e. we hold 64.6554 BTC ABOVE the buffer floor.
+- **Q: Have we sold any BTC?** A: **No** — units are constant across all four quarter-end snapshots; the [[dat-sell-call-strategy]] sell plan is unexecuted as of the latest report.
+
 ## Summary
 
 A monthly series of "Coin Weekly Report (UPDATE)" PDFs tracking Brooker's digital-asset

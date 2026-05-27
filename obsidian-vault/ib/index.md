@@ -26,8 +26,9 @@ specific to the IB department.
   - SuperSeed Fund III portfolio companies:
     - Buildings & Infrastructure: [[all3]] · [[hive-autonomy]]
     - Manufacturing: [[thingtrax]] · [[ai-build]]
-    - Energy & Logistics: [[octaipipe]] · [[freightsuite]]
+    - Energy & Logistics: [[octaipipe]] *(expanded — federated-AI data-centre cooling; public research)* · [[freightsuite]]
     - Agriculture: [[messium]] · [[biographica]]
+  - Investors & partners: [[abb]] *(ABB Motion Ventures — strategic investor in [[octaipipe]])*
 - **Trends** — `ib/trends/` — Dashboards and historical analyses *(none yet)*
 
 ## Operations Log

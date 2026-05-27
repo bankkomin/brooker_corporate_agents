@@ -13,6 +13,13 @@ tags: ["policy", "regulatory", "investment-holding", "bot"]
 
 # Investment Holding 40% Limit
 
+## Quick-answer aliases (for retrieval)
+
+- **Q: Which dashboard column is the numerator for the 40% Investment Company rule?** A: **`Investment Company Baht`** — **column H, row 32** of `[[dashboard-2026-02]]` (value Bt 1,706,260,117.84). NOT `Total Investments` (col B = Bt 2,925,430,103.67) — using col B yields the wrong answer and is 2× off for BNB OTC.
+- **Q: What is the formula for the 40% Investment Company rule?** A: `Investment Company Baht (col H, row 32) ÷ Total Assets Q4 Estimated (col B, row 38)` ≤ 40%. Published Q2 2026 ratio = 52.23%.
+- **Q: When does the 40% rule become binding?** A: **30 June 2026** (end of 2-year grace period; value-chain carve-out proposed but denied).
+- **Q: Why can't I just use the Total Investments column?** A: Because each holding has its own Investment-Company classification %: BNB OTC = 50.4% (so Bt 1 sold = Bt 0.50 numerator reduction); Digital Assets = 94.2%; listed Brooker portfolio = 100%. Using `Total Investments` skips this scaling.
+
 ## Summary
 
 Investments may not exceed **40% of Total Assets**. The firm has been in a **2-year grace period** carrying excess investment exposure with the regulator's acknowledgement; the grace period **ends 30 June 2026**, after which the ratio must be brought below 40% via divestment, call options, or reclassification.

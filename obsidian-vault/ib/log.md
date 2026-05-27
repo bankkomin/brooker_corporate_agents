@@ -4,6 +4,26 @@ type: log
 department: "ib"
 ---
 
+## [2026-05-22] expand | OctaiPipe knowledge expansion + ABB entity
+
+Expanded [[octaipipe]] from the brief-only stub into a full entity using public web research
+(accessed 2026-05-22): company background (founded 2016, London; CEO & co-founder Eric
+Topham, CTO Ivan Scattergood, CGO George Hancock), technology (federated ML + multi-agent
+reinforcement learning + digital twins, on-prem / no new hardware), the typical-50 MW
+benchmark metrics, funding & investors (Momenta + Kyra Ventures co-led round announced
+30 Sep 2025; existing investors SuperSeed + Atlas; ABB Motion Ventures minority stake
+announced early Dec 2025, terms undisclosed), and named customers (Analog Devices, CPI,
+Italtel, ABB).
+
+New article (1): [[abb]] — ABB / ABB Motion Ventures, strategic investor + distribution
+partner in OctaiPipe; linked from [[index]] under Investors & partners.
+
+Provenance: every external fact is labelled *(public)* with a split Source References
+(Brooker brief vs external URLs). Flagged a discrepancy — the brief states "ABB 10%" while
+public sources report an **undisclosed minority** stake; both recorded, neither asserted as
+a verified percentage. No `config/document_inventory.json` change (web research, not a new
+corporate source file).
+
 ## [2026-05-22] ingest | 11 articles from brooker_database/ib
 
 First knowledge ingest for the IB department, from

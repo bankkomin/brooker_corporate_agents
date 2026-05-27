@@ -41,6 +41,12 @@ class HRAgentState(TypedDict):
     # grounding_gate output — True means the turn has adequate source grounding
     # (or is conversational) and should proceed normally; False triggers abstention.
     is_grounded: bool
+    # True when grounding_gate passed because the query is conversational /
+    # capability (greeting, "what is your mandate?"). synthesise reads this to
+    # SKIP the post-LLM citation-grounding backstop — capability answers come
+    # from the SKILL mandate, not retrieved sources, so the backstop has nothing
+    # legitimate to verify against and would wrongly replace the answer.
+    is_capability_bypass: bool
 
     # agent output
     agent_response: str
