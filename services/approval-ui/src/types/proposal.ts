@@ -12,6 +12,9 @@ export interface Proposal {
   status: "pending" | "approved" | "rejected";
   dept: string;
   source?: string;
+  // Present on rows returned from the CEO board approved/rejected columns
+  // (joined from approval_decisions.decided_at); absent on plain proposal rows.
+  decided_at?: string;
 }
 
 export interface ProposalListResponse {

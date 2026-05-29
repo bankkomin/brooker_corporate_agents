@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from services.gateway.src.auth import extract_claims
-from services.gateway.src.utils import serialize_row
+from services.gateway.src.utils import SEVERITY_ORDER_SQL, serialize_row
 
 logger = structlog.get_logger(__name__)
 
@@ -34,7 +34,7 @@ async def list_escalations(request: Request) -> JSONResponse:
     async with pool.acquire() as conn:
         rows = await conn.fetch(
             "SELECT * FROM escalations WHERE dept = $1 "
-            "ORDER BY severity ASC, created_at DESC",
+            f"ORDER BY {SEVERITY_ORDER_SQL}, created_at DESC",
             claims.dept,
         )
 

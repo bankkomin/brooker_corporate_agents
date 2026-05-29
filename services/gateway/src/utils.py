@@ -13,3 +13,16 @@ def serialize_row(row: dict[str, Any]) -> dict[str, Any]:
         else:
             result[key] = value
     return result
+
+
+# SQL fragment for ordering escalations by urgency (not alphabetic). Use this
+# instead of `ORDER BY severity ASC` — the text column would otherwise sort
+# {critical, high, low, medium} lexicographically, placing 'low' before 'medium'.
+SEVERITY_ORDER_SQL = (
+    "CASE severity "
+    "WHEN 'critical' THEN 0 "
+    "WHEN 'high'     THEN 1 "
+    "WHEN 'medium'   THEN 2 "
+    "WHEN 'low'      THEN 3 "
+    "ELSE 4 END"
+)
