@@ -1,0 +1,24 @@
+{
+  "_doc": "B4 — minimum distinct-source-document count to trigger an auto-synthesis proposal for an entity in a department. Higher = stricter (less noise from accidental mentions). Confirmed defaults 2026-05-26.",
+  "default": 3,
+  "per_dept": {
+    "regulations": 2,
+    "finance": 2,
+    "ic": 3,
+    "cac": 3,
+    "ceo": 3,
+    "cio": 3,
+    "legal": 3,
+    "hr": 3,
+    "comms": 3,
+    "vcc": 3,
+    "ops": 3,
+    "it": 3,
+    "risk": 3,
+    "invest": 3,
+    "ib": 3,
+    "macro": 4,
+    "research": 4,
+    "shared": 4
+  }
+}

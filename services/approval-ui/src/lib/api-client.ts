@@ -10,6 +10,7 @@ import type {
   EscalationListResponse,
   AnalyticsSummary,
   ApiError,
+  CeoBoardResponse,
 } from "@/types/api";
 
 const GATEWAY_URL = env.NEXT_PUBLIC_GATEWAY_URL;
@@ -178,6 +179,13 @@ class ApiClient {
         body: JSON.stringify({ action }),
       },
     );
+    return this.handleResponse(resp);
+  }
+
+  async getCeoBoard(): Promise<CeoBoardResponse> {
+    const resp = await fetch(`${GATEWAY_URL}/api/ceo/board`, {
+      headers: this.getHeaders(),
+    });
     return this.handleResponse(resp);
   }
 

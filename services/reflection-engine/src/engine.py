@@ -22,6 +22,7 @@ import asyncpg
 import structlog
 
 from .config import settings
+from .daily_log_drafter import draft_daily_log
 from .decisions_joiner import get_recent_decisions, get_recent_knowledge_gaps
 from .log_reader import parse_daily_log
 from .pattern_detector import detect_skill_improvement_patterns
@@ -186,6 +187,21 @@ async def run_dept_reflection(
                 result["skill_proposals_written"] += len(written)
 
         result["db_skill_proposals_detected"] = len(db_proposals)
+
+        # ── 8. B5: Draft a daily-log staging entry for yesterday's activity.
+        # The daily-log file lands in /data/staging/pending/ for HOD review.
+        if settings.DAILY_LOG_DRAFTING_ENABLED and not dry_run:
+            try:
+                daily_log_proposal_id = await draft_daily_log(
+                    dept_id, db_pool,
+                    staging_path=settings.STAGING_PATH,
+                    source_run_id=f"reflection_run_{run_id}",
+                )
+                result["daily_log_proposal_id"] = daily_log_proposal_id
+            except Exception:
+                logger.exception("daily_log_drafter_failed", dept=dept_id)
+                result["daily_log_proposal_id"] = None
+
         logger.info("reflection_complete", **{k: v for k, v in result.items() if k != "changes"})
         await _complete_run(db_pool, run_id, "success", stats=result)
 

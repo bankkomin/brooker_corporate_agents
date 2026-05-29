@@ -1,0 +1,40 @@
+{
+  "skill_name": "ic-monthly-report",
+  "skill_path": "obsidian-vault/skills/ic/ic-monthly-report.md",
+  "evals": [
+    {
+      "id": 1,
+      "name": "happy-path-june-2026",
+      "prompt": "Draft the next IC meeting pack — June 2026. Latest portfolio data is in Y:\\brooker_database\\cio\\portfolio\\Apr\\ and the latest meeting was IC #2 on 12 May 2026. Produce all three artifacts (markdown twin, docx, pptx) and surface any source gaps.",
+      "expected_output": "Three staging drafts (md/docx/pptx) covering all 9 topics with source citations. Source gaps for Sukhothai monthly + non-listed monthlies surfaced as escalation flags. Confidence reflects stale Feb dashboard adjustment.",
+      "files": [
+        "Y:/brooker_database/ic/IC 02 meeting May2026.docx",
+        "Y:/brooker_database/cio/Dashboard Feb2026.xlsx",
+        "Y:/brooker_database/cio/portfolio/Apr/Weekly BG 2026.04.30.xlsx",
+        "Y:/brooker_database/cio/portfolio/Apr/BSFL Monthly 260430.xlsx",
+        "Y:/brooker_database/cio/portfolio/Apr/2026.05.04 Coin Weekly Report (UPDATE)_.pdf"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "stale-data-multi-gap-july-2026",
+      "prompt": "Generate the IC monthly report for July 2026. The Feb 2026 dashboard is still the latest available and the Sukhothai fund letter isn't in the directory. Apply the stale-data adjustment recipe and surface every source gap.",
+      "expected_output": "Three artifacts produced with confidence ≤0.80, stale_data_recipe_applied=true, Feb dashboard baseline + delta applied to tokens-only line items, [TBD — verify] placeholders for missing sources (Sukhothai, possibly non-listed), escalation flags listing each gap with severity.",
+      "files": [
+        "Y:/brooker_database/ic/IC 02 meeting May2026.docx",
+        "Y:/brooker_database/cio/Dashboard Feb2026.xlsx",
+        "Y:/brooker_database/cio/portfolio/Apr/2026.05.04 Coin Weekly Report (UPDATE)_.pdf"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "partial-topic-refresh-dat-only",
+      "prompt": "Refresh just the DAT MTM section (Topic 8 — Digital Asset Division) using the April Coin Weekly Report. Don't regenerate the whole pack. Produce the updated Topic 8 markdown only.",
+      "expected_output": "Single markdown section for Topic 8 with refreshed MTM (USD + Baht), per-token holdings, monthly/YTD/inception percentages, FX disclosure, BNB 50.4% classification caveat. No docx/pptx generated. Source: Coin Weekly Report April only.",
+      "files": [
+        "Y:/brooker_database/cio/portfolio/Apr/2026.05.04 Coin Weekly Report (UPDATE)_.pdf"
+      ]
+    }
+  ],
+  "notes": "Test cases drafted before user review of skill v1.0. Assertions to be added once user confirms the skill draft and is ready for the formal eval loop."
+}

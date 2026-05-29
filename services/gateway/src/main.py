@@ -36,10 +36,12 @@ from services.gateway.src.auth import (
     AuthError,
     permissions_from_access,
     resolve_all_agent_permissions,
+    role_can_read_all,
     validate_jwt,
 )
 from services.gateway.src.chat import router as chat_router
 from services.gateway.src.compliance import router as compliance_router
+from services.gateway.src.ceo_board import router as ceo_board_router
 from services.gateway.src.cross_dept import router as cross_dept_router
 from services.gateway.src.errors import auth_error_handler
 from services.gateway.src.escalations import router as escalations_router
@@ -133,6 +135,19 @@ async def brooker_token_middleware(request: Request, call_next):
         return await call_next(request)
 
     if claims.source == "brooker":
+        # Executive roles (canRead: ["*"]) read every department by design —
+        # they have no per-dept agent_access row and the cac-scoped lookup
+        # below would 403 them on every protected route. Grant a permissive
+        # permission set up-front and short-circuit. Endpoint-level checks
+        # (e.g. ceo_board.role_can_read_all) remain the authoritative gate.
+        if role_can_read_all(claims.role):
+            request.state.agent_permissions = [
+                "query", "view_proposals", "approve", "escalate",
+            ]
+            request.state.brooker_email = claims.email
+            request.state.brooker_employee_id = claims.sub
+            return await call_next(request)
+
         pool = getattr(request.app.state, "db_pool", None)
         try:
             access_by_dept = await resolve_all_agent_permissions(
@@ -173,6 +188,7 @@ app.include_router(reports_router)
 app.include_router(cross_dept_router)
 app.include_router(vm_router)
 app.include_router(slack_proxy_router)
+app.include_router(ceo_board_router)
 
 
 @app.get("/")

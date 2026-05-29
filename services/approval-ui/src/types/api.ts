@@ -25,3 +25,25 @@ export interface AnalyticsSummary {
   escalations: number;
   avg_confidence: number | null;
 }
+
+export interface CeoBoardResponse {
+  columns: {
+    escalated: EscalationItem[];
+    pending: import("./proposal").Proposal[];
+    approved: import("./proposal").Proposal[];
+    rejected: import("./proposal").Proposal[];
+  };
+  totals: {
+    escalated: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+  truncated: {
+    escalated: boolean;
+    pending: boolean;
+    approved: boolean;
+    rejected: boolean;
+  };
+  window_days: number;
+}

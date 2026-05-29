@@ -202,7 +202,7 @@
         "canEscalateTo": [],
         "hodEmails": ["${CEO_EMAIL}"]
       },
-      "dashboardWidgets": ["proposals", "escalations", "analytics", "agent-activity", "agents", "data"],
+      "dashboardWidgets": ["board", "proposals", "escalations", "analytics", "agents", "data"],
       "slackChannels": {
         "general": "${CEO_CHANNEL_ID}",
         "approvals": "${CEO_APPROVALS_CHANNEL_ID}",

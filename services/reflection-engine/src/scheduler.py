@@ -14,6 +14,8 @@ import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .config import settings
+from .synthesis_scan_trigger import trigger_synthesis_scan
+from .vault_health_check import run_and_persist as run_vault_health_check
 
 log = structlog.get_logger(__name__)
 
@@ -21,22 +23,52 @@ log = structlog.get_logger(__name__)
 def start_scheduler(db_pool) -> AsyncIOScheduler:
     """Create and start an AsyncIOScheduler with the nightly reflection job."""
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(
-        _run_all_live_depts,
-        "cron",
-        hour=settings.REFLECTION_CRON_HOUR,
-        minute=settings.REFLECTION_CRON_MINUTE,
-        kwargs={"db_pool": db_pool},
-        id="nightly_reflection",
-        replace_existing=True,
-    )
+    if settings.VAULT_HEALTH_CHECK_ENABLED:
+        scheduler.add_job(
+            _run_vault_health_check_job,
+            "cron",
+            hour=settings.VAULT_HEALTH_CHECK_CRON_HOUR,
+            minute=settings.VAULT_HEALTH_CHECK_CRON_MINUTE,
+            id="vault_health_check",
+            replace_existing=True,
+        )
+    if settings.SYNTHESIS_SCAN_ENABLED:
+        scheduler.add_job(
+            _run_synthesis_scan_job,
+            "cron",
+            hour=settings.SYNTHESIS_SCAN_CRON_HOUR,
+            minute=settings.SYNTHESIS_SCAN_CRON_MINUTE,
+            id="nightly_synthesis_scan",
+            replace_existing=True,
+        )
     scheduler.start()
     log.info(
         "scheduler_started",
         cron_hour=settings.REFLECTION_CRON_HOUR,
         cron_minute=settings.REFLECTION_CRON_MINUTE,
+        vault_health_check=settings.VAULT_HEALTH_CHECK_ENABLED,
+        synthesis_scan=settings.SYNTHESIS_SCAN_ENABLED,
     )
     return scheduler
+
+
+async def _run_vault_health_check_job() -> None:
+    """Wraps run_vault_health_check with exception isolation."""
+    try:
+        await run_vault_health_check(Path(settings.VAULT_ROOT))
+    except Exception:
+        log.exception("vault_health_check_failed")
+
+
+async def _run_synthesis_scan_job() -> None:
+    """Wraps trigger_synthesis_scan with exception isolation."""
+    try:
+        await trigger_synthesis_scan(
+            rag_ingestion_url=settings.RAG_INGESTION_URL,
+            timeout_seconds=settings.SYNTHESIS_SCAN_TIMEOUT,
+        )
+    except Exception:
+        log.exception("synthesis_scan_trigger_failed")
 
 
 async def _run_all_live_depts(db_pool) -> None:

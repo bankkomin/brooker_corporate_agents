@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import httpx
 import structlog
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
@@ -43,6 +44,10 @@ class VaultWatcher:
         self._pending: dict[str, asyncio.TimerHandle] = {}
         self._loop: asyncio.AbstractEventLoop | None = None
         self._watch_config = self._load_watch_config(settings)
+        # B3 meeting-note event emission
+        self._orchestrator_url = getattr(settings, "cac_orchestrator_url", "http://cac-orchestrator:3001")
+        self._meeting_event_enabled = getattr(settings, "meeting_event_emit_enabled", True)
+        self._meeting_event_timeout = float(getattr(settings, "meeting_event_timeout_seconds", 5.0))
 
     def _load_watch_config(self, settings: RAGSettings) -> dict[str, Any]:
         """Load obsidian_watch.json; return empty structure on failure."""
@@ -186,6 +191,56 @@ class VaultWatcher:
             dept=dept,
             chunks=len(chunks),
         )
+
+        # B3: if this is a meeting note, fire the meeting-note-landed event
+        # to cac-orchestrator. Fire-and-forget — never block ingestion on it.
+        if self._is_meeting_note(path_str):
+            await self._emit_meeting_event(
+                path_str=path_str, file_hash=file_hash, size_bytes=path.stat().st_size, dept=dept.lower(),
+            )
+
+    def _is_meeting_note(self, path_str: str) -> bool:
+        """Return True if path matches `{dept}/meeting-notes/*.md` under the vault."""
+        try:
+            rel = Path(path_str).relative_to(Path(self._vault_path))
+        except ValueError:
+            return False
+        parts = rel.as_posix().split("/")
+        # Expect at least dept/meeting-notes/filename.md
+        return len(parts) >= 3 and parts[1] == "meeting-notes" and parts[-1].endswith(".md")
+
+    async def _emit_meeting_event(
+        self, *, path_str: str, file_hash: str, size_bytes: int, dept: str,
+    ) -> None:
+        """POST a meeting_note_landed event to cac-orchestrator. Fire-and-forget."""
+        if not self._meeting_event_enabled:
+            return
+        try:
+            rel = Path(path_str).relative_to(Path(self._vault_path)).as_posix()
+        except ValueError:
+            logger.warning("vault_watcher.event_skipped_path_outside_vault", path=path_str)
+            return
+        payload = {
+            "vault_path": rel,
+            "dept": dept,
+            "sha256": file_hash,
+            "size_bytes": size_bytes,
+        }
+        url = f"{self._orchestrator_url}/events/meeting_note_landed"
+        try:
+            async with httpx.AsyncClient(timeout=self._meeting_event_timeout) as client:
+                resp = await client.post(url, json=payload)
+                if resp.status_code >= 400:
+                    logger.warning(
+                        "vault_watcher.meeting_event_non_2xx",
+                        status=resp.status_code, body=resp.text[:200], url=url,
+                    )
+                else:
+                    logger.info("vault_watcher.meeting_event_emitted", path=rel, dept=dept)
+        except Exception as exc:
+            logger.warning(
+                "vault_watcher.meeting_event_failed", url=url, error=str(exc),
+            )
 
     async def _is_already_ingested(self, filename: str, file_hash: str) -> bool:
         """Check ingested_documents table for matching hash."""

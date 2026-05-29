@@ -10,6 +10,7 @@ import {
   Activity,
   Bot,
   Database,
+  LayoutDashboard,
   Menu,
   Sparkles,
   SearchX,
@@ -36,6 +37,7 @@ const WIDGET_NAV: Record<
   string,
   { label: string; icon: React.ElementType; segment: string }
 > = {
+  board: { label: "Board", icon: LayoutDashboard, segment: "board" },
   proposals: { label: "Proposals", icon: FileText, segment: "proposals" },
   escalations: {
     label: "Escalations",

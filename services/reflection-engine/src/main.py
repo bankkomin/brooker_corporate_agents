@@ -142,3 +142,34 @@ async def trigger_all_reflection(dry_run: bool = False) -> JSONResponse:
         results.append(result)
 
     return JSONResponse(content={"departments_processed": len(results), "results": results})
+
+
+@app.post("/synthesis-scan")
+async def trigger_synthesis_scan_endpoint():
+    """Manually fire the same POST that the nightly synthesis-scan cron does.
+
+    Returns the rag-ingestion response (candidates / proposed / proposal_ids)
+    or a failure payload if the call could not complete.
+    """
+    from .synthesis_scan_trigger import trigger_synthesis_scan
+    return await trigger_synthesis_scan(
+        rag_ingestion_url=settings.RAG_INGESTION_URL,
+        timeout_seconds=settings.SYNTHESIS_SCAN_TIMEOUT,
+    )
+
+
+@app.post("/vault-health-check")
+async def trigger_vault_health_check():
+    """Manually trigger the vault-wide health check (also runs nightly per scheduler)."""
+    from .vault_health_check import run_and_persist
+    report = await run_and_persist(Path(settings.VAULT_ROOT))
+    return {
+        "status": "ok",
+        "run_date": report.run_date.isoformat(),
+        "critical": report.critical_count,
+        "warning": report.warning_count,
+        "info": report.info_count,
+        "depts_scanned": report.depts_scanned,
+        "notes_scanned": report.notes_scanned,
+        "report_path": f"health-reports/{report.run_date.isoformat()}.md",
+    }

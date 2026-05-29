@@ -30,6 +30,7 @@ except ImportError:
 
 from .config import settings
 from .graph import build_graph
+from .meeting_fanout import MeetingNoteLandedEvent, run_fanout
 from .models import QueryRequest, QueryResponse, Source
 from .skills.loader import SkillsLoader
 from .tools.db_client import DBClient
@@ -547,3 +548,31 @@ async def health() -> dict:
 async def heartbeat() -> dict:
     """Paperclip heartbeat endpoint."""
     return {"status": "ok"}
+
+
+@app.post("/events/meeting_note_landed")
+async def meeting_note_landed(event: MeetingNoteLandedEvent) -> dict:
+    """B3 — Triggered (e.g. by rag-ingestion vault_watcher) when a new
+    meeting note lands in the vault. Spawns the extractor fan-out and
+    returns the source_run_id + proposal ids. All proposals go through
+    /data/staging/pending/ — never directly to the vault.
+
+    Disabled via settings.meeting_fanout_enabled=False (default true).
+    """
+    if not settings.meeting_fanout_enabled:
+        return {"status": "disabled", "source_run_id": None, "proposal_ids": []}
+    try:
+        result = await run_fanout(
+            event,
+            staging_path=settings.staging_path,
+            vault_root=settings.vault_root_absolute,
+        )
+    except Exception as exc:
+        logger.exception("meeting_fanout_failed", error=str(exc))
+        raise HTTPException(status_code=500, detail=f"fanout failed: {exc}") from exc
+    return {
+        "status": "ok",
+        "source_run_id": result.source_run_id,
+        "proposal_ids": result.proposal_ids,
+        "skipped_extractors": result.skipped_extractors,
+    }

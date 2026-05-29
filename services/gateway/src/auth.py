@@ -297,6 +297,20 @@ def _load_global_access_roles() -> dict[str, dict[str, list[str]]]:
         return {}
 
 
+def role_can_read_all(role: str) -> bool:
+    """True if the role has globalAccess.canRead containing '*' (wildcard).
+
+    Public helper consumed by:
+      - services.gateway.src.ceo_board (cross-dept board endpoint)
+      - services.gateway.src.main.brooker_token_middleware (skip per-dept
+        agent_access lookup for executive roles that read every department)
+
+    Empty/unknown roles return False.
+    """
+    cfg = _load_global_access_roles().get(role) or {}
+    return "*" in cfg.get("canRead", [])
+
+
 def check_dept_access(
     claims: JWTClaims,
     resource_dept: str,
