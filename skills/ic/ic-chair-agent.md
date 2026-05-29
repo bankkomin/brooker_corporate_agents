@@ -33,12 +33,12 @@ The IC committee at Brooker is **read-only** — this agent never proposes Excel
 
 ### Three engines (canonical)
 
-| Engine | Domain | Bt mn target |
-|--------|--------|--------------|
-| **Engine 1** | VCC Platform — Brook Technology VCC ([[singapore-vcc-structure]]) | ~214 |
-| **Engine 2** | Advisory mandates | ~30 |
-| **Engine 3** | DAT yield + structured loan + innovation ([[dat-sell-call-strategy]] · [[bicl-movie-private-credit]] · [[prediction-market-pilot]]) | ~244 |
-| | **North Star [[okr-500mb-recurring-income]]** | **500** |
+| Engine       | Domain                                                                                                                              | Bt mn target |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| **Engine 1** | VCC Platform — Brook Technology VCC ([[singapore-vcc-structure]])                                                                   | ~214         |
+| **Engine 2** | Advisory mandates                                                                                                                   | ~30          |
+| **Engine 3** | DAT yield + structured loan + innovation ([[dat-sell-call-strategy]] · [[bicl-movie-private-credit]] · [[prediction-market-pilot]]) | ~244         |
+|              | **North Star [[okr-500mb-recurring-income]]**                                                                                       | **500**      |
 
 ### Standing portfolio constraints (every meeting must report)
 
@@ -115,11 +115,11 @@ External partners: [[a16z-crypto-fund-v]] · [[pantera-fund]] · [[obsidian-cree
 
 When asked to **generate the next IC meeting's artifacts** (a recurring monthly task), produce **THREE companion drafts** for the same meeting date:
 
-| Artifact | Output path | Schema |
-|----------|-------------|--------|
-| **Markdown twin** (RAG-indexable) | `obsidian-vault/ic/meeting-notes/IC-{YYYY-MM-DD}-draft.md` | [[meeting-note]] template |
-| **Formal minutes (.docx)** | `/data/staging/pending/ic/IC-{YYYY-MM-DD}-draft.docx` | [[meeting-minutes-docx]] schema |
-| **Monthly deck (.pptx)** | `/data/staging/pending/ic/IC-deck-{YYYY-MM-DD}-draft.pptx` | [[meeting-deck-pptx]] schema |
+| Artifact                          | Output path                                                | Schema                          |
+| --------------------------------- | ---------------------------------------------------------- | ------------------------------- |
+| **Markdown twin** (RAG-indexable) | `obsidian-vault/ic/meeting-notes/IC-{YYYY-MM-DD}-draft.md` | [[meeting-note]] template       |
+| **Formal minutes (.docx)**        | `/data/staging/pending/ic/IC-{YYYY-MM-DD}-draft.docx`      | [[meeting-minutes-docx]] schema |
+| **Monthly deck (.pptx)**          | `/data/staging/pending/ic/IC-deck-{YYYY-MM-DD}-draft.pptx` | [[meeting-deck-pptx]] schema    |
 
 Plus the dashboard ingestion that precedes it:
 

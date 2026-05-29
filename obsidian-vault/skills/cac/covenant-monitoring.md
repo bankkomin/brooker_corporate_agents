@@ -3,6 +3,12 @@ name: covenant-monitoring
 agent: all
 dept: cac
 version: 1.0
+permissions:
+  mode: write_via_staging
+  data_zones: [1, 2]
+  outbound_apis: []
+  read_collections: [cac_docs, cac_chat, cac_knowledge, shared_policies, finance_docs, risk_docs, cio_docs, ceo_docs]
+output_types: [text, table, checklist]
 ---
 
 ## Mandate
