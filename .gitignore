@@ -83,6 +83,9 @@ node_modules/
 Thumbs.db
 desktop.ini
 
+# Obsidian local workspace state (machine-local, not project source)
+.obsidian/
+
 # Obsidian internals
 obsidian-vault/.obsidian/
 
